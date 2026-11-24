@@ -1,0 +1,41 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "pb": {
+      "$aid": {
+        ".write": "auth != null && auth.uid === $aid",
+        "$tok": {
+          ".read": "auth != null",
+          ".validate": "$tok.matches(/^[A-Za-z0-9_-]{16,40}$/) && newData.hasChildren(['s','u','x'])",
+          "s": { ".validate": "newData.isString() && newData.val().length < 12000" },
+          "u": { ".validate": "newData.isNumber()" },
+          "x": { ".validate": "newData.isNumber()" },
+          "$other": { ".validate": false }
+        }
+      }
+    },
+    "claims": {
+      "$aid": {
+        ".read": "auth != null && auth.uid === $aid",
+        ".write": "auth != null && auth.uid === $aid",
+        "$tok": {
+          ".read": "auth != null",
+          "$cid": {
+            ".write": "auth != null && !data.exists() && !newData.child('st').exists() && root.child('pb').child($aid).child($tok).exists()",
+            ".validate": "$cid.matches(/^[A-Za-z0-9_-]{8,40}$/) && newData.hasChildren(['k','t']) && newData.child('k').val().matches(/^(paid|skip|promise)$/) && (newData.child('k').val() != 'paid' || newData.child('a').exists()) && (newData.child('k').val() != 'promise' || newData.child('d').exists())",
+            "k": { ".validate": "newData.isString()" },
+            "t": { ".validate": "newData.isNumber()" },
+            "a": { ".validate": "newData.isNumber() && newData.val() > 0 && newData.val() <= 10000000" },
+            "r": { ".validate": "newData.isString() && newData.val().length <= 40" },
+            "d": { ".validate": "newData.isString() && newData.val().matches(/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/)" },
+            "n": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 5000" },
+            "st": { ".validate": "newData.isString() && newData.val().matches(/^(ok|no)$/)" },
+            "rt": { ".validate": "newData.isNumber()" },
+            "$other": { ".validate": false }
+          }
+        }
+      }
+    }
+  }
+}
