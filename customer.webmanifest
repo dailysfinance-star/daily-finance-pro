@@ -1,0 +1,32 @@
+{
+  "id": "./?app=c",
+  "name": "Passbook — Daily Finance",
+  "short_name": "Passbook",
+  "description": "Your live loan passbook: schedule, payments, balance and UPI pay",
+  "start_url": "./?app=c",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f5",
+  "theme_color": "#166534",
+  "icons": [
+    {
+      "src": "icon-pb-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-pb-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-pb-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -4,11 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#166534">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-192.png">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Finance">
+<script>/* ఏజెంట్ యాప్ = manifest.webmanifest · కస్టమర్ పాస్‌బుక్ లింక్ / ఐకాన్ (?app=c) = customer.webmanifest (వేరే యాప్‌గా ఇన్‌స్టాల్) */
+(function () { var c = /^#(pb|lv)=/.test(location.hash) || /[?&]app=c(&|$)/.test(location.search), h = document.head, l = document.createElement('link'), a = document.createElement('link');
+  l.rel = 'manifest'; l.href = c ? 'customer.webmanifest' : 'manifest.webmanifest'; h.appendChild(l);
+  a.rel = 'apple-touch-icon'; a.href = c ? 'icon-pb-192.png' : 'icon-192.png'; h.appendChild(a);
+  if (c) { document.title = 'Passbook'; var m = document.querySelector('meta[name="apple-mobile-web-app-title"]'); if (m) m.content = 'Passbook'; } })();</script>
 <title>Daily Finance</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 100 100%27%3E%3Ctext y=%27.9em%27 font-size=%2790%27%3E%F0%9F%92%B0%3C/text%3E%3C/svg%3E">
 <style>
@@ -258,6 +261,22 @@ body.pbmode{padding:0!important}
   .float-mic{bottom:24px}
   #c-dash{grid-template-columns:repeat(4,1fr)}
 }
+.cell .s{white-space:normal;overflow-wrap:anywhere;text-overflow:clip;font-variant-numeric:tabular-nums}
+.cell .s small{display:block;font-size:8.5px;font-weight:600;opacity:.85}
+.cell.fut .s{color:var(--mu);font-weight:600}
+.grid{max-height:none;overflow:visible}
+.grid.snap{overflow-y:auto;scroll-snap-type:y mandatory;scroll-padding:6px 0}
+.grid.snap .cell{scroll-snap-align:start}
+#pbv .grid{grid-auto-rows:1fr}
+body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
+.lg-card{max-width:440px;margin:14px auto}
+.lg-card>h2{text-align:center;border:0;margin-bottom:2px}
+.lg-ic{text-align:center;font-size:46px;line-height:1.1;margin-top:4px}
+.lg-forgot{display:block;margin:10px auto 0}
+.lg-or{height:1px;background:var(--bd);margin:16px 0 14px}
+.lg-off{display:block;margin:12px auto 0;font-size:12px;color:var(--mu)}
+#t-login .seg{margin-top:12px}
+#li-id,#li-pin{font-size:17px;letter-spacing:.5px}
 </style>
 </head>
 <body>
@@ -341,6 +360,25 @@ body.pbmode{padding:0!important}
     </div>
   </section>
 
+  <!-- ============ 0. లాగిన్ (మొబైల్ / Gmail + PIN) ============ -->
+  <section id="t-login" class="tab">
+    <div class="card lg-card">
+      <div class="lg-ic">💰</div>
+      <h2 data-i18n="li_h">🔐 Login</h2>
+      <div class="note" data-i18n="li_sub"></div>
+      <div class="seg" id="li-mode"><button type="button" data-m="m" class="on" data-i18n="li_m">📱 Mobile</button><button type="button" data-m="g" data-i18n="li_g">✉️ Gmail</button></div>
+      <input id="li-id" type="tel" inputmode="numeric" maxlength="14" autocomplete="tel" autocapitalize="none" spellcheck="false" aria-label="ID">
+      <label for="li-pin" class="mt12" data-i18n="li_pin">Login PIN</label>
+      <input id="li-pin" type="password" inputmode="numeric" maxlength="32" autocomplete="current-password">
+      <button type="button" class="btn btn-p full mt12" id="li-go" data-i18n="li_go">🔐 Login</button>
+      <button type="button" class="lnk lg-forgot" id="li-forgot" data-i18n="li_forgot">Forgot PIN?</button>
+      <div class="lg-or"></div>
+      <button type="button" class="btn btn-sec full" id="li-new" data-i18n="li_new">➕ New account</button>
+      <button type="button" class="lnk lg-off" id="li-off" data-i18n="li_off">Use without account</button>
+      <details class="adv" id="li-cfgw" hidden><summary data-i18n="li_cfg">⚙️ Cloud setup (Firebase config)</summary><textarea id="li-cfg" rows="4" spellcheck="false" autocomplete="off" autocapitalize="none" style="width:100%;font-family:monospace;font-size:12px" placeholder='{ apiKey: "AIza…", databaseURL: "https://…firebasedatabase.app" }'></textarea></details>
+    </div>
+  </section>
+
   <!-- ============ 4. ఏజెంట్ ప్రొఫైల్ ============ -->
   <section id="t-agent" class="tab">
     <div class="card">
@@ -354,7 +392,12 @@ body.pbmode{padding:0!important}
         <div><label for="a-tn" data-i18n="ag_town">పట్టణం / గ్రామం *</label><input id="a-tn" type="text" autocomplete="off"></div>
         <div class="full2"><label for="a-pin" data-i18n="ag_pin">పిన్ కోడ్ *</label><input id="a-pin" type="text" inputmode="numeric" maxlength="6" autocomplete="postal-code"></div>
       </div>
+      <div id="a-pinw" hidden><div class="g2 mt8">
+        <div><label for="a-pin1" data-i18n="ag_pin1">🔑 Login PIN (6 digits) *</label><input id="a-pin1" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password"></div>
+        <div><label for="a-pin2" data-i18n="ag_pin2">Confirm PIN *</label><input id="a-pin2" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password"></div>
+      </div><div class="note left" data-i18n="ag_pin_note"></div></div>
       <button type="button" class="btn btn-p full mt12" id="a-save" data-i18n="ag_btn">✅ సేవ్ & ప్రారంభించండి</button>
+      <button type="button" class="lnk lg-forgot" id="a-login" hidden data-i18n="li_have">Already have an account? Login</button>
       <button type="button" class="btn btn-sec full mt8" id="a-restore" hidden data-i18n="btn_restore_d">⬆️ రీస్టోర్ (Drive / ఫైల్)</button>
       <div class="note left" data-i18n="ag_note"></div>
     </div>
@@ -390,19 +433,27 @@ body.pbmode{padding:0!important}
       <select id="s-lang"></select><label class="mt12" data-i18n="set_theme">🎨 రంగు థీమ్</label><div class="swatches" id="s-theme"></div>
     </div>
     <div class="card" id="s-lv">
-      <h2 data-i18n="lv_h">🔴 Live sync</h2>
-      <div class="note left" data-i18n="lv_help"></div>
+      <h2 data-i18n="cl_h">☁️ Account · auto backup · live sync</h2>
+      <div class="kv" id="s-clst"></div>
       <div class="kv"><div class="row"><span id="s-lvst"></span></div></div>
+      <div id="s-clwarn"></div>
+      <div class="btn-row mt8" id="s-clbtns" hidden><button type="button" class="btn btn-sec" id="s-clpin" data-i18n="cl_chpin">🔑 Change PIN</button><button type="button" class="btn btn-sec" id="s-clout" data-i18n="cl_logout">🚪 Logout</button></div>
+      <button type="button" class="btn btn-p full mt8" id="s-cllogin" hidden data-i18n="cl_login_btn">🔐 Login / create account</button>
+      <button type="button" class="btn btn-sec full mt8" id="s-lvrules" data-i18n="lv_rules">📋 Copy Firebase rules</button>
+      <details class="adv" id="s-lvadv"><summary data-i18n="lv_adv">⚙️ Advanced: Firebase project / sync password</summary>
+      <div class="note left" data-i18n="lv_help"></div>
       <label for="s-lvcfg" data-i18n="lv_cfg">Firebase config</label>
       <textarea id="s-lvcfg" rows="4" spellcheck="false" autocomplete="off" autocapitalize="none" style="width:100%;font-family:monospace;font-size:12px" placeholder='{ apiKey: "AIza…", databaseURL: "https://…firebasedatabase.app" }'></textarea>
       <label for="s-lvpw" data-i18n="lv_pw">Sync password</label>
       <input id="s-lvpw" type="password" autocomplete="new-password" autocapitalize="none">
       <div class="btn-row mt8"><button type="button" class="btn btn-p" id="s-lvgo" data-i18n="lv_connect">🔌 Connect</button><button type="button" class="btn btn-sec" id="s-lvoff" hidden data-i18n="lv_disc">Disconnect</button></div>
-      <button type="button" class="btn btn-sec full mt8" id="s-lvrules" data-i18n="lv_rules">📋 Copy Firebase rules</button>
+      </details>
     </div>
     <div class="card">
       <h2 data-i18n="set_data">💾 బ్యాకప్ & డేటా</h2>
       <div class="kv" id="s-info"></div>
+      <div class="note left" id="s-clnote" data-i18n="cl_note" hidden></div>
+      <details class="adv" id="s-manual"><summary data-i18n="cl_manual">📁 Manual backup file (optional)</summary>
       <button type="button" class="btn btn-p full" id="s-gshare" data-i18n="gd_share">☁️ Google Drive లో బ్యాకప్ సేవ్ చేయండి</button>
       <div class="btn-row mt8"><button type="button" class="btn btn-sec" id="s-backup" data-i18n="btn_backup">⬇️ బ్యాకప్ ఫైల్</button><button type="button" class="btn btn-sec" id="s-restore" data-i18n="btn_restore_d">⬆️ రీస్టోర్ (Drive / ఫైల్)</button></div>
       <input type="file" id="s-file" accept=".json,.txt,application/json,text/plain" hidden>
@@ -414,10 +465,11 @@ body.pbmode{padding:0!important}
         <div class="btn-row mt8"><button type="button" class="btn btn-p" id="gd-sync" data-i18n="gd_sync">☁️ Drive కు సింక్</button><button type="button" class="btn btn-sec" id="gd-restore" data-i18n="gd_restore">⬇️ Drive నుంచి రీస్టోర్</button></div>
         <div class="note left" data-i18n="gd_note"></div>
       </details>
+      </details>
       <button type="button" class="btn btn-danger full" id="s-wipe" data-i18n="btn_wipe">🗑️ ఈ యాప్ డేటా మొత్తం తొలగించు</button>
-      <div class="note left" data-i18n="iso_note">ఈ డైలీ ఫైనాన్స్ యాప్ డేటా ఈ ఫోన్ బ్రౌజర్‌లో దాని సొంత స్టోరేజ్ (DAILY_FINANCE_PRO_V1) లో మాత్రమే ఉంటుంది — ల్యాబ్, పర్మిట్ రూమ్, ఇతర యాప్‌ల డేటాతో కలవదు. రోజూ / వారానికి ఒకసారి బ్యాకప్ తీసి Google Drive / WhatsApp లో దాచండి.</div>
+      <div class="note left" id="iso-note" data-i18n="iso_note">ఈ డైలీ ఫైనాన్స్ యాప్ డేటా ఈ ఫోన్ బ్రౌజర్‌లో దాని సొంత స్టోరేజ్ (DAILY_FINANCE_PRO_V1) లో మాత్రమే ఉంటుంది — ల్యాబ్, పర్మిట్ రూమ్, ఇతర యాప్‌ల డేటాతో కలవదు. రోజూ / వారానికి ఒకసారి బ్యాకప్ తీసి Google Drive / WhatsApp లో దాచండి.</div>
     </div>
-    <div class="note">Daily Finance Pro v3.0</div>
+    <div class="note">Daily Finance Pro v3.1</div>
   </section>
 </main>
 
@@ -526,7 +578,7 @@ const DB = (() => {
     get mode() { return mode; },
     get: (k, def) => mem.has(k) ? mem.get(k) : def,
     put(k, v) { v = JSON.parse(JSON.stringify(v)); mem.set(k, v); write(k, v); post({ k, v }); if (putHook) try { putHook(k); } catch (e) {} },
-    del(k) { if (!mem.has(k)) return; mem.delete(k); write(k, undefined); post({ k, d: 1 }); },
+    del(k) { if (!mem.has(k)) return; mem.delete(k); write(k, undefined); post({ k, d: 1 }); if (putHook) try { putHook(k); } catch (e) {} },
     list(prefix) { const out = []; for (const [k, v] of mem) if (k.startsWith(prefix)) out.push(v); return out; },
     count(prefix) { let n = 0; for (const k of mem.keys()) if (k.startsWith(prefix)) n++; return n; },
     dump: () => Object.fromEntries(mem),
@@ -907,7 +959,73 @@ const I18N = {
     sc_h: 'చెల్లింపు విశ్వసనీయత',
     sc_n: '{1} లో {0} వాయిదాలు సమయానికి',
     lv_reset: '🔄 కొత్త లింక్ (పాత లింక్ ఆగిపోతుంది)',
-    lv_note: '🔴 లైవ్ లింక్: బ్యాలెన్స్, బాకీ, చరిత్ర ఆటోమేటిక్‌గా మారుతాయి. కస్టమర్ అభ్యర్థనలు 📥 కస్టమర్ అభ్యర్థనలలో కనిపిస్తాయి.'
+    lv_note: '🔴 లైవ్ లింక్: బ్యాలెన్స్, బాకీ, చరిత్ర ఆటోమేటిక్‌గా మారుతాయి. కస్టమర్ అభ్యర్థనలు 📥 కస్టమర్ అభ్యర్థనలలో కనిపిస్తాయి.',
+    li_h: '🔐 లాగిన్',
+    li_sub: 'మీ మొబైల్ నంబర్, PIN తో లాగిన్ అవ్వండి — మీ డేటా మొత్తం ఆటోమేటిక్‌గా తిరిగి వస్తుంది.',
+    li_m: '📱 మొబైల్',
+    li_g: '✉️ Gmail',
+    li_pin: 'లాగిన్ PIN',
+    li_go: '🔐 లాగిన్',
+    li_forgot: 'PIN మర్చిపోయారా?',
+    li_new: '➕ కొత్త ఖాతా',
+    li_off: 'ఖాతా లేకుండా వాడండి (డేటా ఈ ఫోన్‌లో మాత్రమే)',
+    li_have: 'ఇప్పటికే ఖాతా ఉందా? లాగిన్',
+    li_cfg: '⚙️ క్లౌడ్ సెటప్ (Firebase config)',
+    li_busy: 'లాగిన్ అవుతోంది, మీ డేటా తిరిగి తెస్తోంది…',
+    li_bad: '⚠️ మొబైల్ / Gmail లేదా PIN తప్పు',
+    li_nouser: '⚠️ ఈ మొబైల్ నంబర్‌కు ఖాతా లేదు — నంబర్ సరిచూడండి, లేదా Gmail తో లాగిన్ అవ్వండి',
+    li_many: '⚠️ చాలాసార్లు తప్పు — కొన్ని నిమిషాలు ఆగి మళ్లీ ప్రయత్నించండి',
+    li_net: '⚠️ ఇంటర్నెట్ లేదు — కనెక్ట్ అయి మళ్లీ ప్రయత్నించండి',
+    li_auth_off: '⚠️ Firebase → Authentication లో Email/Password సైన్-ఇన్ ఆన్ చేయలేదు',
+    li_need_pin: 'PIN ఇవ్వండి (కనీసం 6 అంకెలు)',
+    li_restored: '✅ స్వాగతం! {0} లోన్ ఖాతాలు తిరిగి వచ్చాయి',
+    li_empty: '✅ లాగిన్ అయ్యారు. ఆటో బ్యాకప్ ఆన్.',
+    li_reset_sent: '📧 PIN రీసెట్ లింక్ {0} కు పంపాం. ఆ మెయిల్ తెరిచి కొత్త 6 అంకెల PIN టైప్ చేసి, ఇక్కడ లాగిన్ అవ్వండి.',
+    li_merge_h: '☁️ క్లౌడ్‌లో డేటా ఉంది',
+    li_merge_t: 'క్లౌడ్: {0} లోన్ ఖాతాలు ({1} న సేవ్). ఈ ఫోన్: {2} లోన్ ఖాతాలు. ఏం చేయాలి?',
+    li_use_cloud: '☁️ క్లౌడ్ డేటా వాడండి (సూచన)',
+    li_merge: '📱 ఈ ఫోన్ డేటా ఉంచి, క్లౌడ్ ఖాతాలు కలపండి',
+    ag_pin1: '🔑 లాగిన్ PIN (6 అంకెలు) *',
+    ag_pin2: 'PIN మళ్లీ *',
+    ag_pin_note: 'మొబైల్ నంబర్ + ఈ PIN తో ఏ ఫోన్‌లోనైనా మీ డేటా తెరుచుకుంటుంది. అంతా ఆటోమేటిక్‌గా బ్యాకప్ అవుతుంది.',
+    ag_pin_bad: 'PIN 6–12 అంకెలు ఉండాలి, రెండూ ఒకటే ఉండాలి',
+    ag_pin_weak: 'ఈ PIN సులభంగా ఊహించవచ్చు (123456 / 000000 లాంటివి) — వేరేది పెట్టండి',
+    ag_acc_exists: 'ఈ Gmail కు ఇప్పటికే ఖాతా ఉంది — దానితో లాగిన్ అవ్వండి (PIN మర్చిపోతే Gmail తో రీసెట్)',
+    ag_acc_ok: '☁️ ఖాతా తయారైంది — ఆటో బ్యాకప్ ఆన్',
+    cl_h: '☁️ ఖాతా · ఆటో బ్యాకప్ · లైవ్ సింక్',
+    cl_acc: '👤 ఖాతా',
+    cl_bk: '☁️ ఆటో బ్యాకప్',
+    cl_bk_ok: '✅ సేవ్ అయింది {0}',
+    cl_bk_wait: '⏳ సేవ్ అవుతోంది…',
+    cl_bk_pend: '🟠 {0} మార్పులు — ఇంటర్నెట్ రాగానే అప్‌లోడ్',
+    cl_bk_off: '⚪ ఆఫ్',
+    cl_rules: '⚠️ ఒక్కసారి చేయాల్సింది: ఆటో బ్యాకప్ కోసం Firebase rules అప్‌డేట్ కావాలి. “📋 Copy Firebase rules” నొక్కి → Firebase → Realtime Database → Rules → పేస్ట్ → Publish.',
+    cl_fix: '⚠️ ఆటో బ్యాకప్ ఆగింది — Firebase rules ఒక్కసారి అప్‌డేట్ చేయాలి',
+    cl_setpin_box: '🔑 6 అంకెల లాగిన్ PIN పెట్టండి — అప్పుడు ఏ ఫోన్‌లోనైనా మొబైల్ నంబర్‌తో లాగిన్ అవ్వొచ్చు.',
+    cl_setpin: '🔑 లాగిన్ PIN పెట్టండి',
+    cl_chpin: '🔑 PIN మార్చండి',
+    cl_oldpw: 'ప్రస్తుత సింక్ పాస్‌వర్డ్',
+    cl_oldpin: 'ప్రస్తుత PIN',
+    cl_newpin: 'కొత్త PIN (6 అంకెలు)',
+    cl_pin_save: '✅ PIN సేవ్',
+    cl_pin_ok: '✅ PIN సేవ్ అయింది. ఏ ఫోన్‌లోనైనా {0} + PIN తో లాగిన్ అవ్వండి.',
+    cl_logout: '🚪 లాగౌట్',
+    cl_logout_cf: 'ఈ ఫోన్ నుండి లాగౌట్?\n\nమీ డేటా క్లౌడ్‌లో భద్రంగా ఉంది. ఈ ఫోన్‌లోని కాపీ తొలగుతుంది — ఎప్పుడైనా మొబైల్ + PIN తో మళ్లీ లాగిన్ అవ్వొచ్చు.',
+    cl_logout_pend: '{0} మార్పులు ఇంకా అప్‌లోడ్ కాలేదు (ఇంటర్నెట్ లేదు). అయినా లాగౌట్? ఆ మార్పులు పోతాయి.',
+    cl_login_btn: '🔐 లాగిన్ / కొత్త ఖాతా',
+    cl_relogin: '🔑 ఆటో బ్యాకప్ కొనసాగడానికి మళ్లీ లాగిన్ అవ్వండి',
+    cl_note: '☁️ ఆటో బ్యాకప్ ఆన్: ప్రతి మార్పు కొన్ని సెకన్లలో మీ సొంత Firebase (Google) ఖాతాలో సేవ్ అవుతుంది. కొత్త ఫోన్‌లో మొబైల్ + PIN తో లాగిన్ అయితే అంతా తిరిగి వస్తుంది.',
+    cl_manual: '📁 మాన్యువల్ బ్యాకప్ ఫైల్ (ఐచ్ఛికం)',
+    lv_adv: '⚙️ అడ్వాన్స్‌డ్: Firebase ప్రాజెక్ట్ / సింక్ పాస్‌వర్డ్',
+    pb_due_today: 'ఈరోజు కట్టాల్సినది',
+    pburl_db: '⚠️ ఇది Firebase డేటాబేస్ అడ్రస్, యాప్ వెబ్‌సైట్ కాదు. ఈ గడి ఖాళీగా ఉంచండి, లేదా మీ GitHub Pages / Vercel అడ్రస్ పెట్టండి.',
+    pburl_move2: '💡 ఈ అడ్రస్ నుండి యాప్ తెరిచి మొబైల్ + PIN తో లాగిన్ అవ్వండి — మీ డేటా ఆటోమేటిక్‌గా వస్తుంది.',
+    ci_install: '📲 పాస్‌బుక్ యాప్ ఇన్‌స్టాల్ చేయండి',
+    ci_ios: '📲 ఈ పాస్‌బుక్‌ను యాప్‌లా ఉంచుకోవడానికి: Share ⬆️ → “Add to Home Screen” నొక్కండి',
+    ci_and: '📲 ఈ పాస్‌బుక్‌ను యాప్‌లా ఉంచుకోవడానికి: Chrome మెనూ ⋮ → “Install app” / “Add to Home screen”',
+    ci_done: '✅ ఇన్‌స్టాల్ అయింది — హోమ్ స్క్రీన్‌లో “Passbook” తెరవండి',
+    ci_mine: '📒 నా పాస్‌బుక్‌లు',
+    ci_none: 'మీ పాస్‌బుక్ QR స్కాన్ చేయండి లేదా WhatsApp లింక్ ఒకసారి తెరవండి — ఇక్కడ దానంతట అదే కనిపిస్తుంది.'
   },
   en: {
     hdr_sub: 'Daily & Weekly Finance Collection',
@@ -1070,7 +1188,73 @@ const I18N = {
     sc_h: 'Payment reliability',
     sc_n: '{0} of {1} instalments on time',
     lv_reset: '🔄 New link (old one stops)',
-    lv_note: '🔴 Live link: balance, dues and history update automatically. Customer requests appear in 📥 Customer requests.'
+    lv_note: '🔴 Live link: balance, dues and history update automatically. Customer requests appear in 📥 Customer requests.',
+    li_h: '🔐 Login',
+    li_sub: 'Login with your mobile number and PIN — all your data comes back automatically.',
+    li_m: '📱 Mobile',
+    li_g: '✉️ Gmail',
+    li_pin: 'Login PIN',
+    li_go: '🔐 Login',
+    li_forgot: 'Forgot PIN?',
+    li_new: '➕ New account',
+    li_off: 'Use without account (data stays on this phone only)',
+    li_have: 'Already have an account? Login',
+    li_cfg: '⚙️ Cloud setup (Firebase config)',
+    li_busy: 'Logging in and bringing back your data…',
+    li_bad: '⚠️ Wrong mobile / Gmail or PIN',
+    li_nouser: '⚠️ No account found for this mobile number — check it, or login with Gmail',
+    li_many: '⚠️ Too many wrong tries — wait a few minutes and try again',
+    li_net: '⚠️ No internet — connect and try again',
+    li_auth_off: '⚠️ In Firebase → Authentication, Email/Password sign-in is not turned on',
+    li_need_pin: 'Enter your PIN (at least 6 digits)',
+    li_restored: '✅ Welcome back! {0} loan accounts restored',
+    li_empty: '✅ Logged in. Auto backup is on.',
+    li_reset_sent: '📧 PIN reset link sent to {0}. Open the mail, type a new 6-digit PIN there, then login here.',
+    li_merge_h: '☁️ Cloud data found',
+    li_merge_t: 'Cloud: {0} loan accounts (saved {1}). This phone: {2} loan accounts. What should we do?',
+    li_use_cloud: '☁️ Use cloud data (recommended)',
+    li_merge: '📱 Keep this phone\'s data + add cloud accounts',
+    ag_pin1: '🔑 Login PIN (6 digits) *',
+    ag_pin2: 'Confirm PIN *',
+    ag_pin_note: 'Mobile number + this PIN open your data on any phone. Everything is backed up automatically.',
+    ag_pin_bad: 'PIN must be 6–12 digits and both must match',
+    ag_pin_weak: 'This PIN is too easy to guess (like 123456 / 000000) — choose another',
+    ag_acc_exists: 'This Gmail already has an account — login with it (forgot PIN? reset it by Gmail)',
+    ag_acc_ok: '☁️ Account created — auto backup is on',
+    cl_h: '☁️ Account · auto backup · live sync',
+    cl_acc: '👤 Account',
+    cl_bk: '☁️ Auto backup',
+    cl_bk_ok: '✅ saved {0}',
+    cl_bk_wait: '⏳ saving…',
+    cl_bk_pend: '🟠 {0} changes — will upload when online',
+    cl_bk_off: '⚪ Off',
+    cl_rules: '⚠️ One-time step: Firebase rules need an update for auto backup. Tap “📋 Copy Firebase rules” → Firebase → Realtime Database → Rules → paste → Publish.',
+    cl_fix: '⚠️ Auto backup is paused — Firebase rules need a one-time update',
+    cl_setpin_box: '🔑 Set a 6-digit login PIN — then you can login on any phone with your mobile number.',
+    cl_setpin: '🔑 Set login PIN',
+    cl_chpin: '🔑 Change PIN',
+    cl_oldpw: 'Current sync password',
+    cl_oldpin: 'Current PIN',
+    cl_newpin: 'New PIN (6 digits)',
+    cl_pin_save: '✅ Save PIN',
+    cl_pin_ok: '✅ PIN saved. Login on any phone with {0} + PIN.',
+    cl_logout: '🚪 Logout',
+    cl_logout_cf: 'Logout from this phone?\n\nYour data is safe in the cloud. This phone\'s copy will be removed — login again with mobile + PIN anytime.',
+    cl_logout_pend: '{0} changes are not uploaded yet (no internet). Logout anyway? Those changes will be lost.',
+    cl_login_btn: '🔐 Login / create account',
+    cl_relogin: '🔑 Login again to keep auto backup on',
+    cl_note: '☁️ Auto backup is on: every change is saved to your own Firebase (Google) account within seconds. On a new phone, login with mobile + PIN and everything comes back.',
+    cl_manual: '📁 Manual backup file (optional)',
+    lv_adv: '⚙️ Advanced: Firebase project / sync password',
+    pb_due_today: 'Due today',
+    pburl_db: '⚠️ This is your Firebase database address, not the app\'s website. Leave this empty, or paste your GitHub Pages / Vercel address.',
+    pburl_move2: '💡 Open the app from this address and login with mobile + PIN — your data comes back automatically.',
+    ci_install: '📲 Install passbook app',
+    ci_ios: '📲 Keep this passbook as an app: tap Share ⬆️ → “Add to Home Screen”',
+    ci_and: '📲 Keep this passbook as an app: Chrome menu ⋮ → “Install app” / “Add to Home screen”',
+    ci_done: '✅ Installed — open “Passbook” from your home screen',
+    ci_mine: '📒 My passbooks',
+    ci_none: 'Scan your passbook QR code or open the link from WhatsApp once — it will appear here automatically.'
   }
 };
 // <i18n-packs>
@@ -1469,7 +1653,73 @@ I18N.hi = {
  "lv_reset": "🔄 नया लिंक (पुराना बंद हो जाएगा)",
  "lv_note": "🔴 लाइव लिंक: बैलेंस, बकाया और इतिहास अपने आप अपडेट होते हैं। ग्राहक अनुरोध 📥 ग्राहक अनुरोध में दिखते हैं।",
  "lv_rules_ok": "✅ नियम कॉपी हो गए — Firebase → Realtime Database → Rules में पेस्ट करके Publish दबाएँ",
- "lv_rules_lock": "🔒 लॉक किए हुए नियम कॉपी हुए (सिर्फ़ आपका खाता लिख सकेगा) — Firebase → Rules में पेस्ट करके Publish दबाएँ"
+ "lv_rules_lock": "🔒 लॉक किए हुए नियम कॉपी हुए (सिर्फ़ आपका खाता लिख सकेगा) — Firebase → Rules में पेस्ट करके Publish दबाएँ",
+ "li_h": "🔐 लॉगिन",
+ "li_sub": "अपने मोबाइल नंबर और PIN से लॉगिन करें — आपका सारा डेटा अपने-आप वापस आ जाएगा।",
+ "li_m": "📱 मोबाइल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लॉगिन PIN",
+ "li_go": "🔐 लॉगिन",
+ "li_forgot": "PIN भूल गए?",
+ "li_new": "➕ नया खाता",
+ "li_off": "बिना खाते के इस्तेमाल करें (डेटा सिर्फ़ इसी फ़ोन में)",
+ "li_have": "पहले से खाता है? लॉगिन करें",
+ "li_cfg": "⚙️ क्लाउड सेटअप (Firebase config)",
+ "li_busy": "लॉगिन हो रहा है, आपका डेटा वापस आ रहा है…",
+ "li_bad": "⚠️ मोबाइल / Gmail या PIN गलत है",
+ "li_nouser": "⚠️ इस मोबाइल नंबर का कोई खाता नहीं मिला — नंबर जाँचें, या Gmail से लॉगिन करें",
+ "li_many": "⚠️ बहुत बार गलत — कुछ मिनट रुककर फिर कोशिश करें",
+ "li_net": "⚠️ इंटरनेट नहीं है — कनेक्ट करके फिर कोशिश करें",
+ "li_auth_off": "⚠️ Firebase → Authentication में Email/Password साइन-इन चालू नहीं है",
+ "li_need_pin": "अपना PIN डालें (कम से कम 6 अंक)",
+ "li_restored": "✅ फिर से स्वागत है! {0} लोन खाते वापस आ गए",
+ "li_empty": "✅ लॉगिन हो गया। ऑटो बैकअप चालू है।",
+ "li_reset_sent": "📧 PIN रीसेट लिंक {0} पर भेजा गया। मेल खोलें, वहाँ नया 6 अंकों का PIN लिखें, फिर यहाँ लॉगिन करें।",
+ "li_merge_h": "☁️ क्लाउड में डेटा मिला",
+ "li_merge_t": "क्लाउड: {0} लोन खाते ({1} को सेव)। इस फ़ोन में: {2} लोन खाते। क्या करें?",
+ "li_use_cloud": "☁️ क्लाउड डेटा इस्तेमाल करें (सुझाव)",
+ "li_merge": "📱 इस फ़ोन का डेटा रखें + क्लाउड के खाते जोड़ें",
+ "ag_pin1": "🔑 लॉगिन PIN (6 अंक) *",
+ "ag_pin2": "PIN दोबारा *",
+ "ag_pin_note": "मोबाइल नंबर + यह PIN किसी भी फ़ोन पर आपका डेटा खोलते हैं। सब कुछ अपने-आप बैकअप होता है।",
+ "ag_pin_bad": "PIN 6–12 अंकों का हो और दोनों एक जैसे हों",
+ "ag_pin_weak": "यह PIN आसानी से अंदाज़ा लगाया जा सकता है (जैसे 123456 / 000000) — दूसरा चुनें",
+ "ag_acc_exists": "इस Gmail का खाता पहले से है — उसी से लॉगिन करें (PIN भूल गए? Gmail से रीसेट करें)",
+ "ag_acc_ok": "☁️ खाता बन गया — ऑटो बैकअप चालू",
+ "cl_h": "☁️ खाता · ऑटो बैकअप · लाइव सिंक",
+ "cl_acc": "👤 खाता",
+ "cl_bk": "☁️ ऑटो बैकअप",
+ "cl_bk_ok": "✅ सेव हुआ {0}",
+ "cl_bk_wait": "⏳ सेव हो रहा है…",
+ "cl_bk_pend": "🟠 {0} बदलाव — इंटरनेट आते ही अपलोड",
+ "cl_bk_off": "⚪ बंद",
+ "cl_rules": "⚠️ एक बार का काम: ऑटो बैकअप के लिए Firebase rules अपडेट करने हैं। “📋 Copy Firebase rules” दबाएँ → Firebase → Realtime Database → Rules → पेस्ट → Publish।",
+ "cl_fix": "⚠️ ऑटो बैकअप रुका है — Firebase rules एक बार अपडेट करने हैं",
+ "cl_setpin_box": "🔑 6 अंकों का लॉगिन PIN बनाएँ — फिर किसी भी फ़ोन पर मोबाइल नंबर से लॉगिन कर सकते हैं।",
+ "cl_setpin": "🔑 लॉगिन PIN बनाएँ",
+ "cl_chpin": "🔑 PIN बदलें",
+ "cl_oldpw": "मौजूदा सिंक पासवर्ड",
+ "cl_oldpin": "मौजूदा PIN",
+ "cl_newpin": "नया PIN (6 अंक)",
+ "cl_pin_save": "✅ PIN सेव करें",
+ "cl_pin_ok": "✅ PIN सेव हुआ। किसी भी फ़ोन पर {0} + PIN से लॉगिन करें।",
+ "cl_logout": "🚪 लॉगआउट",
+ "cl_logout_cf": "इस फ़ोन से लॉगआउट करें?\n\nआपका डेटा क्लाउड में सुरक्षित है। इस फ़ोन की कॉपी हट जाएगी — कभी भी मोबाइल + PIN से फिर लॉगिन करें।",
+ "cl_logout_pend": "{0} बदलाव अभी अपलोड नहीं हुए (इंटरनेट नहीं)। फिर भी लॉगआउट? वे बदलाव खो जाएँगे।",
+ "cl_login_btn": "🔐 लॉगिन / नया खाता",
+ "cl_relogin": "🔑 ऑटो बैकअप चालू रखने के लिए फिर से लॉगिन करें",
+ "cl_note": "☁️ ऑटो बैकअप चालू: हर बदलाव कुछ ही सेकंड में आपके अपने Firebase (Google) खाते में सेव होता है। नए फ़ोन पर मोबाइल + PIN से लॉगिन करें, सब वापस आ जाएगा।",
+ "cl_manual": "📁 मैनुअल बैकअप फ़ाइल (वैकल्पिक)",
+ "lv_adv": "⚙️ एडवांस्ड: Firebase प्रोजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "आज देना है",
+ "pburl_db": "⚠️ यह आपका Firebase डेटाबेस पता है, ऐप की वेबसाइट नहीं। इसे खाली छोड़ें, या अपना GitHub Pages / Vercel पता डालें।",
+ "pburl_move2": "💡 इसी पते से ऐप खोलें और मोबाइल + PIN से लॉगिन करें — आपका डेटा अपने-आप आ जाएगा।",
+ "ci_install": "📲 पासबुक ऐप इंस्टॉल करें",
+ "ci_ios": "📲 इस पासबुक को ऐप की तरह रखें: Share ⬆️ → “Add to Home Screen” दबाएँ",
+ "ci_and": "📲 इस पासबुक को ऐप की तरह रखें: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इंस्टॉल हो गया — होम स्क्रीन पर “Passbook” खोलें",
+ "ci_mine": "📒 मेरी पासबुक",
+ "ci_none": "अपनी पासबुक का QR स्कैन करें या WhatsApp वाला लिंक एक बार खोलें — यह यहाँ अपने-आप दिखेगी।"
 };
 I18N.mr = {
  "hdr_sub": "दैनिक व साप्ताहिक फायनान्स वसुली",
@@ -1865,7 +2115,73 @@ I18N.mr = {
  "lv_reset": "🔄 नवीन लिंक (जुनी बंद होईल)",
  "lv_note": "🔴 लाइव्ह लिंक: शिल्लक, थकबाकी आणि इतिहास आपोआप अपडेट होतात. ग्राहक विनंत्या 📥 ग्राहक विनंत्यांमध्ये दिसतात.",
  "lv_rules_ok": "✅ नियम कॉपी झाले — Firebase → Realtime Database → Rules मध्ये पेस्ट करून Publish दाबा",
- "lv_rules_lock": "🔒 लॉक केलेले नियम कॉपी झाले (फक्त तुमचे खाते लिहू शकेल) — Firebase → Rules मध्ये पेस्ट करून Publish दाबा"
+ "lv_rules_lock": "🔒 लॉक केलेले नियम कॉपी झाले (फक्त तुमचे खाते लिहू शकेल) — Firebase → Rules मध्ये पेस्ट करून Publish दाबा",
+ "li_h": "🔐 लॉगिन",
+ "li_sub": "तुमचा मोबाईल नंबर आणि PIN ने लॉगिन करा — तुमचा सर्व डेटा आपोआप परत येईल.",
+ "li_m": "📱 मोबाईल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लॉगिन PIN",
+ "li_go": "🔐 लॉगिन",
+ "li_forgot": "PIN विसरलात?",
+ "li_new": "➕ नवीन खाते",
+ "li_off": "खात्याशिवाय वापरा (डेटा फक्त या फोनमध्ये)",
+ "li_have": "आधीच खाते आहे? लॉगिन करा",
+ "li_cfg": "⚙️ क्लाउड सेटअप (Firebase config)",
+ "li_busy": "लॉगिन होत आहे, तुमचा डेटा परत आणत आहे…",
+ "li_bad": "⚠️ मोबाईल / Gmail किंवा PIN चुकीचा",
+ "li_nouser": "⚠️ या मोबाईल नंबरचे खाते सापडले नाही — नंबर तपासा, किंवा Gmail ने लॉगिन करा",
+ "li_many": "⚠️ खूप वेळा चुकीचे — काही मिनिटे थांबून पुन्हा प्रयत्न करा",
+ "li_net": "⚠️ इंटरनेट नाही — कनेक्ट करून पुन्हा प्रयत्न करा",
+ "li_auth_off": "⚠️ Firebase → Authentication मध्ये Email/Password साइन-इन चालू नाही",
+ "li_need_pin": "तुमचा PIN टाका (किमान 6 अंक)",
+ "li_restored": "✅ पुन्हा स्वागत! {0} कर्ज खाती परत आली",
+ "li_empty": "✅ लॉगिन झाले. ऑटो बॅकअप चालू आहे.",
+ "li_reset_sent": "📧 PIN रीसेट लिंक {0} वर पाठवली. मेल उघडा, तिथे नवीन 6 अंकी PIN लिहा, मग इथे लॉगिन करा.",
+ "li_merge_h": "☁️ क्लाउडमध्ये डेटा सापडला",
+ "li_merge_t": "क्लाउड: {0} कर्ज खाती ({1} ला सेव्ह). या फोनमध्ये: {2} कर्ज खाती. काय करायचे?",
+ "li_use_cloud": "☁️ क्लाउड डेटा वापरा (शिफारस)",
+ "li_merge": "📱 या फोनचा डेटा ठेवा + क्लाउडची खाती जोडा",
+ "ag_pin1": "🔑 लॉगिन PIN (6 अंक) *",
+ "ag_pin2": "PIN पुन्हा *",
+ "ag_pin_note": "मोबाईल नंबर + हा PIN कोणत्याही फोनवर तुमचा डेटा उघडतात. सर्व काही आपोआप बॅकअप होते.",
+ "ag_pin_bad": "PIN 6–12 अंकी असावा आणि दोन्ही सारखे असावेत",
+ "ag_pin_weak": "हा PIN सहज ओळखता येतो (उदा. 123456 / 000000) — दुसरा निवडा",
+ "ag_acc_exists": "या Gmail चे खाते आधीच आहे — त्यानेच लॉगिन करा (PIN विसरलात? Gmail ने रीसेट करा)",
+ "ag_acc_ok": "☁️ खाते तयार झाले — ऑटो बॅकअप चालू",
+ "cl_h": "☁️ खाते · ऑटो बॅकअप · लाइव्ह सिंक",
+ "cl_acc": "👤 खाते",
+ "cl_bk": "☁️ ऑटो बॅकअप",
+ "cl_bk_ok": "✅ सेव्ह झाले {0}",
+ "cl_bk_wait": "⏳ सेव्ह होत आहे…",
+ "cl_bk_pend": "🟠 {0} बदल — इंटरनेट येताच अपलोड",
+ "cl_bk_off": "⚪ बंद",
+ "cl_rules": "⚠️ एकदाच करायचे: ऑटो बॅकअपसाठी Firebase rules अपडेट करायचे आहेत. “📋 Copy Firebase rules” दाबा → Firebase → Realtime Database → Rules → पेस्ट → Publish.",
+ "cl_fix": "⚠️ ऑटो बॅकअप थांबले आहे — Firebase rules एकदा अपडेट करायचे आहेत",
+ "cl_setpin_box": "🔑 6 अंकी लॉगिन PIN ठेवा — मग कोणत्याही फोनवर मोबाईल नंबरने लॉगिन करता येईल.",
+ "cl_setpin": "🔑 लॉगिन PIN ठेवा",
+ "cl_chpin": "🔑 PIN बदला",
+ "cl_oldpw": "सध्याचा सिंक पासवर्ड",
+ "cl_oldpin": "सध्याचा PIN",
+ "cl_newpin": "नवीन PIN (6 अंक)",
+ "cl_pin_save": "✅ PIN सेव्ह करा",
+ "cl_pin_ok": "✅ PIN सेव्ह झाला. कोणत्याही फोनवर {0} + PIN ने लॉगिन करा.",
+ "cl_logout": "🚪 लॉगआउट",
+ "cl_logout_cf": "या फोनमधून लॉगआउट करायचे?\n\nतुमचा डेटा क्लाउडमध्ये सुरक्षित आहे. या फोनमधील प्रत काढली जाईल — कधीही मोबाईल + PIN ने पुन्हा लॉगिन करा.",
+ "cl_logout_pend": "{0} बदल अजून अपलोड झाले नाहीत (इंटरनेट नाही). तरीही लॉगआउट? ते बदल हरवतील.",
+ "cl_login_btn": "🔐 लॉगिन / नवीन खाते",
+ "cl_relogin": "🔑 ऑटो बॅकअप चालू ठेवण्यासाठी पुन्हा लॉगिन करा",
+ "cl_note": "☁️ ऑटो बॅकअप चालू: प्रत्येक बदल काही सेकंदांत तुमच्या स्वतःच्या Firebase (Google) खात्यात सेव्ह होतो. नवीन फोनवर मोबाईल + PIN ने लॉगिन करा, सर्व परत येईल.",
+ "cl_manual": "📁 मॅन्युअल बॅकअप फाइल (ऐच्छिक)",
+ "lv_adv": "⚙️ ॲडव्हान्स्ड: Firebase प्रोजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "आज भरायचे",
+ "pburl_db": "⚠️ हा तुमचा Firebase डेटाबेस पत्ता आहे, ॲपची वेबसाइट नाही. हे रिकामे ठेवा, किंवा तुमचा GitHub Pages / Vercel पत्ता टाका.",
+ "pburl_move2": "💡 याच पत्त्यावरून ॲप उघडा आणि मोबाईल + PIN ने लॉगिन करा — तुमचा डेटा आपोआप येईल.",
+ "ci_install": "📲 पासबुक ॲप इन्स्टॉल करा",
+ "ci_ios": "📲 हे पासबुक ॲपसारखे ठेवा: Share ⬆️ → “Add to Home Screen” दाबा",
+ "ci_and": "📲 हे पासबुक ॲपसारखे ठेवा: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इन्स्टॉल झाले — होम स्क्रीनवर “Passbook” उघडा",
+ "ci_mine": "📒 माझी पासबुक",
+ "ci_none": "तुमच्या पासबुकचा QR स्कॅन करा किंवा WhatsApp वरची लिंक एकदा उघडा — ते इथे आपोआप दिसेल."
 };
 I18N.ta = {
  "hdr_sub": "தினசரி & வாராந்திர நிதி வசூல்",
@@ -2261,7 +2577,73 @@ I18N.ta = {
  "lv_reset": "🔄 புதிய இணைப்பு (பழையது நின்றுவிடும்)",
  "lv_note": "🔴 நேரடி இணைப்பு: இருப்பு, நிலுவை, வரலாறு தானாகப் புதுப்பிக்கப்படும். வாடிக்கையாளர் கோரிக்கைகள் 📥 வாடிக்கையாளர் கோரிக்கைகளில் தெரியும்.",
  "lv_rules_ok": "✅ விதிகள் நகலெடுக்கப்பட்டன — Firebase → Realtime Database → Rules-இல் ஒட்டி Publish அழுத்துங்கள்",
- "lv_rules_lock": "🔒 பூட்டிய விதிகள் நகலெடுக்கப்பட்டன (உங்கள் கணக்கு மட்டுமே எழுத முடியும்) — Firebase → Rules-இல் ஒட்டி Publish அழுத்துங்கள்"
+ "lv_rules_lock": "🔒 பூட்டிய விதிகள் நகலெடுக்கப்பட்டன (உங்கள் கணக்கு மட்டுமே எழுத முடியும்) — Firebase → Rules-இல் ஒட்டி Publish அழுத்துங்கள்",
+ "li_h": "🔐 உள்நுழை",
+ "li_sub": "உங்கள் மொபைல் எண், PIN மூலம் உள்நுழையுங்கள் — உங்கள் தரவு முழுவதும் தானாகவே திரும்ப வரும்.",
+ "li_m": "📱 மொபைல்",
+ "li_g": "✉️ Gmail",
+ "li_pin": "உள்நுழைவு PIN",
+ "li_go": "🔐 உள்நுழை",
+ "li_forgot": "PIN மறந்துவிட்டதா?",
+ "li_new": "➕ புதிய கணக்கு",
+ "li_off": "கணக்கு இல்லாமல் பயன்படுத்து (தரவு இந்த போனில் மட்டும்)",
+ "li_have": "ஏற்கனவே கணக்கு உள்ளதா? உள்நுழை",
+ "li_cfg": "⚙️ கிளவுட் அமைப்பு (Firebase config)",
+ "li_busy": "உள்நுழைகிறது, உங்கள் தரவை திரும்பக் கொண்டுவருகிறது…",
+ "li_bad": "⚠️ மொபைல் / Gmail அல்லது PIN தவறு",
+ "li_nouser": "⚠️ இந்த மொபைல் எண்ணுக்கு கணக்கு இல்லை — எண்ணைச் சரிபாருங்கள், அல்லது Gmail மூலம் உள்நுழையுங்கள்",
+ "li_many": "⚠️ பலமுறை தவறு — சில நிமிடங்கள் காத்திருந்து மீண்டும் முயலுங்கள்",
+ "li_net": "⚠️ இணையம் இல்லை — இணைத்து மீண்டும் முயலுங்கள்",
+ "li_auth_off": "⚠️ Firebase → Authentication-ல் Email/Password உள்நுழைவு இயக்கப்படவில்லை",
+ "li_need_pin": "உங்கள் PIN-ஐ உள்ளிடுங்கள் (குறைந்தது 6 இலக்கங்கள்)",
+ "li_restored": "✅ மீண்டும் வருக! {0} கடன் கணக்குகள் திரும்ப வந்தன",
+ "li_empty": "✅ உள்நுழைந்தீர்கள். தானியங்கி காப்புப்பிரதி இயக்கத்தில்.",
+ "li_reset_sent": "📧 PIN மீட்டமைப்பு இணைப்பு {0}-க்கு அனுப்பப்பட்டது. மெயிலைத் திறந்து புதிய 6 இலக்க PIN-ஐ அங்கே தட்டச்சு செய்து, இங்கே உள்நுழையுங்கள்.",
+ "li_merge_h": "☁️ கிளவுடில் தரவு உள்ளது",
+ "li_merge_t": "கிளவுட்: {0} கடன் கணக்குகள் ({1} அன்று சேமிப்பு). இந்த போன்: {2} கடன் கணக்குகள். என்ன செய்யலாம்?",
+ "li_use_cloud": "☁️ கிளவுட் தரவைப் பயன்படுத்து (பரிந்துரை)",
+ "li_merge": "📱 இந்த போன் தரவை வைத்து + கிளவுட் கணக்குகளைச் சேர்",
+ "ag_pin1": "🔑 உள்நுழைவு PIN (6 இலக்கம்) *",
+ "ag_pin2": "PIN மீண்டும் *",
+ "ag_pin_note": "மொபைல் எண் + இந்த PIN எந்த போனிலும் உங்கள் தரவைத் திறக்கும். அனைத்தும் தானாகவே காப்புப்பிரதி ஆகும்.",
+ "ag_pin_bad": "PIN 6–12 இலக்கங்களாக இருக்க வேண்டும், இரண்டும் ஒன்றாக இருக்க வேண்டும்",
+ "ag_pin_weak": "இந்த PIN எளிதில் ஊகிக்கக்கூடியது (123456 / 000000 போல) — வேறு தேர்ந்தெடுங்கள்",
+ "ag_acc_exists": "இந்த Gmail-க்கு ஏற்கனவே கணக்கு உள்ளது — அதனுடன் உள்நுழையுங்கள் (PIN மறந்தால் Gmail மூலம் மீட்டமை)",
+ "ag_acc_ok": "☁️ கணக்கு உருவானது — தானியங்கி காப்புப்பிரதி இயக்கத்தில்",
+ "cl_h": "☁️ கணக்கு · தானியங்கி காப்புப்பிரதி · நேரடி ஒத்திசைவு",
+ "cl_acc": "👤 கணக்கு",
+ "cl_bk": "☁️ தானியங்கி காப்புப்பிரதி",
+ "cl_bk_ok": "✅ சேமிக்கப்பட்டது {0}",
+ "cl_bk_wait": "⏳ சேமிக்கிறது…",
+ "cl_bk_pend": "🟠 {0} மாற்றங்கள் — இணையம் வந்ததும் பதிவேற்றம்",
+ "cl_bk_off": "⚪ அணைப்பு",
+ "cl_rules": "⚠️ ஒருமுறை செய்ய வேண்டியது: தானியங்கி காப்புப்பிரதிக்கு Firebase rules புதுப்பிக்க வேண்டும். “📋 Copy Firebase rules” அழுத்தி → Firebase → Realtime Database → Rules → ஒட்டு → Publish.",
+ "cl_fix": "⚠️ தானியங்கி காப்புப்பிரதி நின்றுள்ளது — Firebase rules ஒருமுறை புதுப்பிக்க வேண்டும்",
+ "cl_setpin_box": "🔑 6 இலக்க உள்நுழைவு PIN அமையுங்கள் — பிறகு எந்த போனிலும் மொபைல் எண்ணுடன் உள்நுழையலாம்.",
+ "cl_setpin": "🔑 உள்நுழைவு PIN அமை",
+ "cl_chpin": "🔑 PIN மாற்று",
+ "cl_oldpw": "தற்போதைய ஒத்திசைவு கடவுச்சொல்",
+ "cl_oldpin": "தற்போதைய PIN",
+ "cl_newpin": "புதிய PIN (6 இலக்கம்)",
+ "cl_pin_save": "✅ PIN சேமி",
+ "cl_pin_ok": "✅ PIN சேமிக்கப்பட்டது. எந்த போனிலும் {0} + PIN மூலம் உள்நுழையுங்கள்.",
+ "cl_logout": "🚪 வெளியேறு",
+ "cl_logout_cf": "இந்த போனிலிருந்து வெளியேறவா?\n\nஉங்கள் தரவு கிளவுடில் பாதுகாப்பாக உள்ளது. இந்த போனின் நகல் நீக்கப்படும் — எப்போது வேண்டுமானாலும் மொபைல் + PIN மூலம் மீண்டும் உள்நுழையலாம்.",
+ "cl_logout_pend": "{0} மாற்றங்கள் இன்னும் பதிவேற்றப்படவில்லை (இணையம் இல்லை). இருந்தாலும் வெளியேறவா? அந்த மாற்றங்கள் இழக்கப்படும்.",
+ "cl_login_btn": "🔐 உள்நுழை / புதிய கணக்கு",
+ "cl_relogin": "🔑 தானியங்கி காப்புப்பிரதி தொடர மீண்டும் உள்நுழையுங்கள்",
+ "cl_note": "☁️ தானியங்கி காப்புப்பிரதி இயக்கத்தில்: ஒவ்வொரு மாற்றமும் சில விநாடிகளில் உங்கள் சொந்த Firebase (Google) கணக்கில் சேமிக்கப்படும். புதிய போனில் மொபைல் + PIN மூலம் உள்நுழைந்தால் அனைத்தும் திரும்ப வரும்.",
+ "cl_manual": "📁 கைமுறை காப்புப்பிரதி கோப்பு (விருப்பம்)",
+ "lv_adv": "⚙️ மேம்பட்டது: Firebase திட்டம் / ஒத்திசைவு கடவுச்சொல்",
+ "pb_due_today": "இன்று செலுத்த வேண்டியது",
+ "pburl_db": "⚠️ இது உங்கள் Firebase தரவுத்தள முகவரி, ஆப்பின் வலைத்தளம் அல்ல. இதை காலியாக விடுங்கள், அல்லது உங்கள் GitHub Pages / Vercel முகவரியை இடுங்கள்.",
+ "pburl_move2": "💡 இந்த முகவரியிலிருந்து ஆப்பைத் திறந்து மொபைல் + PIN மூலம் உள்நுழையுங்கள் — உங்கள் தரவு தானாக வரும்.",
+ "ci_install": "📲 பாஸ்புக் ஆப்பை நிறுவு",
+ "ci_ios": "📲 இந்த பாஸ்புக்கை ஆப்பாக வைத்துக்கொள்ள: Share ⬆️ → “Add to Home Screen” அழுத்துங்கள்",
+ "ci_and": "📲 இந்த பாஸ்புக்கை ஆப்பாக வைத்துக்கொள்ள: Chrome மெனு ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ நிறுவப்பட்டது — முகப்புத் திரையில் “Passbook” திறங்கள்",
+ "ci_mine": "📒 என் பாஸ்புக்குகள்",
+ "ci_none": "உங்கள் பாஸ்புக் QR-ஐ ஸ்கேன் செய்யுங்கள் அல்லது WhatsApp இணைப்பை ஒருமுறை திறங்கள் — இங்கே தானாகத் தெரியும்."
 };
 I18N.kn = {
  "hdr_sub": "ದಿನನಿತ್ಯ & ವಾರದ ಫೈನಾನ್ಸ್ ವಸೂಲಿ",
@@ -2657,7 +3039,73 @@ I18N.kn = {
  "lv_reset": "🔄 ಹೊಸ ಲಿಂಕ್ (ಹಳೆಯದು ನಿಲ್ಲುತ್ತದೆ)",
  "lv_note": "🔴 ಲೈವ್ ಲಿಂಕ್: ಉಳಿದ ಮೊತ್ತ, ಬಾಕಿ, ಇತಿಹಾಸ ತಾನಾಗಿ ಅಪ್‌ಡೇಟ್ ಆಗುತ್ತವೆ. ಗ್ರಾಹಕರ ಕೋರಿಕೆಗಳು 📥 ಗ್ರಾಹಕರ ಕೋರಿಕೆಗಳಲ್ಲಿ ಕಾಣುತ್ತವೆ.",
  "lv_rules_ok": "✅ ನಿಯಮಗಳು ನಕಲಾಗಿವೆ — Firebase → Realtime Database → Rules ನಲ್ಲಿ ಅಂಟಿಸಿ Publish ಒತ್ತಿ",
- "lv_rules_lock": "🔒 ಲಾಕ್ ಮಾಡಿದ ನಿಯಮಗಳು ನಕಲಾಗಿವೆ (ನಿಮ್ಮ ಖಾತೆ ಮಾತ್ರ ಬರೆಯಬಹುದು) — Firebase → Rules ನಲ್ಲಿ ಅಂಟಿಸಿ Publish ಒತ್ತಿ"
+ "lv_rules_lock": "🔒 ಲಾಕ್ ಮಾಡಿದ ನಿಯಮಗಳು ನಕಲಾಗಿವೆ (ನಿಮ್ಮ ಖಾತೆ ಮಾತ್ರ ಬರೆಯಬಹುದು) — Firebase → Rules ನಲ್ಲಿ ಅಂಟಿಸಿ Publish ಒತ್ತಿ",
+ "li_h": "🔐 ಲಾಗಿನ್",
+ "li_sub": "ನಿಮ್ಮ ಮೊಬೈಲ್ ನಂಬರ್ ಮತ್ತು PIN ನಿಂದ ಲಾಗಿನ್ ಆಗಿ — ನಿಮ್ಮ ಎಲ್ಲಾ ಡೇಟಾ ತಾನಾಗಿಯೇ ಮರಳಿ ಬರುತ್ತದೆ.",
+ "li_m": "📱 ಮೊಬೈಲ್",
+ "li_g": "✉️ Gmail",
+ "li_pin": "ಲಾಗಿನ್ PIN",
+ "li_go": "🔐 ಲಾಗಿನ್",
+ "li_forgot": "PIN ಮರೆತಿರಾ?",
+ "li_new": "➕ ಹೊಸ ಖಾತೆ",
+ "li_off": "ಖಾತೆ ಇಲ್ಲದೆ ಬಳಸಿ (ಡೇಟಾ ಈ ಫೋನ್‌ನಲ್ಲಿ ಮಾತ್ರ)",
+ "li_have": "ಈಗಾಗಲೇ ಖಾತೆ ಇದೆಯೇ? ಲಾಗಿನ್",
+ "li_cfg": "⚙️ ಕ್ಲೌಡ್ ಸೆಟಪ್ (Firebase config)",
+ "li_busy": "ಲಾಗಿನ್ ಆಗುತ್ತಿದೆ, ನಿಮ್ಮ ಡೇಟಾ ಮರಳಿ ತರುತ್ತಿದೆ…",
+ "li_bad": "⚠️ ಮೊಬೈಲ್ / Gmail ಅಥವಾ PIN ತಪ್ಪು",
+ "li_nouser": "⚠️ ಈ ಮೊಬೈಲ್ ನಂಬರ್‌ಗೆ ಖಾತೆ ಸಿಗಲಿಲ್ಲ — ನಂಬರ್ ಪರಿಶೀಲಿಸಿ, ಅಥವಾ Gmail ನಿಂದ ಲಾಗಿನ್ ಆಗಿ",
+ "li_many": "⚠️ ಹಲವು ಬಾರಿ ತಪ್ಪು — ಕೆಲವು ನಿಮಿಷ ಕಾದು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+ "li_net": "⚠️ ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ — ಸಂಪರ್ಕಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ",
+ "li_auth_off": "⚠️ Firebase → Authentication ನಲ್ಲಿ Email/Password ಸೈನ್-ಇನ್ ಆನ್ ಆಗಿಲ್ಲ",
+ "li_need_pin": "ನಿಮ್ಮ PIN ನಮೂದಿಸಿ (ಕನಿಷ್ಠ 6 ಅಂಕಿ)",
+ "li_restored": "✅ ಮತ್ತೆ ಸ್ವಾಗತ! {0} ಸಾಲ ಖಾತೆಗಳು ಮರಳಿ ಬಂದಿವೆ",
+ "li_empty": "✅ ಲಾಗಿನ್ ಆಗಿದೆ. ಆಟೋ ಬ್ಯಾಕಪ್ ಆನ್.",
+ "li_reset_sent": "📧 PIN ರೀಸೆಟ್ ಲಿಂಕ್ {0} ಗೆ ಕಳುಹಿಸಲಾಗಿದೆ. ಮೇಲ್ ತೆರೆದು ಅಲ್ಲಿ ಹೊಸ 6 ಅಂಕಿಯ PIN ಟೈಪ್ ಮಾಡಿ, ನಂತರ ಇಲ್ಲಿ ಲಾಗಿನ್ ಆಗಿ.",
+ "li_merge_h": "☁️ ಕ್ಲೌಡ್‌ನಲ್ಲಿ ಡೇಟಾ ಇದೆ",
+ "li_merge_t": "ಕ್ಲೌಡ್: {0} ಸಾಲ ಖಾತೆಗಳು ({1} ರಂದು ಸೇವ್). ಈ ಫೋನ್: {2} ಸಾಲ ಖಾತೆಗಳು. ಏನು ಮಾಡಬೇಕು?",
+ "li_use_cloud": "☁️ ಕ್ಲೌಡ್ ಡೇಟಾ ಬಳಸಿ (ಶಿಫಾರಸು)",
+ "li_merge": "📱 ಈ ಫೋನ್ ಡೇಟಾ ಇಟ್ಟುಕೊಂಡು + ಕ್ಲೌಡ್ ಖಾತೆಗಳನ್ನು ಸೇರಿಸಿ",
+ "ag_pin1": "🔑 ಲಾಗಿನ್ PIN (6 ಅಂಕಿ) *",
+ "ag_pin2": "PIN ಮತ್ತೊಮ್ಮೆ *",
+ "ag_pin_note": "ಮೊಬೈಲ್ ನಂಬರ್ + ಈ PIN ಯಾವುದೇ ಫೋನ್‌ನಲ್ಲಿ ನಿಮ್ಮ ಡೇಟಾ ತೆರೆಯುತ್ತವೆ. ಎಲ್ಲವೂ ತಾನಾಗಿಯೇ ಬ್ಯಾಕಪ್ ಆಗುತ್ತದೆ.",
+ "ag_pin_bad": "PIN 6–12 ಅಂಕಿಗಳಿರಬೇಕು ಮತ್ತು ಎರಡೂ ಒಂದೇ ಆಗಿರಬೇಕು",
+ "ag_pin_weak": "ಈ PIN ಸುಲಭವಾಗಿ ಊಹಿಸಬಹುದು (123456 / 000000 ಹಾಗೆ) — ಬೇರೆಯದನ್ನು ಆರಿಸಿ",
+ "ag_acc_exists": "ಈ Gmail ಗೆ ಈಗಾಗಲೇ ಖಾತೆ ಇದೆ — ಅದರಿಂದಲೇ ಲಾಗಿನ್ ಆಗಿ (PIN ಮರೆತರೆ Gmail ಮೂಲಕ ರೀಸೆಟ್)",
+ "ag_acc_ok": "☁️ ಖಾತೆ ರಚನೆಯಾಯಿತು — ಆಟೋ ಬ್ಯಾಕಪ್ ಆನ್",
+ "cl_h": "☁️ ಖಾತೆ · ಆಟೋ ಬ್ಯಾಕಪ್ · ಲೈವ್ ಸಿಂಕ್",
+ "cl_acc": "👤 ಖಾತೆ",
+ "cl_bk": "☁️ ಆಟೋ ಬ್ಯಾಕಪ್",
+ "cl_bk_ok": "✅ ಸೇವ್ ಆಗಿದೆ {0}",
+ "cl_bk_wait": "⏳ ಸೇವ್ ಆಗುತ್ತಿದೆ…",
+ "cl_bk_pend": "🟠 {0} ಬದಲಾವಣೆಗಳು — ಇಂಟರ್ನೆಟ್ ಬಂದ ತಕ್ಷಣ ಅಪ್‌ಲೋಡ್",
+ "cl_bk_off": "⚪ ಆಫ್",
+ "cl_rules": "⚠️ ಒಂದೇ ಬಾರಿ ಮಾಡಬೇಕಾದದ್ದು: ಆಟೋ ಬ್ಯಾಕಪ್‌ಗಾಗಿ Firebase rules ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕು. “📋 Copy Firebase rules” ಒತ್ತಿ → Firebase → Realtime Database → Rules → ಪೇಸ್ಟ್ → Publish.",
+ "cl_fix": "⚠️ ಆಟೋ ಬ್ಯಾಕಪ್ ನಿಂತಿದೆ — Firebase rules ಒಮ್ಮೆ ಅಪ್‌ಡೇಟ್ ಮಾಡಬೇಕು",
+ "cl_setpin_box": "🔑 6 ಅಂಕಿಯ ಲಾಗಿನ್ PIN ಇಡಿ — ನಂತರ ಯಾವುದೇ ಫೋನ್‌ನಲ್ಲಿ ಮೊಬೈಲ್ ನಂಬರ್‌ನಿಂದ ಲಾಗಿನ್ ಆಗಬಹುದು.",
+ "cl_setpin": "🔑 ಲಾಗಿನ್ PIN ಇಡಿ",
+ "cl_chpin": "🔑 PIN ಬದಲಿಸಿ",
+ "cl_oldpw": "ಈಗಿನ ಸಿಂಕ್ ಪಾಸ್‌ವರ್ಡ್",
+ "cl_oldpin": "ಈಗಿನ PIN",
+ "cl_newpin": "ಹೊಸ PIN (6 ಅಂಕಿ)",
+ "cl_pin_save": "✅ PIN ಸೇವ್",
+ "cl_pin_ok": "✅ PIN ಸೇವ್ ಆಯಿತು. ಯಾವುದೇ ಫೋನ್‌ನಲ್ಲಿ {0} + PIN ನಿಂದ ಲಾಗಿನ್ ಆಗಿ.",
+ "cl_logout": "🚪 ಲಾಗ್‌ಔಟ್",
+ "cl_logout_cf": "ಈ ಫೋನ್‌ನಿಂದ ಲಾಗ್‌ಔಟ್ ಆಗಬೇಕೇ?\n\nನಿಮ್ಮ ಡೇಟಾ ಕ್ಲೌಡ್‌ನಲ್ಲಿ ಸುರಕ್ಷಿತವಾಗಿದೆ. ಈ ಫೋನ್‌ನ ಪ್ರತಿ ಅಳಿಸಲಾಗುತ್ತದೆ — ಯಾವಾಗ ಬೇಕಾದರೂ ಮೊಬೈಲ್ + PIN ನಿಂದ ಮತ್ತೆ ಲಾಗಿನ್ ಆಗಿ.",
+ "cl_logout_pend": "{0} ಬದಲಾವಣೆಗಳು ಇನ್ನೂ ಅಪ್‌ಲೋಡ್ ಆಗಿಲ್ಲ (ಇಂಟರ್ನೆಟ್ ಇಲ್ಲ). ಆದರೂ ಲಾಗ್‌ಔಟ್? ಆ ಬದಲಾವಣೆಗಳು ಕಳೆದುಹೋಗುತ್ತವೆ.",
+ "cl_login_btn": "🔐 ಲಾಗಿನ್ / ಹೊಸ ಖಾತೆ",
+ "cl_relogin": "🔑 ಆಟೋ ಬ್ಯಾಕಪ್ ಮುಂದುವರಿಯಲು ಮತ್ತೆ ಲಾಗಿನ್ ಆಗಿ",
+ "cl_note": "☁️ ಆಟೋ ಬ್ಯಾಕಪ್ ಆನ್: ಪ್ರತಿಯೊಂದು ಬದಲಾವಣೆ ಕೆಲವೇ ಸೆಕೆಂಡುಗಳಲ್ಲಿ ನಿಮ್ಮ ಸ್ವಂತ Firebase (Google) ಖಾತೆಯಲ್ಲಿ ಸೇವ್ ಆಗುತ್ತದೆ. ಹೊಸ ಫೋನ್‌ನಲ್ಲಿ ಮೊಬೈಲ್ + PIN ನಿಂದ ಲಾಗಿನ್ ಆದರೆ ಎಲ್ಲವೂ ಮರಳಿ ಬರುತ್ತದೆ.",
+ "cl_manual": "📁 ಮ್ಯಾನುಯಲ್ ಬ್ಯಾಕಪ್ ಫೈಲ್ (ಐಚ್ಛಿಕ)",
+ "lv_adv": "⚙️ ಸುಧಾರಿತ: Firebase ಪ್ರಾಜೆಕ್ಟ್ / ಸಿಂಕ್ ಪಾಸ್‌ವರ್ಡ್",
+ "pb_due_today": "ಇಂದು ಕಟ್ಟಬೇಕಾದದ್ದು",
+ "pburl_db": "⚠️ ಇದು ನಿಮ್ಮ Firebase ಡೇಟಾಬೇಸ್ ವಿಳಾಸ, ಆ್ಯಪ್‌ನ ವೆಬ್‌ಸೈಟ್ ಅಲ್ಲ. ಇದನ್ನು ಖಾಲಿ ಬಿಡಿ, ಅಥವಾ ನಿಮ್ಮ GitHub Pages / Vercel ವಿಳಾಸ ಹಾಕಿ.",
+ "pburl_move2": "💡 ಇದೇ ವಿಳಾಸದಿಂದ ಆ್ಯಪ್ ತೆರೆದು ಮೊಬೈಲ್ + PIN ನಿಂದ ಲಾಗಿನ್ ಆಗಿ — ನಿಮ್ಮ ಡೇಟಾ ತಾನಾಗಿಯೇ ಬರುತ್ತದೆ.",
+ "ci_install": "📲 ಪಾಸ್‌ಬುಕ್ ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ",
+ "ci_ios": "📲 ಈ ಪಾಸ್‌ಬುಕ್ ಅನ್ನು ಆ್ಯಪ್‌ನಂತೆ ಇಡಲು: Share ⬆️ → “Add to Home Screen” ಒತ್ತಿ",
+ "ci_and": "📲 ಈ ಪಾಸ್‌ಬುಕ್ ಅನ್ನು ಆ್ಯಪ್‌ನಂತೆ ಇಡಲು: Chrome ಮೆನು ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ಇನ್‌ಸ್ಟಾಲ್ ಆಯಿತು — ಹೋಮ್ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ “Passbook” ತೆರೆಯಿರಿ",
+ "ci_mine": "📒 ನನ್ನ ಪಾಸ್‌ಬುಕ್‌ಗಳು",
+ "ci_none": "ನಿಮ್ಮ ಪಾಸ್‌ಬುಕ್ QR ಸ್ಕ್ಯಾನ್ ಮಾಡಿ ಅಥವಾ WhatsApp ಲಿಂಕ್ ಒಮ್ಮೆ ತೆರೆಯಿರಿ — ಇಲ್ಲಿ ತಾನಾಗಿಯೇ ಕಾಣಿಸುತ್ತದೆ."
 };
 I18N.ml = {
  "hdr_sub": "ദിവസ & ആഴ്ച ഫിനാൻസ് പിരിവ്",
@@ -3053,7 +3501,73 @@ I18N.ml = {
  "lv_reset": "🔄 പുതിയ ലിങ്ക് (പഴയത് നിലയ്ക്കും)",
  "lv_note": "🔴 ലൈവ് ലിങ്ക്: ബാക്കി തുകയും കുടിശ്ശികയും ചരിത്രവും തനിയെ അപ്ഡേറ്റ് ആകും. ഉപഭോക്തൃ അഭ്യർത്ഥനകൾ 📥 ഉപഭോക്തൃ അഭ്യർത്ഥനകളിൽ കാണാം.",
  "lv_rules_ok": "✅ നിയമങ്ങൾ പകർത്തി — Firebase → Realtime Database → Rules-ൽ ഒട്ടിച്ച് Publish അമർത്തുക",
- "lv_rules_lock": "🔒 ലോക്ക് ചെയ്ത നിയമങ്ങൾ പകർത്തി (നിങ്ങളുടെ അക്കൗണ്ടിന് മാത്രം എഴുതാം) — Firebase → Rules-ൽ ഒട്ടിച്ച് Publish അമർത്തുക"
+ "lv_rules_lock": "🔒 ലോക്ക് ചെയ്ത നിയമങ്ങൾ പകർത്തി (നിങ്ങളുടെ അക്കൗണ്ടിന് മാത്രം എഴുതാം) — Firebase → Rules-ൽ ഒട്ടിച്ച് Publish അമർത്തുക",
+ "li_h": "🔐 ലോഗിൻ",
+ "li_sub": "നിങ്ങളുടെ മൊബൈൽ നമ്പറും PIN-ഉം ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക — നിങ്ങളുടെ എല്ലാ ഡാറ്റയും സ്വയം തിരികെ വരും.",
+ "li_m": "📱 മൊബൈൽ",
+ "li_g": "✉️ Gmail",
+ "li_pin": "ലോഗിൻ PIN",
+ "li_go": "🔐 ലോഗിൻ",
+ "li_forgot": "PIN മറന്നോ?",
+ "li_new": "➕ പുതിയ അക്കൗണ്ട്",
+ "li_off": "അക്കൗണ്ട് ഇല്ലാതെ ഉപയോഗിക്കുക (ഡാറ്റ ഈ ഫോണിൽ മാത്രം)",
+ "li_have": "ഇതിനകം അക്കൗണ്ട് ഉണ്ടോ? ലോഗിൻ",
+ "li_cfg": "⚙️ ക്ലൗഡ് സജ്ജീകരണം (Firebase config)",
+ "li_busy": "ലോഗിൻ ചെയ്യുന്നു, നിങ്ങളുടെ ഡാറ്റ തിരികെ കൊണ്ടുവരുന്നു…",
+ "li_bad": "⚠️ മൊബൈൽ / Gmail അല്ലെങ്കിൽ PIN തെറ്റാണ്",
+ "li_nouser": "⚠️ ഈ മൊബൈൽ നമ്പറിന് അക്കൗണ്ട് കണ്ടെത്തിയില്ല — നമ്പർ പരിശോധിക്കുക, അല്ലെങ്കിൽ Gmail ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക",
+ "li_many": "⚠️ പലതവണ തെറ്റി — കുറച്ച് മിനിറ്റ് കാത്തിരുന്ന് വീണ്ടും ശ്രമിക്കുക",
+ "li_net": "⚠️ ഇന്റർനെറ്റ് ഇല്ല — കണക്റ്റ് ചെയ്ത് വീണ്ടും ശ്രമിക്കുക",
+ "li_auth_off": "⚠️ Firebase → Authentication-ൽ Email/Password സൈൻ-ഇൻ ഓൺ ചെയ്തിട്ടില്ല",
+ "li_need_pin": "നിങ്ങളുടെ PIN നൽകുക (കുറഞ്ഞത് 6 അക്കം)",
+ "li_restored": "✅ വീണ്ടും സ്വാഗതം! {0} ലോൺ അക്കൗണ്ടുകൾ തിരികെ വന്നു",
+ "li_empty": "✅ ലോഗിൻ ചെയ്തു. ഓട്ടോ ബാക്കപ്പ് ഓൺ.",
+ "li_reset_sent": "📧 PIN റീസെറ്റ് ലിങ്ക് {0}-ലേക്ക് അയച്ചു. മെയിൽ തുറന്ന് അവിടെ പുതിയ 6 അക്ക PIN ടൈപ്പ് ചെയ്ത്, ഇവിടെ ലോഗിൻ ചെയ്യുക.",
+ "li_merge_h": "☁️ ക്ലൗഡിൽ ഡാറ്റയുണ്ട്",
+ "li_merge_t": "ക്ലൗഡ്: {0} ലോൺ അക്കൗണ്ടുകൾ ({1}-ന് സേവ്). ഈ ഫോൺ: {2} ലോൺ അക്കൗണ്ടുകൾ. എന്തു ചെയ്യണം?",
+ "li_use_cloud": "☁️ ക്ലൗഡ് ഡാറ്റ ഉപയോഗിക്കുക (ശുപാർശ)",
+ "li_merge": "📱 ഈ ഫോണിലെ ഡാറ്റ നിലനിർത്തി + ക്ലൗഡ് അക്കൗണ്ടുകൾ ചേർക്കുക",
+ "ag_pin1": "🔑 ലോഗിൻ PIN (6 അക്കം) *",
+ "ag_pin2": "PIN വീണ്ടും *",
+ "ag_pin_note": "മൊബൈൽ നമ്പറും ഈ PIN-ഉം ഏത് ഫോണിലും നിങ്ങളുടെ ഡാറ്റ തുറക്കും. എല്ലാം സ്വയം ബാക്കപ്പ് ആകും.",
+ "ag_pin_bad": "PIN 6–12 അക്കം ആയിരിക്കണം, രണ്ടും ഒന്നായിരിക്കണം",
+ "ag_pin_weak": "ഈ PIN എളുപ്പം ഊഹിക്കാം (123456 / 000000 പോലെ) — മറ്റൊന്ന് തിരഞ്ഞെടുക്കുക",
+ "ag_acc_exists": "ഈ Gmail-ന് ഇതിനകം അക്കൗണ്ട് ഉണ്ട് — അതുപയോഗിച്ച് ലോഗിൻ ചെയ്യുക (PIN മറന്നോ? Gmail വഴി റീസെറ്റ്)",
+ "ag_acc_ok": "☁️ അക്കൗണ്ട് സൃഷ്ടിച്ചു — ഓട്ടോ ബാക്കപ്പ് ഓൺ",
+ "cl_h": "☁️ അക്കൗണ്ട് · ഓട്ടോ ബാക്കപ്പ് · ലൈവ് സിങ്ക്",
+ "cl_acc": "👤 അക്കൗണ്ട്",
+ "cl_bk": "☁️ ഓട്ടോ ബാക്കപ്പ്",
+ "cl_bk_ok": "✅ സേവ് ചെയ്തു {0}",
+ "cl_bk_wait": "⏳ സേവ് ചെയ്യുന്നു…",
+ "cl_bk_pend": "🟠 {0} മാറ്റങ്ങൾ — ഇന്റർനെറ്റ് വന്നാലുടൻ അപ്‌ലോഡ്",
+ "cl_bk_off": "⚪ ഓഫ്",
+ "cl_rules": "⚠️ ഒരുതവണ ചെയ്യേണ്ടത്: ഓട്ടോ ബാക്കപ്പിനായി Firebase rules അപ്‌ഡേറ്റ് ചെയ്യണം. “📋 Copy Firebase rules” അമർത്തി → Firebase → Realtime Database → Rules → പേസ്റ്റ് → Publish.",
+ "cl_fix": "⚠️ ഓട്ടോ ബാക്കപ്പ് നിർത്തിയിരിക്കുന്നു — Firebase rules ഒരുതവണ അപ്‌ഡേറ്റ് ചെയ്യണം",
+ "cl_setpin_box": "🔑 6 അക്ക ലോഗിൻ PIN സജ്ജമാക്കുക — പിന്നെ ഏത് ഫോണിലും മൊബൈൽ നമ്പർ ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യാം.",
+ "cl_setpin": "🔑 ലോഗിൻ PIN സജ്ജമാക്കുക",
+ "cl_chpin": "🔑 PIN മാറ്റുക",
+ "cl_oldpw": "നിലവിലെ സിങ്ക് പാസ്‌വേഡ്",
+ "cl_oldpin": "നിലവിലെ PIN",
+ "cl_newpin": "പുതിയ PIN (6 അക്കം)",
+ "cl_pin_save": "✅ PIN സേവ് ചെയ്യുക",
+ "cl_pin_ok": "✅ PIN സേവ് ചെയ്തു. ഏത് ഫോണിലും {0} + PIN ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക.",
+ "cl_logout": "🚪 ലോഗൗട്ട്",
+ "cl_logout_cf": "ഈ ഫോണിൽ നിന്ന് ലോഗൗട്ട് ചെയ്യണോ?\n\nനിങ്ങളുടെ ഡാറ്റ ക്ലൗഡിൽ സുരക്ഷിതമാണ്. ഈ ഫോണിലെ പകർപ്പ് നീക്കം ചെയ്യും — എപ്പോൾ വേണമെങ്കിലും മൊബൈൽ + PIN ഉപയോഗിച്ച് വീണ്ടും ലോഗിൻ ചെയ്യാം.",
+ "cl_logout_pend": "{0} മാറ്റങ്ങൾ ഇനിയും അപ്‌ലോഡ് ചെയ്തിട്ടില്ല (ഇന്റർനെറ്റ് ഇല്ല). എന്നാലും ലോഗൗട്ട്? ആ മാറ്റങ്ങൾ നഷ്ടപ്പെടും.",
+ "cl_login_btn": "🔐 ലോഗിൻ / പുതിയ അക്കൗണ്ട്",
+ "cl_relogin": "🔑 ഓട്ടോ ബാക്കപ്പ് തുടരാൻ വീണ്ടും ലോഗിൻ ചെയ്യുക",
+ "cl_note": "☁️ ഓട്ടോ ബാക്കപ്പ് ഓൺ: ഓരോ മാറ്റവും ഏതാനും സെക്കൻഡിനുള്ളിൽ നിങ്ങളുടെ സ്വന്തം Firebase (Google) അക്കൗണ്ടിൽ സേവ് ആകും. പുതിയ ഫോണിൽ മൊബൈൽ + PIN ഉപയോഗിച്ച് ലോഗിൻ ചെയ്താൽ എല്ലാം തിരികെ വരും.",
+ "cl_manual": "📁 മാനുവൽ ബാക്കപ്പ് ഫയൽ (ഐച്ഛികം)",
+ "lv_adv": "⚙️ അഡ്വാൻസ്ഡ്: Firebase പ്രോജക്റ്റ് / സിങ്ക് പാസ്‌വേഡ്",
+ "pb_due_today": "ഇന്ന് അടയ്ക്കേണ്ടത്",
+ "pburl_db": "⚠️ ഇത് നിങ്ങളുടെ Firebase ഡാറ്റാബേസ് വിലാസമാണ്, ആപ്പിന്റെ വെബ്സൈറ്റ് അല്ല. ഇത് ശൂന്യമായി വിടുക, അല്ലെങ്കിൽ നിങ്ങളുടെ GitHub Pages / Vercel വിലാസം നൽകുക.",
+ "pburl_move2": "💡 ഈ വിലാസത്തിൽ നിന്ന് ആപ്പ് തുറന്ന് മൊബൈൽ + PIN ഉപയോഗിച്ച് ലോഗിൻ ചെയ്യുക — നിങ്ങളുടെ ഡാറ്റ സ്വയം വരും.",
+ "ci_install": "📲 പാസ്ബുക്ക് ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക",
+ "ci_ios": "📲 ഈ പാസ്ബുക്ക് ആപ്പായി സൂക്ഷിക്കാൻ: Share ⬆️ → “Add to Home Screen” അമർത്തുക",
+ "ci_and": "📲 ഈ പാസ്ബുക്ക് ആപ്പായി സൂക്ഷിക്കാൻ: Chrome മെനു ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ഇൻസ്റ്റാൾ ചെയ്തു — ഹോം സ്ക്രീനിൽ “Passbook” തുറക്കുക",
+ "ci_mine": "📒 എന്റെ പാസ്ബുക്കുകൾ",
+ "ci_none": "നിങ്ങളുടെ പാസ്ബുക്ക് QR സ്കാൻ ചെയ്യുക അല്ലെങ്കിൽ WhatsApp ലിങ്ക് ഒരിക്കൽ തുറക്കുക — അത് ഇവിടെ സ്വയം കാണിക്കും."
 };
 I18N.bn = {
  "hdr_sub": "দৈনিক ও সাপ্তাহিক ফাইন্যান্স আদায়",
@@ -3449,7 +3963,73 @@ I18N.bn = {
  "lv_reset": "🔄 নতুন লিংক (পুরনোটি বন্ধ হবে)",
  "lv_note": "🔴 লাইভ লিংক: ব্যালান্স, বকেয়া ও ইতিহাস নিজে থেকেই আপডেট হয়। গ্রাহকের অনুরোধ 📥 গ্রাহকের অনুরোধে দেখা যায়।",
  "lv_rules_ok": "✅ নিয়ম কপি হয়েছে — Firebase → Realtime Database → Rules-এ পেস্ট করে Publish চাপুন",
- "lv_rules_lock": "🔒 লক করা নিয়ম কপি হয়েছে (শুধু আপনার অ্যাকাউন্ট লিখতে পারবে) — Firebase → Rules-এ পেস্ট করে Publish চাপুন"
+ "lv_rules_lock": "🔒 লক করা নিয়ম কপি হয়েছে (শুধু আপনার অ্যাকাউন্ট লিখতে পারবে) — Firebase → Rules-এ পেস্ট করে Publish চাপুন",
+ "li_h": "🔐 লগইন",
+ "li_sub": "আপনার মোবাইল নম্বর ও PIN দিয়ে লগইন করুন — আপনার সব ডেটা নিজে থেকেই ফিরে আসবে।",
+ "li_m": "📱 মোবাইল",
+ "li_g": "✉️ Gmail",
+ "li_pin": "লগইন PIN",
+ "li_go": "🔐 লগইন",
+ "li_forgot": "PIN ভুলে গেছেন?",
+ "li_new": "➕ নতুন অ্যাকাউন্ট",
+ "li_off": "অ্যাকাউন্ট ছাড়া ব্যবহার করুন (ডেটা শুধু এই ফোনে)",
+ "li_have": "আগে থেকেই অ্যাকাউন্ট আছে? লগইন",
+ "li_cfg": "⚙️ ক্লাউড সেটআপ (Firebase config)",
+ "li_busy": "লগইন হচ্ছে, আপনার ডেটা ফিরিয়ে আনা হচ্ছে…",
+ "li_bad": "⚠️ মোবাইল / Gmail বা PIN ভুল",
+ "li_nouser": "⚠️ এই মোবাইল নম্বরের কোনো অ্যাকাউন্ট পাওয়া যায়নি — নম্বর দেখুন, বা Gmail দিয়ে লগইন করুন",
+ "li_many": "⚠️ অনেকবার ভুল — কয়েক মিনিট অপেক্ষা করে আবার চেষ্টা করুন",
+ "li_net": "⚠️ ইন্টারনেট নেই — সংযোগ করে আবার চেষ্টা করুন",
+ "li_auth_off": "⚠️ Firebase → Authentication-এ Email/Password সাইন-ইন চালু নেই",
+ "li_need_pin": "আপনার PIN দিন (অন্তত 6 সংখ্যা)",
+ "li_restored": "✅ আবার স্বাগতম! {0}টি লোন অ্যাকাউন্ট ফিরে এসেছে",
+ "li_empty": "✅ লগইন হয়েছে। অটো ব্যাকআপ চালু।",
+ "li_reset_sent": "📧 PIN রিসেট লিংক {0}-এ পাঠানো হয়েছে। মেল খুলে সেখানে নতুন 6 সংখ্যার PIN লিখুন, তারপর এখানে লগইন করুন।",
+ "li_merge_h": "☁️ ক্লাউডে ডেটা পাওয়া গেছে",
+ "li_merge_t": "ক্লাউড: {0}টি লোন অ্যাকাউন্ট ({1}-এ সেভ)। এই ফোনে: {2}টি লোন অ্যাকাউন্ট। কী করবেন?",
+ "li_use_cloud": "☁️ ক্লাউড ডেটা ব্যবহার করুন (প্রস্তাবিত)",
+ "li_merge": "📱 এই ফোনের ডেটা রাখুন + ক্লাউডের অ্যাকাউন্ট যোগ করুন",
+ "ag_pin1": "🔑 লগইন PIN (6 সংখ্যা) *",
+ "ag_pin2": "PIN আবার *",
+ "ag_pin_note": "মোবাইল নম্বর + এই PIN যেকোনো ফোনে আপনার ডেটা খোলে। সবকিছু নিজে থেকে ব্যাকআপ হয়।",
+ "ag_pin_bad": "PIN 6–12 সংখ্যার হতে হবে এবং দুটো এক হতে হবে",
+ "ag_pin_weak": "এই PIN সহজে আন্দাজ করা যায় (যেমন 123456 / 000000) — অন্যটা বেছে নিন",
+ "ag_acc_exists": "এই Gmail-এর অ্যাকাউন্ট আগে থেকেই আছে — সেটা দিয়েই লগইন করুন (PIN ভুলে গেলে Gmail দিয়ে রিসেট)",
+ "ag_acc_ok": "☁️ অ্যাকাউন্ট তৈরি হয়েছে — অটো ব্যাকআপ চালু",
+ "cl_h": "☁️ অ্যাকাউন্ট · অটো ব্যাকআপ · লাইভ সিঙ্ক",
+ "cl_acc": "👤 অ্যাকাউন্ট",
+ "cl_bk": "☁️ অটো ব্যাকআপ",
+ "cl_bk_ok": "✅ সেভ হয়েছে {0}",
+ "cl_bk_wait": "⏳ সেভ হচ্ছে…",
+ "cl_bk_pend": "🟠 {0}টি পরিবর্তন — ইন্টারনেট এলেই আপলোড",
+ "cl_bk_off": "⚪ বন্ধ",
+ "cl_rules": "⚠️ একবারের কাজ: অটো ব্যাকআপের জন্য Firebase rules আপডেট করতে হবে। “📋 Copy Firebase rules” চাপুন → Firebase → Realtime Database → Rules → পেস্ট → Publish।",
+ "cl_fix": "⚠️ অটো ব্যাকআপ থেমে আছে — Firebase rules একবার আপডেট করতে হবে",
+ "cl_setpin_box": "🔑 6 সংখ্যার লগইন PIN দিন — তারপর যেকোনো ফোনে মোবাইল নম্বর দিয়ে লগইন করতে পারবেন।",
+ "cl_setpin": "🔑 লগইন PIN দিন",
+ "cl_chpin": "🔑 PIN বদলান",
+ "cl_oldpw": "বর্তমান সিঙ্ক পাসওয়ার্ড",
+ "cl_oldpin": "বর্তমান PIN",
+ "cl_newpin": "নতুন PIN (6 সংখ্যা)",
+ "cl_pin_save": "✅ PIN সেভ করুন",
+ "cl_pin_ok": "✅ PIN সেভ হয়েছে। যেকোনো ফোনে {0} + PIN দিয়ে লগইন করুন।",
+ "cl_logout": "🚪 লগআউট",
+ "cl_logout_cf": "এই ফোন থেকে লগআউট করবেন?\n\nআপনার ডেটা ক্লাউডে নিরাপদ। এই ফোনের কপি মুছে যাবে — যেকোনো সময় মোবাইল + PIN দিয়ে আবার লগইন করুন।",
+ "cl_logout_pend": "{0}টি পরিবর্তন এখনও আপলোড হয়নি (ইন্টারনেট নেই)। তবুও লগআউট? ওই পরিবর্তনগুলো হারিয়ে যাবে।",
+ "cl_login_btn": "🔐 লগইন / নতুন অ্যাকাউন্ট",
+ "cl_relogin": "🔑 অটো ব্যাকআপ চালু রাখতে আবার লগইন করুন",
+ "cl_note": "☁️ অটো ব্যাকআপ চালু: প্রতিটি পরিবর্তন কয়েক সেকেন্ডে আপনার নিজের Firebase (Google) অ্যাকাউন্টে সেভ হয়। নতুন ফোনে মোবাইল + PIN দিয়ে লগইন করলে সব ফিরে আসে।",
+ "cl_manual": "📁 ম্যানুয়াল ব্যাকআপ ফাইল (ঐচ্ছিক)",
+ "lv_adv": "⚙️ অ্যাডভান্সড: Firebase প্রজেক্ট / সিঙ্ক পাসওয়ার্ড",
+ "pb_due_today": "আজ দেয়",
+ "pburl_db": "⚠️ এটা আপনার Firebase ডেটাবেসের ঠিকানা, অ্যাপের ওয়েবসাইট নয়। এটা খালি রাখুন, বা আপনার GitHub Pages / Vercel ঠিকানা দিন।",
+ "pburl_move2": "💡 এই ঠিকানা থেকে অ্যাপ খুলে মোবাইল + PIN দিয়ে লগইন করুন — আপনার ডেটা নিজে থেকেই আসবে।",
+ "ci_install": "📲 পাসবুক অ্যাপ ইনস্টল করুন",
+ "ci_ios": "📲 এই পাসবুক অ্যাপের মতো রাখতে: Share ⬆️ → “Add to Home Screen” চাপুন",
+ "ci_and": "📲 এই পাসবুক অ্যাপের মতো রাখতে: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ইনস্টল হয়েছে — হোম স্ক্রিনে “Passbook” খুলুন",
+ "ci_mine": "📒 আমার পাসবুক",
+ "ci_none": "আপনার পাসবুকের QR স্ক্যান করুন বা WhatsApp-এর লিংক একবার খুলুন — এটা এখানে নিজে থেকেই দেখাবে।"
 };
 I18N.gu = {
  "hdr_sub": "દૈનિક અને સાપ્તાહિક ફાઇનાન્સ ઉઘરાણી",
@@ -3845,7 +4425,73 @@ I18N.gu = {
  "lv_reset": "🔄 નવી લિંક (જૂની બંધ થશે)",
  "lv_note": "🔴 લાઇવ લિંક: બાકી રકમ, બાકી હપ્તા અને ઇતિહાસ આપોઆપ અપડેટ થાય છે. ગ્રાહક વિનંતીઓ 📥 ગ્રાહક વિનંતીઓમાં દેખાય છે.",
  "lv_rules_ok": "✅ નિયમો કૉપી થયા — Firebase → Realtime Database → Rules માં પેસ્ટ કરી Publish દબાવો",
- "lv_rules_lock": "🔒 લૉક કરેલા નિયમો કૉપી થયા (ફક્ત તમારું ખાતું લખી શકશે) — Firebase → Rules માં પેસ્ટ કરી Publish દબાવો"
+ "lv_rules_lock": "🔒 લૉક કરેલા નિયમો કૉપી થયા (ફક્ત તમારું ખાતું લખી શકશે) — Firebase → Rules માં પેસ્ટ કરી Publish દબાવો",
+ "li_h": "🔐 લૉગિન",
+ "li_sub": "તમારા મોબાઇલ નંબર અને PIN થી લૉગિન કરો — તમારો બધો ડેટા આપોઆપ પાછો આવશે.",
+ "li_m": "📱 મોબાઇલ",
+ "li_g": "✉️ Gmail",
+ "li_pin": "લૉગિન PIN",
+ "li_go": "🔐 લૉગિન",
+ "li_forgot": "PIN ભૂલી ગયા?",
+ "li_new": "➕ નવું ખાતું",
+ "li_off": "ખાતા વગર વાપરો (ડેટા ફક્ત આ ફોનમાં)",
+ "li_have": "પહેલેથી ખાતું છે? લૉગિન",
+ "li_cfg": "⚙️ ક્લાઉડ સેટઅપ (Firebase config)",
+ "li_busy": "લૉગિન થઈ રહ્યું છે, તમારો ડેટા પાછો લાવી રહ્યું છે…",
+ "li_bad": "⚠️ મોબાઇલ / Gmail અથવા PIN ખોટો",
+ "li_nouser": "⚠️ આ મોબાઇલ નંબરનું ખાતું મળ્યું નહીં — નંબર તપાસો, અથવા Gmail થી લૉગિન કરો",
+ "li_many": "⚠️ ઘણી વાર ખોટું — થોડી મિનિટ રાહ જોઈ ફરી પ્રયાસ કરો",
+ "li_net": "⚠️ ઇન્ટરનેટ નથી — કનેક્ટ કરી ફરી પ્રયાસ કરો",
+ "li_auth_off": "⚠️ Firebase → Authentication માં Email/Password સાઇન-ઇન ચાલુ નથી",
+ "li_need_pin": "તમારો PIN લખો (ઓછામાં ઓછા 6 અંક)",
+ "li_restored": "✅ ફરી સ્વાગત! {0} લોન ખાતાં પાછાં આવ્યાં",
+ "li_empty": "✅ લૉગિન થયું. ઑટો બેકઅપ ચાલુ.",
+ "li_reset_sent": "📧 PIN રીસેટ લિંક {0} પર મોકલી. મેઇલ ખોલી ત્યાં નવો 6 અંકનો PIN લખો, પછી અહીં લૉગિન કરો.",
+ "li_merge_h": "☁️ ક્લાઉડમાં ડેટા મળ્યો",
+ "li_merge_t": "ક્લાઉડ: {0} લોન ખાતાં ({1} એ સેવ). આ ફોનમાં: {2} લોન ખાતાં. શું કરવું?",
+ "li_use_cloud": "☁️ ક્લાઉડ ડેટા વાપરો (ભલામણ)",
+ "li_merge": "📱 આ ફોનનો ડેટા રાખો + ક્લાઉડનાં ખાતાં ઉમેરો",
+ "ag_pin1": "🔑 લૉગિન PIN (6 અંક) *",
+ "ag_pin2": "PIN ફરી *",
+ "ag_pin_note": "મોબાઇલ નંબર + આ PIN કોઈપણ ફોનમાં તમારો ડેટા ખોલે છે. બધું આપોઆપ બેકઅપ થાય છે.",
+ "ag_pin_bad": "PIN 6–12 અંકનો હોવો જોઈએ અને બંને સરખા હોવા જોઈએ",
+ "ag_pin_weak": "આ PIN સહેલાઈથી અનુમાની શકાય (જેમ કે 123456 / 000000) — બીજો પસંદ કરો",
+ "ag_acc_exists": "આ Gmail નું ખાતું પહેલેથી છે — તેનાથી જ લૉગિન કરો (PIN ભૂલી ગયા? Gmail થી રીસેટ)",
+ "ag_acc_ok": "☁️ ખાતું બન્યું — ઑટો બેકઅપ ચાલુ",
+ "cl_h": "☁️ ખાતું · ઑટો બેકઅપ · લાઇવ સિંક",
+ "cl_acc": "👤 ખાતું",
+ "cl_bk": "☁️ ઑટો બેકઅપ",
+ "cl_bk_ok": "✅ સેવ થયું {0}",
+ "cl_bk_wait": "⏳ સેવ થઈ રહ્યું છે…",
+ "cl_bk_pend": "🟠 {0} ફેરફાર — ઇન્ટરનેટ આવતાં જ અપલોડ",
+ "cl_bk_off": "⚪ બંધ",
+ "cl_rules": "⚠️ એક જ વાર કરવાનું: ઑટો બેકઅપ માટે Firebase rules અપડેટ કરવા પડશે. “📋 Copy Firebase rules” દબાવો → Firebase → Realtime Database → Rules → પેસ્ટ → Publish.",
+ "cl_fix": "⚠️ ઑટો બેકઅપ અટક્યું છે — Firebase rules એક વાર અપડેટ કરવા પડશે",
+ "cl_setpin_box": "🔑 6 અંકનો લૉગિન PIN રાખો — પછી કોઈપણ ફોનમાં મોબાઇલ નંબરથી લૉગિન કરી શકો.",
+ "cl_setpin": "🔑 લૉગિન PIN રાખો",
+ "cl_chpin": "🔑 PIN બદલો",
+ "cl_oldpw": "હાલનો સિંક પાસવર્ડ",
+ "cl_oldpin": "હાલનો PIN",
+ "cl_newpin": "નવો PIN (6 અંક)",
+ "cl_pin_save": "✅ PIN સેવ કરો",
+ "cl_pin_ok": "✅ PIN સેવ થયો. કોઈપણ ફોનમાં {0} + PIN થી લૉગિન કરો.",
+ "cl_logout": "🚪 લૉગઆઉટ",
+ "cl_logout_cf": "આ ફોનમાંથી લૉગઆઉટ કરવું છે?\n\nતમારો ડેટા ક્લાઉડમાં સુરક્ષિત છે. આ ફોનની નકલ દૂર થશે — ગમે ત્યારે મોબાઇલ + PIN થી ફરી લૉગિન કરો.",
+ "cl_logout_pend": "{0} ફેરફાર હજી અપલોડ થયા નથી (ઇન્ટરનેટ નથી). છતાં લૉગઆઉટ? એ ફેરફાર ખોવાઈ જશે.",
+ "cl_login_btn": "🔐 લૉગિન / નવું ખાતું",
+ "cl_relogin": "🔑 ઑટો બેકઅપ ચાલુ રાખવા ફરી લૉગિન કરો",
+ "cl_note": "☁️ ઑટો બેકઅપ ચાલુ: દરેક ફેરફાર થોડી સેકન્ડમાં તમારા પોતાના Firebase (Google) ખાતામાં સેવ થાય છે. નવા ફોનમાં મોબાઇલ + PIN થી લૉગિન કરો, બધું પાછું આવશે.",
+ "cl_manual": "📁 મેન્યુઅલ બેકઅપ ફાઇલ (વૈકલ્પિક)",
+ "lv_adv": "⚙️ એડવાન્સ્ડ: Firebase પ્રોજેક્ટ / સિંક પાસવર્ડ",
+ "pb_due_today": "આજે ભરવાનું",
+ "pburl_db": "⚠️ આ તમારું Firebase ડેટાબેઝ સરનામું છે, ઍપની વેબસાઇટ નહીં. આ ખાલી રાખો, અથવા તમારું GitHub Pages / Vercel સરનામું નાખો.",
+ "pburl_move2": "💡 આ સરનામેથી ઍપ ખોલી મોબાઇલ + PIN થી લૉગિન કરો — તમારો ડેટા આપોઆપ આવશે.",
+ "ci_install": "📲 પાસબુક ઍપ ઇન્સ્ટોલ કરો",
+ "ci_ios": "📲 આ પાસબુકને ઍપની જેમ રાખવા: Share ⬆️ → “Add to Home Screen” દબાવો",
+ "ci_and": "📲 આ પાસબુકને ઍપની જેમ રાખવા: Chrome મેનુ ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ઇન્સ્ટોલ થયું — હોમ સ્ક્રીન પર “Passbook” ખોલો",
+ "ci_mine": "📒 મારી પાસબુક",
+ "ci_none": "તમારી પાસબુકનો QR સ્કેન કરો અથવા WhatsApp ની લિંક એક વાર ખોલો — તે અહીં આપોઆપ દેખાશે."
 };
 I18N.pa = {
  "hdr_sub": "ਰੋਜ਼ਾਨਾ ਤੇ ਹਫ਼ਤਾਵਾਰੀ ਫਾਈਨੈਂਸ ਵਸੂਲੀ",
@@ -4241,7 +4887,73 @@ I18N.pa = {
  "lv_reset": "🔄 ਨਵਾਂ ਲਿੰਕ (ਪੁਰਾਣਾ ਬੰਦ ਹੋ ਜਾਵੇਗਾ)",
  "lv_note": "🔴 ਲਾਈਵ ਲਿੰਕ: ਬਕਾਇਆ, ਬਾਕੀ ਕਿਸ਼ਤਾਂ ਅਤੇ ਇਤਿਹਾਸ ਆਪਣੇ-ਆਪ ਅਪਡੇਟ ਹੁੰਦੇ ਹਨ। ਗਾਹਕ ਬੇਨਤੀਆਂ 📥 ਗਾਹਕ ਬੇਨਤੀਆਂ ਵਿੱਚ ਦਿਸਦੀਆਂ ਹਨ।",
  "lv_rules_ok": "✅ ਨਿਯਮ ਕਾਪੀ ਹੋ ਗਏ — Firebase → Realtime Database → Rules ਵਿੱਚ ਪੇਸਟ ਕਰਕੇ Publish ਦਬਾਓ",
- "lv_rules_lock": "🔒 ਲਾਕ ਕੀਤੇ ਨਿਯਮ ਕਾਪੀ ਹੋਏ (ਸਿਰਫ਼ ਤੁਹਾਡਾ ਖਾਤਾ ਲਿਖ ਸਕੇਗਾ) — Firebase → Rules ਵਿੱਚ ਪੇਸਟ ਕਰਕੇ Publish ਦਬਾਓ"
+ "lv_rules_lock": "🔒 ਲਾਕ ਕੀਤੇ ਨਿਯਮ ਕਾਪੀ ਹੋਏ (ਸਿਰਫ਼ ਤੁਹਾਡਾ ਖਾਤਾ ਲਿਖ ਸਕੇਗਾ) — Firebase → Rules ਵਿੱਚ ਪੇਸਟ ਕਰਕੇ Publish ਦਬਾਓ",
+ "li_h": "🔐 ਲੌਗਇਨ",
+ "li_sub": "ਆਪਣੇ ਮੋਬਾਈਲ ਨੰਬਰ ਅਤੇ PIN ਨਾਲ ਲੌਗਇਨ ਕਰੋ — ਤੁਹਾਡਾ ਸਾਰਾ ਡਾਟਾ ਆਪਣੇ-ਆਪ ਵਾਪਸ ਆ ਜਾਵੇਗਾ।",
+ "li_m": "📱 ਮੋਬਾਈਲ",
+ "li_g": "✉️ Gmail",
+ "li_pin": "ਲੌਗਇਨ PIN",
+ "li_go": "🔐 ਲੌਗਇਨ",
+ "li_forgot": "PIN ਭੁੱਲ ਗਏ?",
+ "li_new": "➕ ਨਵਾਂ ਖਾਤਾ",
+ "li_off": "ਖਾਤੇ ਤੋਂ ਬਿਨਾਂ ਵਰਤੋ (ਡਾਟਾ ਸਿਰਫ਼ ਇਸ ਫ਼ੋਨ ਵਿੱਚ)",
+ "li_have": "ਪਹਿਲਾਂ ਹੀ ਖਾਤਾ ਹੈ? ਲੌਗਇਨ",
+ "li_cfg": "⚙️ ਕਲਾਉਡ ਸੈੱਟਅੱਪ (Firebase config)",
+ "li_busy": "ਲੌਗਇਨ ਹੋ ਰਿਹਾ ਹੈ, ਤੁਹਾਡਾ ਡਾਟਾ ਵਾਪਸ ਆ ਰਿਹਾ ਹੈ…",
+ "li_bad": "⚠️ ਮੋਬਾਈਲ / Gmail ਜਾਂ PIN ਗਲਤ ਹੈ",
+ "li_nouser": "⚠️ ਇਸ ਮੋਬਾਈਲ ਨੰਬਰ ਦਾ ਕੋਈ ਖਾਤਾ ਨਹੀਂ ਮਿਲਿਆ — ਨੰਬਰ ਜਾਂਚੋ, ਜਾਂ Gmail ਨਾਲ ਲੌਗਇਨ ਕਰੋ",
+ "li_many": "⚠️ ਬਹੁਤ ਵਾਰ ਗਲਤ — ਕੁਝ ਮਿੰਟ ਰੁਕ ਕੇ ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+ "li_net": "⚠️ ਇੰਟਰਨੈੱਟ ਨਹੀਂ — ਕਨੈਕਟ ਕਰਕੇ ਫਿਰ ਕੋਸ਼ਿਸ਼ ਕਰੋ",
+ "li_auth_off": "⚠️ Firebase → Authentication ਵਿੱਚ Email/Password ਸਾਈਨ-ਇਨ ਚਾਲੂ ਨਹੀਂ",
+ "li_need_pin": "ਆਪਣਾ PIN ਪਾਓ (ਘੱਟੋ-ਘੱਟ 6 ਅੰਕ)",
+ "li_restored": "✅ ਫਿਰ ਜੀ ਆਇਆਂ ਨੂੰ! {0} ਲੋਨ ਖਾਤੇ ਵਾਪਸ ਆ ਗਏ",
+ "li_empty": "✅ ਲੌਗਇਨ ਹੋ ਗਿਆ। ਆਟੋ ਬੈਕਅੱਪ ਚਾਲੂ ਹੈ।",
+ "li_reset_sent": "📧 PIN ਰੀਸੈੱਟ ਲਿੰਕ {0} ’ਤੇ ਭੇਜਿਆ। ਮੇਲ ਖੋਲ੍ਹੋ, ਉੱਥੇ ਨਵਾਂ 6 ਅੰਕਾਂ ਦਾ PIN ਲਿਖੋ, ਫਿਰ ਇੱਥੇ ਲੌਗਇਨ ਕਰੋ।",
+ "li_merge_h": "☁️ ਕਲਾਉਡ ਵਿੱਚ ਡਾਟਾ ਮਿਲਿਆ",
+ "li_merge_t": "ਕਲਾਉਡ: {0} ਲੋਨ ਖਾਤੇ ({1} ਨੂੰ ਸੇਵ)। ਇਸ ਫ਼ੋਨ ਵਿੱਚ: {2} ਲੋਨ ਖਾਤੇ। ਕੀ ਕਰੀਏ?",
+ "li_use_cloud": "☁️ ਕਲਾਉਡ ਡਾਟਾ ਵਰਤੋ (ਸਿਫ਼ਾਰਸ਼)",
+ "li_merge": "📱 ਇਸ ਫ਼ੋਨ ਦਾ ਡਾਟਾ ਰੱਖੋ + ਕਲਾਉਡ ਦੇ ਖਾਤੇ ਜੋੜੋ",
+ "ag_pin1": "🔑 ਲੌਗਇਨ PIN (6 ਅੰਕ) *",
+ "ag_pin2": "PIN ਦੁਬਾਰਾ *",
+ "ag_pin_note": "ਮੋਬਾਈਲ ਨੰਬਰ + ਇਹ PIN ਕਿਸੇ ਵੀ ਫ਼ੋਨ ’ਤੇ ਤੁਹਾਡਾ ਡਾਟਾ ਖੋਲ੍ਹਦੇ ਹਨ। ਸਭ ਕੁਝ ਆਪਣੇ-ਆਪ ਬੈਕਅੱਪ ਹੁੰਦਾ ਹੈ।",
+ "ag_pin_bad": "PIN 6–12 ਅੰਕਾਂ ਦਾ ਹੋਵੇ ਅਤੇ ਦੋਵੇਂ ਇੱਕੋ ਜਿਹੇ ਹੋਣ",
+ "ag_pin_weak": "ਇਹ PIN ਆਸਾਨੀ ਨਾਲ ਅੰਦਾਜ਼ਾ ਲੱਗ ਸਕਦਾ ਹੈ (ਜਿਵੇਂ 123456 / 000000) — ਹੋਰ ਚੁਣੋ",
+ "ag_acc_exists": "ਇਸ Gmail ਦਾ ਖਾਤਾ ਪਹਿਲਾਂ ਹੀ ਹੈ — ਉਸੇ ਨਾਲ ਲੌਗਇਨ ਕਰੋ (PIN ਭੁੱਲ ਗਏ? Gmail ਨਾਲ ਰੀਸੈੱਟ)",
+ "ag_acc_ok": "☁️ ਖਾਤਾ ਬਣ ਗਿਆ — ਆਟੋ ਬੈਕਅੱਪ ਚਾਲੂ",
+ "cl_h": "☁️ ਖਾਤਾ · ਆਟੋ ਬੈਕਅੱਪ · ਲਾਈਵ ਸਿੰਕ",
+ "cl_acc": "👤 ਖਾਤਾ",
+ "cl_bk": "☁️ ਆਟੋ ਬੈਕਅੱਪ",
+ "cl_bk_ok": "✅ ਸੇਵ ਹੋਇਆ {0}",
+ "cl_bk_wait": "⏳ ਸੇਵ ਹੋ ਰਿਹਾ ਹੈ…",
+ "cl_bk_pend": "🟠 {0} ਬਦਲਾਅ — ਇੰਟਰਨੈੱਟ ਆਉਂਦੇ ਹੀ ਅੱਪਲੋਡ",
+ "cl_bk_off": "⚪ ਬੰਦ",
+ "cl_rules": "⚠️ ਇੱਕ ਵਾਰ ਦਾ ਕੰਮ: ਆਟੋ ਬੈਕਅੱਪ ਲਈ Firebase rules ਅੱਪਡੇਟ ਕਰਨੇ ਹਨ। “📋 Copy Firebase rules” ਦਬਾਓ → Firebase → Realtime Database → Rules → ਪੇਸਟ → Publish।",
+ "cl_fix": "⚠️ ਆਟੋ ਬੈਕਅੱਪ ਰੁਕਿਆ ਹੈ — Firebase rules ਇੱਕ ਵਾਰ ਅੱਪਡੇਟ ਕਰਨੇ ਹਨ",
+ "cl_setpin_box": "🔑 6 ਅੰਕਾਂ ਦਾ ਲੌਗਇਨ PIN ਬਣਾਓ — ਫਿਰ ਕਿਸੇ ਵੀ ਫ਼ੋਨ ’ਤੇ ਮੋਬਾਈਲ ਨੰਬਰ ਨਾਲ ਲੌਗਇਨ ਕਰ ਸਕਦੇ ਹੋ।",
+ "cl_setpin": "🔑 ਲੌਗਇਨ PIN ਬਣਾਓ",
+ "cl_chpin": "🔑 PIN ਬਦਲੋ",
+ "cl_oldpw": "ਮੌਜੂਦਾ ਸਿੰਕ ਪਾਸਵਰਡ",
+ "cl_oldpin": "ਮੌਜੂਦਾ PIN",
+ "cl_newpin": "ਨਵਾਂ PIN (6 ਅੰਕ)",
+ "cl_pin_save": "✅ PIN ਸੇਵ ਕਰੋ",
+ "cl_pin_ok": "✅ PIN ਸੇਵ ਹੋਇਆ। ਕਿਸੇ ਵੀ ਫ਼ੋਨ ’ਤੇ {0} + PIN ਨਾਲ ਲੌਗਇਨ ਕਰੋ।",
+ "cl_logout": "🚪 ਲੌਗਆਉਟ",
+ "cl_logout_cf": "ਇਸ ਫ਼ੋਨ ਤੋਂ ਲੌਗਆਉਟ ਕਰਨਾ ਹੈ?\n\nਤੁਹਾਡਾ ਡਾਟਾ ਕਲਾਉਡ ਵਿੱਚ ਸੁਰੱਖਿਅਤ ਹੈ। ਇਸ ਫ਼ੋਨ ਦੀ ਕਾਪੀ ਹਟ ਜਾਵੇਗੀ — ਕਦੇ ਵੀ ਮੋਬਾਈਲ + PIN ਨਾਲ ਫਿਰ ਲੌਗਇਨ ਕਰੋ।",
+ "cl_logout_pend": "{0} ਬਦਲਾਅ ਹਾਲੇ ਅੱਪਲੋਡ ਨਹੀਂ ਹੋਏ (ਇੰਟਰਨੈੱਟ ਨਹੀਂ)। ਫਿਰ ਵੀ ਲੌਗਆਉਟ? ਉਹ ਬਦਲਾਅ ਗੁੰਮ ਹੋ ਜਾਣਗੇ।",
+ "cl_login_btn": "🔐 ਲੌਗਇਨ / ਨਵਾਂ ਖਾਤਾ",
+ "cl_relogin": "🔑 ਆਟੋ ਬੈਕਅੱਪ ਚਾਲੂ ਰੱਖਣ ਲਈ ਫਿਰ ਲੌਗਇਨ ਕਰੋ",
+ "cl_note": "☁️ ਆਟੋ ਬੈਕਅੱਪ ਚਾਲੂ: ਹਰ ਬਦਲਾਅ ਕੁਝ ਸਕਿੰਟਾਂ ਵਿੱਚ ਤੁਹਾਡੇ ਆਪਣੇ Firebase (Google) ਖਾਤੇ ਵਿੱਚ ਸੇਵ ਹੁੰਦਾ ਹੈ। ਨਵੇਂ ਫ਼ੋਨ ’ਤੇ ਮੋਬਾਈਲ + PIN ਨਾਲ ਲੌਗਇਨ ਕਰੋ, ਸਭ ਵਾਪਸ ਆ ਜਾਵੇਗਾ।",
+ "cl_manual": "📁 ਮੈਨੂਅਲ ਬੈਕਅੱਪ ਫ਼ਾਈਲ (ਵਿਕਲਪਿਕ)",
+ "lv_adv": "⚙️ ਐਡਵਾਂਸਡ: Firebase ਪ੍ਰੋਜੈਕਟ / ਸਿੰਕ ਪਾਸਵਰਡ",
+ "pb_due_today": "ਅੱਜ ਦੇਣਾ ਹੈ",
+ "pburl_db": "⚠️ ਇਹ ਤੁਹਾਡਾ Firebase ਡਾਟਾਬੇਸ ਪਤਾ ਹੈ, ਐਪ ਦੀ ਵੈੱਬਸਾਈਟ ਨਹੀਂ। ਇਸਨੂੰ ਖਾਲੀ ਛੱਡੋ, ਜਾਂ ਆਪਣਾ GitHub Pages / Vercel ਪਤਾ ਪਾਓ।",
+ "pburl_move2": "💡 ਇਸੇ ਪਤੇ ਤੋਂ ਐਪ ਖੋਲ੍ਹੋ ਅਤੇ ਮੋਬਾਈਲ + PIN ਨਾਲ ਲੌਗਇਨ ਕਰੋ — ਤੁਹਾਡਾ ਡਾਟਾ ਆਪਣੇ-ਆਪ ਆ ਜਾਵੇਗਾ।",
+ "ci_install": "📲 ਪਾਸਬੁੱਕ ਐਪ ਇੰਸਟਾਲ ਕਰੋ",
+ "ci_ios": "📲 ਇਸ ਪਾਸਬੁੱਕ ਨੂੰ ਐਪ ਵਾਂਗ ਰੱਖੋ: Share ⬆️ → “Add to Home Screen” ਦਬਾਓ",
+ "ci_and": "📲 ਇਸ ਪਾਸਬੁੱਕ ਨੂੰ ਐਪ ਵਾਂਗ ਰੱਖੋ: Chrome ਮੀਨੂ ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ਇੰਸਟਾਲ ਹੋ ਗਿਆ — ਹੋਮ ਸਕ੍ਰੀਨ ’ਤੇ “Passbook” ਖੋਲ੍ਹੋ",
+ "ci_mine": "📒 ਮੇਰੀਆਂ ਪਾਸਬੁੱਕਾਂ",
+ "ci_none": "ਆਪਣੀ ਪਾਸਬੁੱਕ ਦਾ QR ਸਕੈਨ ਕਰੋ ਜਾਂ WhatsApp ਵਾਲਾ ਲਿੰਕ ਇੱਕ ਵਾਰ ਖੋਲ੍ਹੋ — ਇਹ ਇੱਥੇ ਆਪਣੇ-ਆਪ ਦਿਸੇਗੀ।"
 };
 I18N.or = {
  "hdr_sub": "ଦୈନିକ ଓ ସାପ୍ତାହିକ ଫାଇନାନ୍ସ ଆଦାୟ",
@@ -4637,7 +5349,73 @@ I18N.or = {
  "lv_reset": "🔄 ନୂଆ ଲିଙ୍କ୍ (ପୁରୁଣା ବନ୍ଦ ହେବ)",
  "lv_note": "🔴 ଲାଇଭ୍ ଲିଙ୍କ୍: ବାକି ରାଶି, ବକେୟା ଓ ଇତିହାସ ଆପେ ଆପେ ଅପଡେଟ୍ ହୁଏ। ଗ୍ରାହକ ଅନୁରୋଧ 📥 ଗ୍ରାହକ ଅନୁରୋଧରେ ଦେଖାଯାଏ।",
  "lv_rules_ok": "✅ ନିୟମ କପି ହେଲା — Firebase → Realtime Database → Rules ରେ ପେଷ୍ଟ କରି Publish ଦବାନ୍ତୁ",
- "lv_rules_lock": "🔒 ଲକ୍ ହୋଇଥିବା ନିୟମ କପି ହେଲା (କେବଳ ଆପଣଙ୍କ ଆକାଉଣ୍ଟ ଲେଖିପାରିବ) — Firebase → Rules ରେ ପେଷ୍ଟ କରି Publish ଦବାନ୍ତୁ"
+ "lv_rules_lock": "🔒 ଲକ୍ ହୋଇଥିବା ନିୟମ କପି ହେଲା (କେବଳ ଆପଣଙ୍କ ଆକାଉଣ୍ଟ ଲେଖିପାରିବ) — Firebase → Rules ରେ ପେଷ୍ଟ କରି Publish ଦବାନ୍ତୁ",
+ "li_h": "🔐 ଲଗଇନ୍",
+ "li_sub": "ଆପଣଙ୍କ ମୋବାଇଲ ନମ୍ବର ଓ PIN ଦେଇ ଲଗଇନ୍ କରନ୍ତୁ — ଆପଣଙ୍କ ସବୁ ଡାଟା ନିଜେ ନିଜେ ଫେରି ଆସିବ।",
+ "li_m": "📱 ମୋବାଇଲ",
+ "li_g": "✉️ Gmail",
+ "li_pin": "ଲଗଇନ୍ PIN",
+ "li_go": "🔐 ଲଗଇନ୍",
+ "li_forgot": "PIN ଭୁଲିଗଲେ?",
+ "li_new": "➕ ନୂଆ ଖାତା",
+ "li_off": "ଖାତା ବିନା ବ୍ୟବହାର କରନ୍ତୁ (ଡାଟା କେବଳ ଏହି ଫୋନରେ)",
+ "li_have": "ପୂର୍ବରୁ ଖାତା ଅଛି? ଲଗଇନ୍",
+ "li_cfg": "⚙️ କ୍ଲାଉଡ୍ ସେଟଅପ୍ (Firebase config)",
+ "li_busy": "ଲଗଇନ୍ ହେଉଛି, ଆପଣଙ୍କ ଡାଟା ଫେରାଇ ଆଣୁଛି…",
+ "li_bad": "⚠️ ମୋବାଇଲ / Gmail କିମ୍ବା PIN ଭୁଲ",
+ "li_nouser": "⚠️ ଏହି ମୋବାଇଲ ନମ୍ବରର କୌଣସି ଖାତା ମିଳିଲା ନାହିଁ — ନମ୍ବର ଯାଞ୍ଚ କରନ୍ତୁ, କିମ୍ବା Gmail ଦେଇ ଲଗଇନ୍ କରନ୍ତୁ",
+ "li_many": "⚠️ ଅନେକ ଥର ଭୁଲ — କିଛି ମିନିଟ୍ ଅପେକ୍ଷା କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+ "li_net": "⚠️ ଇଣ୍ଟରନେଟ୍ ନାହିଁ — ସଂଯୋଗ କରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ",
+ "li_auth_off": "⚠️ Firebase → Authentication ରେ Email/Password ସାଇନ-ଇନ୍ ଚାଲୁ ନାହିଁ",
+ "li_need_pin": "ଆପଣଙ୍କ PIN ଦିଅନ୍ତୁ (ଅତି କମରେ 6 ଅଙ୍କ)",
+ "li_restored": "✅ ପୁଣି ସ୍ୱାଗତ! {0}ଟି ଋଣ ଖାତା ଫେରି ଆସିଲା",
+ "li_empty": "✅ ଲଗଇନ୍ ହେଲା। ଅଟୋ ବ୍ୟାକଅପ୍ ଚାଲୁ।",
+ "li_reset_sent": "📧 PIN ରିସେଟ୍ ଲିଙ୍କ {0} କୁ ପଠାଗଲା। ମେଲ୍ ଖୋଲି ସେଠାରେ ନୂଆ 6 ଅଙ୍କ PIN ଲେଖନ୍ତୁ, ତାପରେ ଏଠାରେ ଲଗଇନ୍ କରନ୍ତୁ।",
+ "li_merge_h": "☁️ କ୍ଲାଉଡରେ ଡାଟା ମିଳିଲା",
+ "li_merge_t": "କ୍ଲାଉଡ୍: {0}ଟି ଋଣ ଖାତା ({1} ରେ ସେଭ୍)। ଏହି ଫୋନ୍: {2}ଟି ଋଣ ଖାତା। କ'ଣ କରିବେ?",
+ "li_use_cloud": "☁️ କ୍ଲାଉଡ୍ ଡାଟା ବ୍ୟବହାର କରନ୍ତୁ (ସୁପାରିଶ)",
+ "li_merge": "📱 ଏହି ଫୋନର ଡାଟା ରଖନ୍ତୁ + କ୍ଲାଉଡର ଖାତା ଯୋଡନ୍ତୁ",
+ "ag_pin1": "🔑 ଲଗଇନ୍ PIN (6 ଅଙ୍କ) *",
+ "ag_pin2": "PIN ପୁଣି *",
+ "ag_pin_note": "ମୋବାଇଲ ନମ୍ବର + ଏହି PIN ଯେକୌଣସି ଫୋନରେ ଆପଣଙ୍କ ଡାଟା ଖୋଲେ। ସବୁକିଛି ନିଜେ ନିଜେ ବ୍ୟାକଅପ୍ ହୁଏ।",
+ "ag_pin_bad": "PIN 6–12 ଅଙ୍କର ହେବା ଉଚିତ ଓ ଦୁଇଟି ସମାନ ହେବା ଉଚିତ",
+ "ag_pin_weak": "ଏହି PIN ସହଜରେ ଅନୁମାନ କରାଯାଇପାରେ (ଯେପରି 123456 / 000000) — ଅନ୍ୟଟି ବାଛନ୍ତୁ",
+ "ag_acc_exists": "ଏହି Gmail ର ଖାତା ପୂର୍ବରୁ ଅଛି — ସେଥିରେ ଲଗଇନ୍ କରନ୍ତୁ (PIN ଭୁଲିଗଲେ Gmail ଦେଇ ରିସେଟ୍)",
+ "ag_acc_ok": "☁️ ଖାତା ତିଆରି ହେଲା — ଅଟୋ ବ୍ୟାକଅପ୍ ଚାଲୁ",
+ "cl_h": "☁️ ଖାତା · ଅଟୋ ବ୍ୟାକଅପ୍ · ଲାଇଭ୍ ସିଙ୍କ",
+ "cl_acc": "👤 ଖାତା",
+ "cl_bk": "☁️ ଅଟୋ ବ୍ୟାକଅପ୍",
+ "cl_bk_ok": "✅ ସେଭ୍ ହେଲା {0}",
+ "cl_bk_wait": "⏳ ସେଭ୍ ହେଉଛି…",
+ "cl_bk_pend": "🟠 {0}ଟି ପରିବର୍ତ୍ତନ — ଇଣ୍ଟରନେଟ୍ ଆସିଲେ ଅପଲୋଡ୍",
+ "cl_bk_off": "⚪ ବନ୍ଦ",
+ "cl_rules": "⚠️ ଥରେ କରିବାକୁ ହେବ: ଅଟୋ ବ୍ୟାକଅପ୍ ପାଇଁ Firebase rules ଅପଡେଟ୍ କରିବାକୁ ହେବ। “📋 Copy Firebase rules” ଦବାନ୍ତୁ → Firebase → Realtime Database → Rules → ପେଷ୍ଟ → Publish।",
+ "cl_fix": "⚠️ ଅଟୋ ବ୍ୟାକଅପ୍ ବନ୍ଦ ଅଛି — Firebase rules ଥରେ ଅପଡେଟ୍ କରିବାକୁ ହେବ",
+ "cl_setpin_box": "🔑 6 ଅଙ୍କର ଲଗଇନ୍ PIN ରଖନ୍ତୁ — ତାପରେ ଯେକୌଣସି ଫୋନରେ ମୋବାଇଲ ନମ୍ବର ଦେଇ ଲଗଇନ୍ କରିପାରିବେ।",
+ "cl_setpin": "🔑 ଲଗଇନ୍ PIN ରଖନ୍ତୁ",
+ "cl_chpin": "🔑 PIN ବଦଳାନ୍ତୁ",
+ "cl_oldpw": "ବର୍ତ୍ତମାନର ସିଙ୍କ ପାସୱାର୍ଡ",
+ "cl_oldpin": "ବର୍ତ୍ତମାନର PIN",
+ "cl_newpin": "ନୂଆ PIN (6 ଅଙ୍କ)",
+ "cl_pin_save": "✅ PIN ସେଭ୍ କରନ୍ତୁ",
+ "cl_pin_ok": "✅ PIN ସେଭ୍ ହେଲା। ଯେକୌଣସି ଫୋନରେ {0} + PIN ଦେଇ ଲଗଇନ୍ କରନ୍ତୁ।",
+ "cl_logout": "🚪 ଲଗଆଉଟ୍",
+ "cl_logout_cf": "ଏହି ଫୋନରୁ ଲଗଆଉଟ୍ କରିବେ?\n\nଆପଣଙ୍କ ଡାଟା କ୍ଲାଉଡରେ ସୁରକ୍ଷିତ। ଏହି ଫୋନର କପି ହଟିଯିବ — ଯେକୌଣସି ସମୟରେ ମୋବାଇଲ + PIN ଦେଇ ପୁଣି ଲଗଇନ୍ କରନ୍ତୁ।",
+ "cl_logout_pend": "{0}ଟି ପରିବର୍ତ୍ତନ ଏପର୍ଯ୍ୟନ୍ତ ଅପଲୋଡ୍ ହୋଇନାହିଁ (ଇଣ୍ଟରନେଟ୍ ନାହିଁ)। ତଥାପି ଲଗଆଉଟ୍? ସେହି ପରିବର୍ତ୍ତନ ହଜିଯିବ।",
+ "cl_login_btn": "🔐 ଲଗଇନ୍ / ନୂଆ ଖାତା",
+ "cl_relogin": "🔑 ଅଟୋ ବ୍ୟାକଅପ୍ ଜାରି ରଖିବାକୁ ପୁଣି ଲଗଇନ୍ କରନ୍ତୁ",
+ "cl_note": "☁️ ଅଟୋ ବ୍ୟାକଅପ୍ ଚାଲୁ: ପ୍ରତ୍ୟେକ ପରିବର୍ତ୍ତନ କିଛି ସେକେଣ୍ଡରେ ଆପଣଙ୍କ ନିଜ Firebase (Google) ଖାତାରେ ସେଭ୍ ହୁଏ। ନୂଆ ଫୋନରେ ମୋବାଇଲ + PIN ଦେଇ ଲଗଇନ୍ କଲେ ସବୁ ଫେରି ଆସେ।",
+ "cl_manual": "📁 ମାନୁଆଲ୍ ବ୍ୟାକଅପ୍ ଫାଇଲ୍ (ଇଚ୍ଛାଧୀନ)",
+ "lv_adv": "⚙️ ଆଡଭାନ୍ସଡ୍: Firebase ପ୍ରୋଜେକ୍ଟ / ସିଙ୍କ ପାସୱାର୍ଡ",
+ "pb_due_today": "ଆଜି ଦେବାକୁ ଥିବା",
+ "pburl_db": "⚠️ ଏହା ଆପଣଙ୍କ Firebase ଡାଟାବେସ୍ ଠିକଣା, ଆପ୍‌ର ୱେବସାଇଟ୍ ନୁହେଁ। ଏହାକୁ ଖାଲି ରଖନ୍ତୁ, କିମ୍ବା ଆପଣଙ୍କ GitHub Pages / Vercel ଠିକଣା ଦିଅନ୍ତୁ।",
+ "pburl_move2": "💡 ଏହି ଠିକଣାରୁ ଆପ୍ ଖୋଲି ମୋବାଇଲ + PIN ଦେଇ ଲଗଇନ୍ କରନ୍ତୁ — ଆପଣଙ୍କ ଡାଟା ନିଜେ ନିଜେ ଆସିବ।",
+ "ci_install": "📲 ପାସବୁକ୍ ଆପ୍ ଇନଷ୍ଟଲ୍ କରନ୍ତୁ",
+ "ci_ios": "📲 ଏହି ପାସବୁକକୁ ଆପ୍ ଭଳି ରଖିବାକୁ: Share ⬆️ → “Add to Home Screen” ଦବାନ୍ତୁ",
+ "ci_and": "📲 ଏହି ପାସବୁକକୁ ଆପ୍ ଭଳି ରଖିବାକୁ: Chrome ମେନୁ ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ଇନଷ୍ଟଲ୍ ହେଲା — ହୋମ୍ ସ୍କ୍ରିନରେ “Passbook” ଖୋଲନ୍ତୁ",
+ "ci_mine": "📒 ମୋ ପାସବୁକ୍",
+ "ci_none": "ଆପଣଙ୍କ ପାସବୁକର QR ସ୍କାନ୍ କରନ୍ତୁ କିମ୍ବା WhatsApp ଲିଙ୍କ ଥରେ ଖୋଲନ୍ତୁ — ଏହା ଏଠାରେ ନିଜେ ନିଜେ ଦେଖାଯିବ।"
 };
 I18N.ur = {
  "hdr_sub": "روزانہ اور ہفتہ وار فائنانس وصولی",
@@ -5033,7 +5811,73 @@ I18N.ur = {
  "lv_reset": "🔄 نیا لنک (پرانا بند ہو جائے گا)",
  "lv_note": "🔴 لائیو لنک: بقایا، واجب الادا رقم اور تاریخ خود بخود اپ ڈیٹ ہوتے ہیں۔ گاہک کی درخواستیں 📥 گاہکوں کی درخواستیں میں نظر آتی ہیں۔",
  "lv_rules_ok": "✅ رولز کاپی ہو گئے — Firebase → Realtime Database → Rules میں پیسٹ کر کے Publish دبائیں",
- "lv_rules_lock": "🔒 لاک شدہ رولز کاپی ہوئے (صرف آپ کا اکاؤنٹ لکھ سکے گا) — Firebase → Rules میں پیسٹ کر کے Publish دبائیں"
+ "lv_rules_lock": "🔒 لاک شدہ رولز کاپی ہوئے (صرف آپ کا اکاؤنٹ لکھ سکے گا) — Firebase → Rules میں پیسٹ کر کے Publish دبائیں",
+ "li_h": "🔐 لاگ اِن",
+ "li_sub": "اپنے موبائل نمبر اور PIN سے لاگ اِن کریں — آپ کا سارا ڈیٹا خود بخود واپس آ جائے گا۔",
+ "li_m": "📱 موبائل",
+ "li_g": "✉️ Gmail",
+ "li_pin": "لاگ اِن PIN",
+ "li_go": "🔐 لاگ اِن",
+ "li_forgot": "PIN بھول گئے؟",
+ "li_new": "➕ نیا اکاؤنٹ",
+ "li_off": "اکاؤنٹ کے بغیر استعمال کریں (ڈیٹا صرف اسی فون میں)",
+ "li_have": "پہلے سے اکاؤنٹ ہے؟ لاگ اِن",
+ "li_cfg": "⚙️ کلاؤڈ سیٹ اپ (Firebase config)",
+ "li_busy": "لاگ اِن ہو رہا ہے، آپ کا ڈیٹا واپس آ رہا ہے…",
+ "li_bad": "⚠️ موبائل / Gmail یا PIN غلط ہے",
+ "li_nouser": "⚠️ اس موبائل نمبر کا کوئی اکاؤنٹ نہیں ملا — نمبر دیکھیں، یا Gmail سے لاگ اِن کریں",
+ "li_many": "⚠️ بہت بار غلط — چند منٹ رک کر پھر کوشش کریں",
+ "li_net": "⚠️ انٹرنیٹ نہیں — کنیکٹ کر کے پھر کوشش کریں",
+ "li_auth_off": "⚠️ Firebase → Authentication میں Email/Password سائن اِن آن نہیں ہے",
+ "li_need_pin": "اپنا PIN درج کریں (کم از کم 6 ہندسے)",
+ "li_restored": "✅ دوبارہ خوش آمدید! {0} قرض کھاتے واپس آ گئے",
+ "li_empty": "✅ لاگ اِن ہو گیا۔ آٹو بیک اپ آن ہے۔",
+ "li_reset_sent": "📧 PIN ری سیٹ لنک {0} پر بھیج دیا۔ میل کھولیں، وہاں نیا 6 ہندسوں کا PIN لکھیں، پھر یہاں لاگ اِن کریں۔",
+ "li_merge_h": "☁️ کلاؤڈ میں ڈیٹا ملا",
+ "li_merge_t": "کلاؤڈ: {0} قرض کھاتے ({1} کو محفوظ)۔ اس فون میں: {2} قرض کھاتے۔ کیا کریں؟",
+ "li_use_cloud": "☁️ کلاؤڈ ڈیٹا استعمال کریں (تجویز)",
+ "li_merge": "📱 اس فون کا ڈیٹا رکھیں + کلاؤڈ کے کھاتے جوڑیں",
+ "ag_pin1": "🔑 لاگ اِن PIN (6 ہندسے) *",
+ "ag_pin2": "PIN دوبارہ *",
+ "ag_pin_note": "موبائل نمبر + یہ PIN کسی بھی فون پر آپ کا ڈیٹا کھولتے ہیں۔ سب کچھ خود بخود بیک اپ ہوتا ہے۔",
+ "ag_pin_bad": "PIN 6–12 ہندسوں کا ہو اور دونوں ایک جیسے ہوں",
+ "ag_pin_weak": "یہ PIN آسانی سے اندازہ لگایا جا سکتا ہے (جیسے 123456 / 000000) — کوئی اور چنیں",
+ "ag_acc_exists": "اس Gmail کا اکاؤنٹ پہلے سے ہے — اسی سے لاگ اِن کریں (PIN بھول گئے؟ Gmail سے ری سیٹ)",
+ "ag_acc_ok": "☁️ اکاؤنٹ بن گیا — آٹو بیک اپ آن",
+ "cl_h": "☁️ اکاؤنٹ · آٹو بیک اپ · لائیو سنک",
+ "cl_acc": "👤 اکاؤنٹ",
+ "cl_bk": "☁️ آٹو بیک اپ",
+ "cl_bk_ok": "✅ محفوظ ہوا {0}",
+ "cl_bk_wait": "⏳ محفوظ ہو رہا ہے…",
+ "cl_bk_pend": "🟠 {0} تبدیلیاں — انٹرنیٹ آتے ہی اپ لوڈ",
+ "cl_bk_off": "⚪ بند",
+ "cl_rules": "⚠️ ایک بار کا کام: آٹو بیک اپ کے لیے Firebase rules اپ ڈیٹ کرنے ہیں۔ “📋 Copy Firebase rules” دبائیں → Firebase → Realtime Database → Rules → پیسٹ → Publish۔",
+ "cl_fix": "⚠️ آٹو بیک اپ رکا ہوا ہے — Firebase rules ایک بار اپ ڈیٹ کرنے ہیں",
+ "cl_setpin_box": "🔑 6 ہندسوں کا لاگ اِن PIN بنائیں — پھر کسی بھی فون پر موبائل نمبر سے لاگ اِن کر سکتے ہیں۔",
+ "cl_setpin": "🔑 لاگ اِن PIN بنائیں",
+ "cl_chpin": "🔑 PIN بدلیں",
+ "cl_oldpw": "موجودہ سنک پاس ورڈ",
+ "cl_oldpin": "موجودہ PIN",
+ "cl_newpin": "نیا PIN (6 ہندسے)",
+ "cl_pin_save": "✅ PIN محفوظ کریں",
+ "cl_pin_ok": "✅ PIN محفوظ ہو گیا۔ کسی بھی فون پر {0} + PIN سے لاگ اِن کریں۔",
+ "cl_logout": "🚪 لاگ آؤٹ",
+ "cl_logout_cf": "اس فون سے لاگ آؤٹ کریں؟\n\nآپ کا ڈیٹا کلاؤڈ میں محفوظ ہے۔ اس فون کی کاپی ہٹ جائے گی — کبھی بھی موبائل + PIN سے دوبارہ لاگ اِن کریں۔",
+ "cl_logout_pend": "{0} تبدیلیاں ابھی اپ لوڈ نہیں ہوئیں (انٹرنیٹ نہیں)۔ پھر بھی لاگ آؤٹ؟ وہ تبدیلیاں ضائع ہو جائیں گی۔",
+ "cl_login_btn": "🔐 لاگ اِن / نیا اکاؤنٹ",
+ "cl_relogin": "🔑 آٹو بیک اپ جاری رکھنے کے لیے دوبارہ لاگ اِن کریں",
+ "cl_note": "☁️ آٹو بیک اپ آن: ہر تبدیلی چند سیکنڈ میں آپ کے اپنے Firebase (Google) اکاؤنٹ میں محفوظ ہوتی ہے۔ نئے فون پر موبائل + PIN سے لاگ اِن کریں، سب واپس آ جائے گا۔",
+ "cl_manual": "📁 دستی بیک اپ فائل (اختیاری)",
+ "lv_adv": "⚙️ ایڈوانسڈ: Firebase پروجیکٹ / سنک پاس ورڈ",
+ "pb_due_today": "آج دینا ہے",
+ "pburl_db": "⚠️ یہ آپ کا Firebase ڈیٹا بیس پتہ ہے، ایپ کی ویب سائٹ نہیں۔ اسے خالی چھوڑیں، یا اپنا GitHub Pages / Vercel پتہ ڈالیں۔",
+ "pburl_move2": "💡 اسی پتے سے ایپ کھولیں اور موبائل + PIN سے لاگ اِن کریں — آپ کا ڈیٹا خود بخود آ جائے گا۔",
+ "ci_install": "📲 پاس بک ایپ انسٹال کریں",
+ "ci_ios": "📲 اس پاس بک کو ایپ کی طرح رکھیں: Share ⬆️ → “Add to Home Screen” دبائیں",
+ "ci_and": "📲 اس پاس بک کو ایپ کی طرح رکھیں: Chrome مینو ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ انسٹال ہو گیا — ہوم اسکرین پر “Passbook” کھولیں",
+ "ci_mine": "📒 میری پاس بکیں",
+ "ci_none": "اپنی پاس بک کا QR اسکین کریں یا WhatsApp والا لنک ایک بار کھولیں — یہ یہاں خود بخود نظر آئے گی۔"
 };
 I18N.as = {
  "hdr_sub": "দৈনিক আৰু সাপ্তাহিক ফাইনেন্স আদায়",
@@ -5429,7 +6273,73 @@ I18N.as = {
  "lv_reset": "🔄 নতুন লিংক (পুৰণিটো বন্ধ হ'ব)",
  "lv_note": "🔴 লাইভ লিংক: বাকী ধন, বকেয়া আৰু ইতিহাস নিজে নিজে আপডেট হয়। গ্ৰাহকৰ অনুৰোধ 📥 গ্ৰাহকৰ অনুৰোধত দেখা যায়।",
  "lv_rules_ok": "✅ নিয়ম কপি হ'ল — Firebase → Realtime Database → Rules ত পেষ্ট কৰি Publish টিপক",
- "lv_rules_lock": "🔒 লক কৰা নিয়ম কপি হ'ল (কেৱল আপোনাৰ একাউণ্টে লিখিব পাৰিব) — Firebase → Rules ত পেষ্ট কৰি Publish টিপক"
+ "lv_rules_lock": "🔒 লক কৰা নিয়ম কপি হ'ল (কেৱল আপোনাৰ একাউণ্টে লিখিব পাৰিব) — Firebase → Rules ত পেষ্ট কৰি Publish টিপক",
+ "li_h": "🔐 লগইন",
+ "li_sub": "আপোনাৰ মোবাইল নম্বৰ আৰু PIN দি লগইন কৰক — আপোনাৰ সকলো ডাটা নিজে নিজে ঘূৰি আহিব।",
+ "li_m": "📱 মোবাইল",
+ "li_g": "✉️ Gmail",
+ "li_pin": "লগইন PIN",
+ "li_go": "🔐 লগইন",
+ "li_forgot": "PIN পাহৰিলে?",
+ "li_new": "➕ নতুন একাউণ্ট",
+ "li_off": "একাউণ্ট নোহোৱাকৈ ব্যৱহাৰ কৰক (ডাটা কেৱল এই ফোনত)",
+ "li_have": "আগৰে পৰা একাউণ্ট আছে? লগইন",
+ "li_cfg": "⚙️ ক্লাউড ছেটআপ (Firebase config)",
+ "li_busy": "লগইন হৈ আছে, আপোনাৰ ডাটা ঘূৰাই আনি আছে…",
+ "li_bad": "⚠️ মোবাইল / Gmail বা PIN ভুল",
+ "li_nouser": "⚠️ এই মোবাইল নম্বৰৰ কোনো একাউণ্ট পোৱা নগ'ল — নম্বৰ চাওক, বা Gmail দি লগইন কৰক",
+ "li_many": "⚠️ বহুবাৰ ভুল — কেইমিনিটমান ৰৈ আকৌ চেষ্টা কৰক",
+ "li_net": "⚠️ ইণ্টাৰনেট নাই — সংযোগ কৰি আকৌ চেষ্টা কৰক",
+ "li_auth_off": "⚠️ Firebase → Authentication ত Email/Password ছাইন-ইন অন কৰা নাই",
+ "li_need_pin": "আপোনাৰ PIN দিয়ক (অন্ততঃ 6 টা সংখ্যা)",
+ "li_restored": "✅ পুনৰ স্বাগতম! {0} টা ঋণ একাউণ্ট ঘূৰি আহিল",
+ "li_empty": "✅ লগইন হ'ল। অটো বেকআপ অন।",
+ "li_reset_sent": "📧 PIN ৰিছেট লিংক {0} লৈ পঠোৱা হ'ল। মেইল খুলি তাত নতুন 6 সংখ্যাৰ PIN লিখক, তাৰ পিছত ইয়াত লগইন কৰক।",
+ "li_merge_h": "☁️ ক্লাউডত ডাটা পোৱা গ'ল",
+ "li_merge_t": "ক্লাউড: {0} টা ঋণ একাউণ্ট ({1} ত ছেভ)। এই ফোনত: {2} টা ঋণ একাউণ্ট। কি কৰিব?",
+ "li_use_cloud": "☁️ ক্লাউড ডাটা ব্যৱহাৰ কৰক (পৰামৰ্শ)",
+ "li_merge": "📱 এই ফোনৰ ডাটা ৰাখক + ক্লাউডৰ একাউণ্ট যোগ কৰক",
+ "ag_pin1": "🔑 লগইন PIN (6 সংখ্যা) *",
+ "ag_pin2": "PIN আকৌ *",
+ "ag_pin_note": "মোবাইল নম্বৰ + এই PIN এ যিকোনো ফোনত আপোনাৰ ডাটা খোলে। সকলো নিজে নিজে বেকআপ হয়।",
+ "ag_pin_bad": "PIN 6–12 সংখ্যাৰ হ'ব লাগিব আৰু দুয়োটা একে হ'ব লাগিব",
+ "ag_pin_weak": "এই PIN সহজে অনুমান কৰিব পাৰি (যেনে 123456 / 000000) — আন এটা বাছক",
+ "ag_acc_exists": "এই Gmail ৰ একাউণ্ট আগৰে পৰা আছে — তাৰে লগইন কৰক (PIN পাহৰিলে Gmail দি ৰিছেট)",
+ "ag_acc_ok": "☁️ একাউণ্ট তৈয়াৰ হ'ল — অটো বেকআপ অন",
+ "cl_h": "☁️ একাউণ্ট · অটো বেকআপ · লাইভ চিংক",
+ "cl_acc": "👤 একাউণ্ট",
+ "cl_bk": "☁️ অটো বেকআপ",
+ "cl_bk_ok": "✅ ছেভ হ'ল {0}",
+ "cl_bk_wait": "⏳ ছেভ হৈ আছে…",
+ "cl_bk_pend": "🟠 {0} টা সলনি — ইণ্টাৰনেট আহিলেই আপলোড",
+ "cl_bk_off": "⚪ বন্ধ",
+ "cl_rules": "⚠️ এবাৰ কৰিবলগীয়া: অটো বেকআপৰ বাবে Firebase rules আপডেট কৰিব লাগিব। “📋 Copy Firebase rules” টিপক → Firebase → Realtime Database → Rules → পেষ্ট → Publish।",
+ "cl_fix": "⚠️ অটো বেকআপ ৰৈ আছে — Firebase rules এবাৰ আপডেট কৰিব লাগিব",
+ "cl_setpin_box": "🔑 6 সংখ্যাৰ লগইন PIN ৰাখক — তাৰ পিছত যিকোনো ফোনত মোবাইল নম্বৰেৰে লগইন কৰিব পাৰিব।",
+ "cl_setpin": "🔑 লগইন PIN ৰাখক",
+ "cl_chpin": "🔑 PIN সলনি কৰক",
+ "cl_oldpw": "বৰ্তমানৰ চিংক পাছৱৰ্ড",
+ "cl_oldpin": "বৰ্তমানৰ PIN",
+ "cl_newpin": "নতুন PIN (6 সংখ্যা)",
+ "cl_pin_save": "✅ PIN ছেভ কৰক",
+ "cl_pin_ok": "✅ PIN ছেভ হ'ল। যিকোনো ফোনত {0} + PIN দি লগইন কৰক।",
+ "cl_logout": "🚪 লগআউট",
+ "cl_logout_cf": "এই ফোনৰ পৰা লগআউট কৰিব?\n\nআপোনাৰ ডাটা ক্লাউডত সুৰক্ষিত। এই ফোনৰ কপি আঁতৰোৱা হ'ব — যিকোনো সময়ত মোবাইল + PIN দি আকৌ লগইন কৰক।",
+ "cl_logout_pend": "{0} টা সলনি এতিয়াও আপলোড হোৱা নাই (ইণ্টাৰনেট নাই)। তথাপি লগআউট? সেই সলনিবোৰ হেৰাব।",
+ "cl_login_btn": "🔐 লগইন / নতুন একাউণ্ট",
+ "cl_relogin": "🔑 অটো বেকআপ চলাই ৰাখিবলৈ আকৌ লগইন কৰক",
+ "cl_note": "☁️ অটো বেকআপ অন: প্ৰতিটো সলনি কেইছেকেণ্ডমানৰ ভিতৰত আপোনাৰ নিজৰ Firebase (Google) একাউণ্টত ছেভ হয়। নতুন ফোনত মোবাইল + PIN দি লগইন কৰিলে সকলো ঘূৰি আহে।",
+ "cl_manual": "📁 মেনুৱেল বেকআপ ফাইল (ঐচ্ছিক)",
+ "lv_adv": "⚙️ এডভান্সড: Firebase প্ৰজেক্ট / চিংক পাছৱৰ্ড",
+ "pb_due_today": "আজি দিবলগীয়া",
+ "pburl_db": "⚠️ এইটো আপোনাৰ Firebase ডাটাবেছৰ ঠিকনা, এপৰ ৱেবছাইট নহয়। ইয়াক খালী ৰাখক, বা আপোনাৰ GitHub Pages / Vercel ঠিকনা দিয়ক।",
+ "pburl_move2": "💡 এই ঠিকনাৰ পৰা এপ খুলি মোবাইল + PIN দি লগইন কৰক — আপোনাৰ ডাটা নিজে নিজে আহিব।",
+ "ci_install": "📲 পাছবুক এপ ইনষ্টল কৰক",
+ "ci_ios": "📲 এই পাছবুক এপৰ দৰে ৰাখিবলৈ: Share ⬆️ → “Add to Home Screen” টিপক",
+ "ci_and": "📲 এই পাছবুক এপৰ দৰে ৰাখিবলৈ: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ইনষ্টল হ'ল — হোম স্ক্ৰীণত “Passbook” খোলক",
+ "ci_mine": "📒 মোৰ পাছবুক",
+ "ci_none": "আপোনাৰ পাছবুকৰ QR স্কেন কৰক বা WhatsApp ৰ লিংক এবাৰ খোলক — ই ইয়াত নিজে নিজে দেখা যাব।"
 };
 I18N.ne = {
  "hdr_sub": "दैनिक र साप्ताहिक फाइनान्स असुली",
@@ -5825,7 +6735,73 @@ I18N.ne = {
  "lv_reset": "🔄 नयाँ लिङ्क (पुरानो बन्द हुन्छ)",
  "lv_note": "🔴 लाइभ लिङ्क: बाँकी रकम, बक्यौता र इतिहास आफैँ अपडेट हुन्छन्। ग्राहक अनुरोध 📥 ग्राहक अनुरोधमा देखिन्छन्।",
  "lv_rules_ok": "✅ नियम कपी भयो — Firebase → Realtime Database → Rules मा पेस्ट गरी Publish थिच्नुहोस्",
- "lv_rules_lock": "🔒 लक गरिएका नियम कपी भयो (तपाईंको खाताले मात्र लेख्न सक्छ) — Firebase → Rules मा पेस्ट गरी Publish थिच्नुहोस्"
+ "lv_rules_lock": "🔒 लक गरिएका नियम कपी भयो (तपाईंको खाताले मात्र लेख्न सक्छ) — Firebase → Rules मा पेस्ट गरी Publish थिच्नुहोस्",
+ "li_h": "🔐 लगइन",
+ "li_sub": "आफ्नो मोबाइल नम्बर र PIN ले लगइन गर्नुहोस् — तपाईंको सबै डाटा आफैँ फर्किन्छ।",
+ "li_m": "📱 मोबाइल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लगइन PIN",
+ "li_go": "🔐 लगइन",
+ "li_forgot": "PIN बिर्सनुभयो?",
+ "li_new": "➕ नयाँ खाता",
+ "li_off": "खाता बिना प्रयोग गर्नुहोस् (डाटा यही फोनमा मात्र)",
+ "li_have": "पहिल्यै खाता छ? लगइन",
+ "li_cfg": "⚙️ क्लाउड सेटअप (Firebase config)",
+ "li_busy": "लगइन हुँदैछ, तपाईंको डाटा फर्काउँदैछ…",
+ "li_bad": "⚠️ मोबाइल / Gmail वा PIN गलत",
+ "li_nouser": "⚠️ यो मोबाइल नम्बरको खाता भेटिएन — नम्बर जाँच्नुहोस्, वा Gmail ले लगइन गर्नुहोस्",
+ "li_many": "⚠️ धेरै पटक गलत — केही मिनेट पर्खेर फेरि प्रयास गर्नुहोस्",
+ "li_net": "⚠️ इन्टरनेट छैन — जोडेर फेरि प्रयास गर्नुहोस्",
+ "li_auth_off": "⚠️ Firebase → Authentication मा Email/Password साइन-इन खुला छैन",
+ "li_need_pin": "आफ्नो PIN हाल्नुहोस् (कम्तीमा 6 अङ्क)",
+ "li_restored": "✅ फेरि स्वागत छ! {0} ऋण खाता फर्किए",
+ "li_empty": "✅ लगइन भयो। अटो ब्याकअप खुला छ।",
+ "li_reset_sent": "📧 PIN रिसेट लिंक {0} मा पठाइयो। मेल खोलेर त्यहाँ नयाँ 6 अङ्कको PIN लेख्नुहोस्, अनि यहाँ लगइन गर्नुहोस्।",
+ "li_merge_h": "☁️ क्लाउडमा डाटा भेटियो",
+ "li_merge_t": "क्लाउड: {0} ऋण खाता ({1} मा सेभ)। यो फोनमा: {2} ऋण खाता। के गर्ने?",
+ "li_use_cloud": "☁️ क्लाउड डाटा प्रयोग गर्नुहोस् (सिफारिस)",
+ "li_merge": "📱 यो फोनको डाटा राख्नुहोस् + क्लाउडका खाता थप्नुहोस्",
+ "ag_pin1": "🔑 लगइन PIN (6 अङ्क) *",
+ "ag_pin2": "PIN फेरि *",
+ "ag_pin_note": "मोबाइल नम्बर + यो PIN ले जुनसुकै फोनमा तपाईंको डाटा खोल्छ। सबै कुरा आफैँ ब्याकअप हुन्छ।",
+ "ag_pin_bad": "PIN 6–12 अङ्कको हुनुपर्छ र दुवै उस्तै हुनुपर्छ",
+ "ag_pin_weak": "यो PIN सजिलै अनुमान गर्न सकिन्छ (जस्तै 123456 / 000000) — अर्को रोज्नुहोस्",
+ "ag_acc_exists": "यो Gmail को खाता पहिल्यै छ — त्यसैबाट लगइन गर्नुहोस् (PIN बिर्सनुभयो? Gmail बाट रिसेट)",
+ "ag_acc_ok": "☁️ खाता बन्यो — अटो ब्याकअप खुला",
+ "cl_h": "☁️ खाता · अटो ब्याकअप · लाइभ सिंक",
+ "cl_acc": "👤 खाता",
+ "cl_bk": "☁️ अटो ब्याकअप",
+ "cl_bk_ok": "✅ सेभ भयो {0}",
+ "cl_bk_wait": "⏳ सेभ हुँदैछ…",
+ "cl_bk_pend": "🟠 {0} परिवर्तन — इन्टरनेट आउनेबित्तिकै अपलोड",
+ "cl_bk_off": "⚪ बन्द",
+ "cl_rules": "⚠️ एक पटक गर्नुपर्ने: अटो ब्याकअपका लागि Firebase rules अपडेट गर्नुपर्छ। “📋 Copy Firebase rules” थिच्नुहोस् → Firebase → Realtime Database → Rules → पेस्ट → Publish।",
+ "cl_fix": "⚠️ अटो ब्याकअप रोकिएको छ — Firebase rules एक पटक अपडेट गर्नुपर्छ",
+ "cl_setpin_box": "🔑 6 अङ्कको लगइन PIN राख्नुहोस् — त्यसपछि जुनसुकै फोनमा मोबाइल नम्बरले लगइन गर्न सकिन्छ।",
+ "cl_setpin": "🔑 लगइन PIN राख्नुहोस्",
+ "cl_chpin": "🔑 PIN बदल्नुहोस्",
+ "cl_oldpw": "हालको सिंक पासवर्ड",
+ "cl_oldpin": "हालको PIN",
+ "cl_newpin": "नयाँ PIN (6 अङ्क)",
+ "cl_pin_save": "✅ PIN सेभ गर्नुहोस्",
+ "cl_pin_ok": "✅ PIN सेभ भयो। जुनसुकै फोनमा {0} + PIN ले लगइन गर्नुहोस्।",
+ "cl_logout": "🚪 लगआउट",
+ "cl_logout_cf": "यो फोनबाट लगआउट गर्ने?\n\nतपाईंको डाटा क्लाउडमा सुरक्षित छ। यो फोनको प्रति हटाइनेछ — जुनसुकै बेला मोबाइल + PIN ले फेरि लगइन गर्नुहोस्।",
+ "cl_logout_pend": "{0} परिवर्तन अझै अपलोड भएका छैनन् (इन्टरनेट छैन)। तैपनि लगआउट? ती परिवर्तन हराउनेछन्।",
+ "cl_login_btn": "🔐 लगइन / नयाँ खाता",
+ "cl_relogin": "🔑 अटो ब्याकअप जारी राख्न फेरि लगइन गर्नुहोस्",
+ "cl_note": "☁️ अटो ब्याकअप खुला: हरेक परिवर्तन केही सेकेन्डमै तपाईंको आफ्नै Firebase (Google) खातामा सेभ हुन्छ। नयाँ फोनमा मोबाइल + PIN ले लगइन गर्दा सबै फर्किन्छ।",
+ "cl_manual": "📁 म्यानुअल ब्याकअप फाइल (ऐच्छिक)",
+ "lv_adv": "⚙️ एडभान्स्ड: Firebase प्रोजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "आज तिर्नुपर्ने",
+ "pburl_db": "⚠️ यो तपाईंको Firebase डाटाबेसको ठेगाना हो, एपको वेबसाइट होइन। यसलाई खाली छोड्नुहोस्, वा आफ्नो GitHub Pages / Vercel ठेगाना हाल्नुहोस्।",
+ "pburl_move2": "💡 यही ठेगानाबाट एप खोलेर मोबाइल + PIN ले लगइन गर्नुहोस् — तपाईंको डाटा आफैँ आउँछ।",
+ "ci_install": "📲 पासबुक एप इन्स्टल गर्नुहोस्",
+ "ci_ios": "📲 यो पासबुकलाई एपजस्तै राख्न: Share ⬆️ → “Add to Home Screen” थिच्नुहोस्",
+ "ci_and": "📲 यो पासबुकलाई एपजस्तै राख्न: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इन्स्टल भयो — होम स्क्रिनमा “Passbook” खोल्नुहोस्",
+ "ci_mine": "📒 मेरा पासबुक",
+ "ci_none": "आफ्नो पासबुकको QR स्क्यान गर्नुहोस् वा WhatsApp को लिंक एक पटक खोल्नुहोस् — यो यहाँ आफैँ देखिन्छ।"
 };
 I18N.sa = {
  "hdr_sub": "दैनिक-साप्ताहिक-वित्त-सङ्ग्रहः",
@@ -6221,7 +7197,73 @@ I18N.sa = {
  "lv_reset": "🔄 नूतनं सूत्रम् (पुरातनं स्थगिष्यते)",
  "lv_note": "🔴 साक्षात्सूत्रम्: शेषराशिः, देयराशिः, इतिहासश्च स्वयं नवीभवन्ति। ग्राहकानुरोधाः 📥 ग्राहकानुरोधेषु दृश्यन्ते।",
  "lv_rules_ok": "✅ नियमाः प्रतिलिपिताः — Firebase → Realtime Database → Rules मध्ये स्थापयित्वा Publish नुदतु",
- "lv_rules_lock": "🔒 रुद्धाः नियमाः प्रतिलिपिताः (भवतः खाता एव लिखितुं शक्नोति) — Firebase → Rules मध्ये स्थापयित्वा Publish नुदतु"
+ "lv_rules_lock": "🔒 रुद्धाः नियमाः प्रतिलिपिताः (भवतः खाता एव लिखितुं शक्नोति) — Firebase → Rules मध्ये स्थापयित्वा Publish नुदतु",
+ "li_h": "🔐 प्रवेशः",
+ "li_sub": "स्वस्य दूरवाणीसङ्ख्यया PIN-सङ्केतेन च प्रविशतु — भवतः सर्वः दत्तांशः स्वयमेव प्रत्यागमिष्यति।",
+ "li_m": "📱 चलदूरवाणी",
+ "li_g": "✉️ Gmail",
+ "li_pin": "प्रवेश-PIN",
+ "li_go": "🔐 प्रविशतु",
+ "li_forgot": "PIN विस्मृतम्?",
+ "li_new": "➕ नूतनं खातम्",
+ "li_off": "खातं विना उपयुङ्क्ताम् (दत्तांशः अस्यां दूरवाण्याम् एव)",
+ "li_have": "पूर्वमेव खातम् अस्ति? प्रविशतु",
+ "li_cfg": "⚙️ मेघ-व्यवस्था (Firebase config)",
+ "li_busy": "प्रवेशः भवति, भवतः दत्तांशः प्रत्यानीयते…",
+ "li_bad": "⚠️ दूरवाणी / Gmail अथवा PIN अशुद्धम्",
+ "li_nouser": "⚠️ अस्याः दूरवाणीसङ्ख्यायाः खातं न लब्धम् — सङ्ख्यां परीक्षताम्, अथवा Gmail द्वारा प्रविशतु",
+ "li_many": "⚠️ बहुवारम् अशुद्धम् — कतिचन निमेषान् प्रतीक्ष्य पुनः प्रयततु",
+ "li_net": "⚠️ अन्तर्जालं नास्ति — संयोज्य पुनः प्रयततु",
+ "li_auth_off": "⚠️ Firebase → Authentication मध्ये Email/Password प्रवेशः न सक्रियः",
+ "li_need_pin": "स्वस्य PIN लिखतु (न्यूनातिन्यूनं 6 अङ्काः)",
+ "li_restored": "✅ पुनः स्वागतम्! {0} ऋणखातानि प्रत्यागतानि",
+ "li_empty": "✅ प्रवेशः जातः। स्वचालित-प्रतिलिपिः सक्रिया।",
+ "li_reset_sent": "📧 PIN-पुनःस्थापन-सम्पर्कः {0} प्रति प्रेषितः। पत्रम् उद्घाट्य तत्र नूतनं 6-अङ्कीयं PIN लिखतु, ततः अत्र प्रविशतु।",
+ "li_merge_h": "☁️ मेघे दत्तांशः लब्धः",
+ "li_merge_t": "मेघः: {0} ऋणखातानि ({1} रक्षितानि)। अस्यां दूरवाण्याम्: {2} ऋणखातानि। किं करणीयम्?",
+ "li_use_cloud": "☁️ मेघदत्तांशम् उपयुङ्क्ताम् (अनुशंसितम्)",
+ "li_merge": "📱 अस्याः दूरवाण्याः दत्तांशं रक्षतु + मेघखातानि योजयतु",
+ "ag_pin1": "🔑 प्रवेश-PIN (6 अङ्काः) *",
+ "ag_pin2": "PIN पुनः *",
+ "ag_pin_note": "दूरवाणीसङ्ख्या + एतत् PIN कस्यामपि दूरवाण्यां भवतः दत्तांशम् उद्घाटयतः। सर्वं स्वयमेव प्रतिलिप्यते।",
+ "ag_pin_bad": "PIN 6–12 अङ्कात्मकं भवेत्, उभे समाने च भवेताम्",
+ "ag_pin_weak": "एतत् PIN सुलभतया अनुमेयम् (यथा 123456 / 000000) — अन्यत् चिनोतु",
+ "ag_acc_exists": "अस्य Gmail इत्यस्य खातं पूर्वमेव अस्ति — तेनैव प्रविशतु (PIN विस्मृतम्? Gmail द्वारा पुनःस्थापयतु)",
+ "ag_acc_ok": "☁️ खातं निर्मितम् — स्वचालित-प्रतिलिपिः सक्रिया",
+ "cl_h": "☁️ खातम् · स्वचालित-प्रतिलिपिः · सजीव-समन्वयः",
+ "cl_acc": "👤 खातम्",
+ "cl_bk": "☁️ स्वचालित-प्रतिलिपिः",
+ "cl_bk_ok": "✅ रक्षितम् {0}",
+ "cl_bk_wait": "⏳ रक्ष्यते…",
+ "cl_bk_pend": "🟠 {0} परिवर्तनानि — अन्तर्जाले आगते आरोप्यन्ते",
+ "cl_bk_off": "⚪ निष्क्रियम्",
+ "cl_rules": "⚠️ एकवारं करणीयम्: स्वचालित-प्रतिलिप्यै Firebase rules नवीकरणीयाः। “📋 Copy Firebase rules” नुदतु → Firebase → Realtime Database → Rules → संलग्नयतु → Publish।",
+ "cl_fix": "⚠️ स्वचालित-प्रतिलिपिः स्थगिता — Firebase rules एकवारं नवीकरणीयाः",
+ "cl_setpin_box": "🔑 6-अङ्कीयं प्रवेश-PIN स्थापयतु — ततः कस्यामपि दूरवाण्यां दूरवाणीसङ्ख्यया प्रवेष्टुं शक्यते।",
+ "cl_setpin": "🔑 प्रवेश-PIN स्थापयतु",
+ "cl_chpin": "🔑 PIN परिवर्तयतु",
+ "cl_oldpw": "वर्तमानः समन्वय-गुप्तशब्दः",
+ "cl_oldpin": "वर्तमानं PIN",
+ "cl_newpin": "नूतनं PIN (6 अङ्काः)",
+ "cl_pin_save": "✅ PIN रक्षतु",
+ "cl_pin_ok": "✅ PIN रक्षितम्। कस्यामपि दूरवाण्यां {0} + PIN द्वारा प्रविशतु।",
+ "cl_logout": "🚪 निर्गमनम्",
+ "cl_logout_cf": "अस्याः दूरवाण्याः निर्गच्छतु वा?\n\nभवतः दत्तांशः मेघे सुरक्षितः। अस्याः दूरवाण्याः प्रतिः अपनेष्यते — यदा कदापि दूरवाणी + PIN द्वारा पुनः प्रविशतु।",
+ "cl_logout_pend": "{0} परिवर्तनानि अद्यापि न आरोपितानि (अन्तर्जालं नास्ति)। तथापि निर्गमनम्? तानि परिवर्तनानि नङ्क्ष्यन्ति।",
+ "cl_login_btn": "🔐 प्रवेशः / नूतनं खातम्",
+ "cl_relogin": "🔑 स्वचालित-प्रतिलिपिं निरन्तरं कर्तुं पुनः प्रविशतु",
+ "cl_note": "☁️ स्वचालित-प्रतिलिपिः सक्रिया: प्रत्येकं परिवर्तनं कतिपयक्षणेषु भवतः स्वकीये Firebase (Google) खाते रक्ष्यते। नूतनदूरवाण्यां दूरवाणी + PIN द्वारा प्रविशतु, सर्वं प्रत्यागच्छति।",
+ "cl_manual": "📁 हस्तचालित-प्रतिलिपि-सञ्चिका (ऐच्छिकी)",
+ "lv_adv": "⚙️ उन्नतम्: Firebase परियोजना / समन्वय-गुप्तशब्दः",
+ "pb_due_today": "अद्य देयम्",
+ "pburl_db": "⚠️ एतत् भवतः Firebase दत्तांशकोशस्य सङ्केतः, न तु अनुप्रयोगस्य जालस्थानम्। एतत् रिक्तं त्यजतु, अथवा स्वस्य GitHub Pages / Vercel सङ्केतं लिखतु।",
+ "pburl_move2": "💡 अस्मात् सङ्केतात् अनुप्रयोगम् उद्घाट्य दूरवाणी + PIN द्वारा प्रविशतु — भवतः दत्तांशः स्वयमेव आगमिष्यति।",
+ "ci_install": "📲 पासबुक्-अनुप्रयोगं स्थापयतु",
+ "ci_ios": "📲 एतां पासबुक् अनुप्रयोगवत् रक्षितुम्: Share ⬆️ → “Add to Home Screen” नुदतु",
+ "ci_and": "📲 एतां पासबुक् अनुप्रयोगवत् रक्षितुम्: Chrome सूची ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ स्थापितम् — मुख्यपटले “Passbook” उद्घाटयतु",
+ "ci_mine": "📒 मम पासबुक्",
+ "ci_none": "स्वस्याः पासबुक् इत्यस्याः QR स्कैन् करोतु अथवा WhatsApp सम्पर्कम् एकवारम् उद्घाटयतु — सा अत्र स्वयमेव दृश्यते।"
 };
 I18N.kok = {
  "hdr_sub": "दिसाळें आनी सुमानाळें फायनान्स वसुली",
@@ -6617,7 +7659,73 @@ I18N.kok = {
  "lv_reset": "🔄 नवो लिंक (जुनो बंद जातलो)",
  "lv_note": "🔴 लायव्ह लिंक: उरिल्ली रक्कम, थकबाकी आनी इतिहास आपसूक अपडेट जाता. गिरायकांच्यो विनंती 📥 गिरायकांच्यो विनंतींत दिसतात.",
  "lv_rules_ok": "✅ नेम कॉपी जाले — Firebase → Realtime Database → Rules त पेस्ट करून Publish दाबात",
- "lv_rules_lock": "🔒 लॉक केल्ले नेम कॉपी जाले (फकत तुमचें खातें बरोवं शकतलें) — Firebase → Rules त पेस्ट करून Publish दाबात"
+ "lv_rules_lock": "🔒 लॉक केल्ले नेम कॉपी जाले (फकत तुमचें खातें बरोवं शकतलें) — Firebase → Rules त पेस्ट करून Publish दाबात",
+ "li_h": "🔐 लॉगिन",
+ "li_sub": "तुमच्या मोबायल नंबर आनी PIN न लॉगिन करात — तुमचो सगळो डेटा आपसूक परत येतलो.",
+ "li_m": "📱 मोबायल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लॉगिन PIN",
+ "li_go": "🔐 लॉगिन",
+ "li_forgot": "PIN विसरलो?",
+ "li_new": "➕ नवें खातें",
+ "li_off": "खात्या बगर वापरात (डेटा फकत ह्या फोनांत)",
+ "li_have": "आदींच खातें आसा? लॉगिन",
+ "li_cfg": "⚙️ क्लावड सेटअप (Firebase config)",
+ "li_busy": "लॉगिन जाता, तुमचो डेटा परत हाडटा…",
+ "li_bad": "⚠️ मोबायल / Gmail वा PIN चुकीचो",
+ "li_nouser": "⚠️ ह्या मोबायल नंबराचें खातें मेळ्ळें ना — नंबर तपासात, वा Gmail न लॉगिन करात",
+ "li_many": "⚠️ खूब फावटीं चूक — कांय मिनटां रावन परत यत्न करात",
+ "li_net": "⚠️ इंटरनेट ना — कनेक्ट करून परत यत्न करात",
+ "li_auth_off": "⚠️ Firebase → Authentication हांगा Email/Password साइन-इन चालू ना",
+ "li_need_pin": "तुमचो PIN घालात (उणेंत उणे 6 आंकडे)",
+ "li_restored": "✅ परत येवकार! {0} रिणाचीं खातीं परत आयलीं",
+ "li_empty": "✅ लॉगिन जालें. ऑटो बॅकअप चालू.",
+ "li_reset_sent": "📧 PIN रिसेट लिंक {0} चेर धाडला. मेल उगडात, थंय नवो 6 आंकड्यांचो PIN बरयात, मागीर हांगा लॉगिन करात.",
+ "li_merge_h": "☁️ क्लावडांत डेटा मेळ्ळो",
+ "li_merge_t": "क्लावड: {0} रिणाचीं खातीं ({1} दिसा सेव). ह्या फोनांत: {2} रिणाचीं खातीं. कितें करप?",
+ "li_use_cloud": "☁️ क्लावड डेटा वापरात (शिफारस)",
+ "li_merge": "📱 ह्या फोनाचो डेटा दवरात + क्लावडाचीं खातीं जोडात",
+ "ag_pin1": "🔑 लॉगिन PIN (6 आंकडे) *",
+ "ag_pin2": "PIN परत *",
+ "ag_pin_note": "मोबायल नंबर + हो PIN खंयच्याय फोनाचेर तुमचो डेटा उगडटात. सगळें आपसूक बॅकअप जाता.",
+ "ag_pin_bad": "PIN 6–12 आंकड्यांचो आसूंक जाय आनी दोनूय सारके आसूंक जाय",
+ "ag_pin_weak": "हो PIN सोंपेपणान अदमास करूं येता (उदा. 123456 / 000000) — दुसरो वेंचात",
+ "ag_acc_exists": "ह्या Gmail चें खातें आदींच आसा — तातूंतल्यानूच लॉगिन करात (PIN विसरलो? Gmail न रिसेट)",
+ "ag_acc_ok": "☁️ खातें तयार जालें — ऑटो बॅकअप चालू",
+ "cl_h": "☁️ खातें · ऑटो बॅकअप · लायव सिंक",
+ "cl_acc": "👤 खातें",
+ "cl_bk": "☁️ ऑटो बॅकअप",
+ "cl_bk_ok": "✅ सेव जालें {0}",
+ "cl_bk_wait": "⏳ सेव जाता…",
+ "cl_bk_pend": "🟠 {0} बदल — इंटरनेट आयल्ल्या बरोबर अपलोड",
+ "cl_bk_off": "⚪ बंद",
+ "cl_rules": "⚠️ एक फावट करपाचें: ऑटो बॅकअपाखातीर Firebase rules अपडेट करपाक जाय. “📋 Copy Firebase rules” दाबात → Firebase → Realtime Database → Rules → पेस्ट → Publish.",
+ "cl_fix": "⚠️ ऑटो बॅकअप थांबला — Firebase rules एक फावट अपडेट करपाक जाय",
+ "cl_setpin_box": "🔑 6 आंकड्यांचो लॉगिन PIN दवरात — मागीर खंयच्याय फोनाचेर मोबायल नंबरान लॉगिन करूं येता.",
+ "cl_setpin": "🔑 लॉगिन PIN दवरात",
+ "cl_chpin": "🔑 PIN बदलात",
+ "cl_oldpw": "सद्याचें सिंक पासवर्ड",
+ "cl_oldpin": "सद्याचो PIN",
+ "cl_newpin": "नवो PIN (6 आंकडे)",
+ "cl_pin_save": "✅ PIN सेव करात",
+ "cl_pin_ok": "✅ PIN सेव जालो. खंयच्याय फोनाचेर {0} + PIN न लॉगिन करात.",
+ "cl_logout": "🚪 लॉगआउट",
+ "cl_logout_cf": "ह्या फोनांतल्यान लॉगआउट करपाचें?\n\nतुमचो डेटा क्लावडांत सुरक्षीत आसा. ह्या फोनांतली प्रत काडटले — केन्नाय मोबायल + PIN न परत लॉगिन करात.",
+ "cl_logout_pend": "{0} बदल अजून अपलोड जावंक नात (इंटरनेट ना). तरी लॉगआउट? ते बदल ना जातले.",
+ "cl_login_btn": "🔐 लॉगिन / नवें खातें",
+ "cl_relogin": "🔑 ऑटो बॅकअप चालू दवरपाक परत लॉगिन करात",
+ "cl_note": "☁️ ऑटो बॅकअप चालू: दर एक बदल थोड्या सेकंदांनी तुमच्या स्वताच्या Firebase (Google) खात्यांत सेव जाता. नव्या फोनाचेर मोबायल + PIN न लॉगिन केल्यार सगळें परत येता.",
+ "cl_manual": "📁 मॅन्युअल बॅकअप फायल (ऐच्छीक)",
+ "lv_adv": "⚙️ ॲडव्हान्स्ड: Firebase प्रोजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "आयज भरपाचें",
+ "pburl_db": "⚠️ हो तुमचो Firebase डेटाबेस पत्तो, ॲपाची वेबसायट न्हय. हें रिकामें दवरात, वा तुमचो GitHub Pages / Vercel पत्तो घालात.",
+ "pburl_move2": "💡 ह्याच पत्त्यावयल्यान ॲप उगडात आनी मोबायल + PIN न लॉगिन करात — तुमचो डेटा आपसूक येतलो.",
+ "ci_install": "📲 पासबुक ॲप इन्स्टॉल करात",
+ "ci_ios": "📲 हें पासबुक ॲपभशेन दवरपाक: Share ⬆️ → “Add to Home Screen” दाबात",
+ "ci_and": "📲 हें पासबुक ॲपभशेन दवरपाक: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इन्स्टॉल जालें — होम स्क्रीनाचेर “Passbook” उगडात",
+ "ci_mine": "📒 म्हजीं पासबुकां",
+ "ci_none": "तुमच्या पासबुकाचो QR स्कॅन करात वा WhatsApp वयली लिंक एक फावट उगडात — तें हांगा आपसूक दिसतलें."
 };
 I18N.mai = {
  "hdr_sub": "दैनिक आ साप्ताहिक फाइनेंस वसूली",
@@ -7013,7 +8121,73 @@ I18N.mai = {
  "lv_reset": "🔄 नव लिंक (पुरान बंद भऽ जायत)",
  "lv_note": "🔴 लाइव लिंक: बाँकी रकम, बकाया आ इतिहास अपने-आप अपडेट होइत अछि। ग्राहकक अनुरोध 📥 ग्राहकक अनुरोध मे देखाइत अछि।",
  "lv_rules_ok": "✅ नियम कॉपी भऽ गेल — Firebase → Realtime Database → Rules मे पेस्ट कऽ Publish दबाउ",
- "lv_rules_lock": "🔒 लॉक कएल नियम कॉपी भेल (सिर्फ अहाँक खाता लिखि सकत) — Firebase → Rules मे पेस्ट कऽ Publish दबाउ"
+ "lv_rules_lock": "🔒 लॉक कएल नियम कॉपी भेल (सिर्फ अहाँक खाता लिखि सकत) — Firebase → Rules मे पेस्ट कऽ Publish दबाउ",
+ "li_h": "🔐 लॉगिन",
+ "li_sub": "अपन मोबाइल नंबर आ PIN सँ लॉगिन करू — अहाँक सभ डेटा अपने-आप घुरि आएत।",
+ "li_m": "📱 मोबाइल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लॉगिन PIN",
+ "li_go": "🔐 लॉगिन",
+ "li_forgot": "PIN बिसरि गेलहुँ?",
+ "li_new": "➕ नव खाता",
+ "li_off": "बिना खाताक उपयोग करू (डेटा केवल एहि फोनमे)",
+ "li_have": "पहिनेसँ खाता अछि? लॉगिन",
+ "li_cfg": "⚙️ क्लाउड सेटअप (Firebase config)",
+ "li_busy": "लॉगिन भ' रहल अछि, अहाँक डेटा घुरा रहल अछि…",
+ "li_bad": "⚠️ मोबाइल / Gmail वा PIN गलत",
+ "li_nouser": "⚠️ एहि मोबाइल नंबरक कोनो खाता नहि भेटल — नंबर जाँचू, वा Gmail सँ लॉगिन करू",
+ "li_many": "⚠️ बहुत बेर गलत — किछु मिनट रुकि फेर प्रयास करू",
+ "li_net": "⚠️ इंटरनेट नहि — कनेक्ट क' फेर प्रयास करू",
+ "li_auth_off": "⚠️ Firebase → Authentication मे Email/Password साइन-इन चालू नहि अछि",
+ "li_need_pin": "अपन PIN लिखू (कम सँ कम 6 अंक)",
+ "li_restored": "✅ फेर स्वागत! {0} कर्ज खाता घुरि आएल",
+ "li_empty": "✅ लॉगिन भ' गेल। ऑटो बैकअप चालू अछि।",
+ "li_reset_sent": "📧 PIN रीसेट लिंक {0} पर पठाओल गेल। मेल खोलू, ओतय नव 6 अंकक PIN लिखू, तखन एतय लॉगिन करू।",
+ "li_merge_h": "☁️ क्लाउडमे डेटा भेटल",
+ "li_merge_t": "क्लाउड: {0} कर्ज खाता ({1} केँ सेव)। एहि फोनमे: {2} कर्ज खाता। की करी?",
+ "li_use_cloud": "☁️ क्लाउड डेटा उपयोग करू (सलाह)",
+ "li_merge": "📱 एहि फोनक डेटा राखू + क्लाउडक खाता जोड़ू",
+ "ag_pin1": "🔑 लॉगिन PIN (6 अंक) *",
+ "ag_pin2": "PIN फेर *",
+ "ag_pin_note": "मोबाइल नंबर + ई PIN कोनो फोनपर अहाँक डेटा खोलैत अछि। सभ किछु अपने-आप बैकअप होइत अछि।",
+ "ag_pin_bad": "PIN 6–12 अंकक होअए आ दुनू एक्के रंग होअए",
+ "ag_pin_weak": "ई PIN आसानीसँ अंदाज लगाओल जा सकैत अछि (जेना 123456 / 000000) — दोसर चुनू",
+ "ag_acc_exists": "एहि Gmail क खाता पहिनेसँ अछि — ओहीसँ लॉगिन करू (PIN बिसरलहुँ? Gmail सँ रीसेट)",
+ "ag_acc_ok": "☁️ खाता बनि गेल — ऑटो बैकअप चालू",
+ "cl_h": "☁️ खाता · ऑटो बैकअप · लाइव सिंक",
+ "cl_acc": "👤 खाता",
+ "cl_bk": "☁️ ऑटो बैकअप",
+ "cl_bk_ok": "✅ सेव भेल {0}",
+ "cl_bk_wait": "⏳ सेव भ' रहल अछि…",
+ "cl_bk_pend": "🟠 {0} बदलाव — इंटरनेट अबिते अपलोड",
+ "cl_bk_off": "⚪ बंद",
+ "cl_rules": "⚠️ एक बेरक काज: ऑटो बैकअप लेल Firebase rules अपडेट करबाक अछि। “📋 Copy Firebase rules” दबाउ → Firebase → Realtime Database → Rules → पेस्ट → Publish।",
+ "cl_fix": "⚠️ ऑटो बैकअप रुकल अछि — Firebase rules एक बेर अपडेट करबाक अछि",
+ "cl_setpin_box": "🔑 6 अंकक लॉगिन PIN बनाउ — तखन कोनो फोनपर मोबाइल नंबरसँ लॉगिन क' सकैत छी।",
+ "cl_setpin": "🔑 लॉगिन PIN बनाउ",
+ "cl_chpin": "🔑 PIN बदलू",
+ "cl_oldpw": "वर्तमान सिंक पासवर्ड",
+ "cl_oldpin": "वर्तमान PIN",
+ "cl_newpin": "नव PIN (6 अंक)",
+ "cl_pin_save": "✅ PIN सेव करू",
+ "cl_pin_ok": "✅ PIN सेव भेल। कोनो फोनपर {0} + PIN सँ लॉगिन करू।",
+ "cl_logout": "🚪 लॉगआउट",
+ "cl_logout_cf": "एहि फोनसँ लॉगआउट करब?\n\nअहाँक डेटा क्लाउडमे सुरक्षित अछि। एहि फोनक कॉपी हटि जाएत — कखनो मोबाइल + PIN सँ फेर लॉगिन करू।",
+ "cl_logout_pend": "{0} बदलाव एखन धरि अपलोड नहि भेल (इंटरनेट नहि)। तैयो लॉगआउट? ओ बदलाव हेरा जाएत।",
+ "cl_login_btn": "🔐 लॉगिन / नव खाता",
+ "cl_relogin": "🔑 ऑटो बैकअप चालू रखबाक लेल फेर लॉगिन करू",
+ "cl_note": "☁️ ऑटो बैकअप चालू: हर बदलाव किछु सेकंडमे अहाँक अपन Firebase (Google) खातामे सेव होइत अछि। नव फोनपर मोबाइल + PIN सँ लॉगिन करू, सभ घुरि आएत।",
+ "cl_manual": "📁 मैनुअल बैकअप फाइल (वैकल्पिक)",
+ "lv_adv": "⚙️ एडवांस्ड: Firebase प्रोजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "आइ देबाक अछि",
+ "pburl_db": "⚠️ ई अहाँक Firebase डेटाबेसक पता अछि, ऐपक वेबसाइट नहि। एकरा खाली छोड़ू, वा अपन GitHub Pages / Vercel पता लिखू।",
+ "pburl_move2": "💡 एही पतासँ ऐप खोलू आ मोबाइल + PIN सँ लॉगिन करू — अहाँक डेटा अपने-आप आबि जाएत।",
+ "ci_install": "📲 पासबुक ऐप इंस्टॉल करू",
+ "ci_ios": "📲 एहि पासबुककेँ ऐप जकाँ राखू: Share ⬆️ → “Add to Home Screen” दबाउ",
+ "ci_and": "📲 एहि पासबुककेँ ऐप जकाँ राखू: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इंस्टॉल भ' गेल — होम स्क्रीनपर “Passbook” खोलू",
+ "ci_mine": "📒 हमर पासबुक",
+ "ci_none": "अपन पासबुकक QR स्कैन करू वा WhatsApp वला लिंक एक बेर खोलू — ई एतय अपने-आप देखाएत।"
 };
 I18N.doi = {
  "hdr_sub": "रोजाना ते हफ्तेवार फाइनेंस वसूली",
@@ -7409,7 +8583,73 @@ I18N.doi = {
  "lv_reset": "🔄 नमां लिंक (पुराना बंद होई जाग)",
  "lv_note": "🔴 लाइव लिंक: बाकी रकम, बकाया ते इतिहास अपने-आप अपडेट होंदे न। ग्राहक अनुरोध 📥 ग्राहक अनुरोध च दिक्खदे न।",
  "lv_rules_ok": "✅ नियम कॉपी होई गे — Firebase → Realtime Database → Rules च पेस्ट करियै Publish दबाओ",
- "lv_rules_lock": "🔒 लॉक कीते दे नियम कॉपी होई गे (सिर्फ तुंदा खाता लिखी सकग) — Firebase → Rules च पेस्ट करियै Publish दबाओ"
+ "lv_rules_lock": "🔒 लॉक कीते दे नियम कॉपी होई गे (सिर्फ तुंदा खाता लिखी सकग) — Firebase → Rules च पेस्ट करियै Publish दबाओ",
+ "li_h": "🔐 लॉगिन",
+ "li_sub": "अपने मोबाइल नंबर ते PIN कन्नै लॉगिन करो — तुंदा सारा डेटा अपने-आप बापस आई जाग।",
+ "li_m": "📱 मोबाइल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लॉगिन PIN",
+ "li_go": "🔐 लॉगिन",
+ "li_forgot": "PIN भुल्ली गे?",
+ "li_new": "➕ नमां खाता",
+ "li_off": "खाते बगैर बरतो (डेटा सिर्फ इस फोन च)",
+ "li_have": "पैह्लें थमां खाता ऐ? लॉगिन",
+ "li_cfg": "⚙️ क्लाउड सैटअप (Firebase config)",
+ "li_busy": "लॉगिन होआ करदा ऐ, तुंदा डेटा बापस आवा करदा ऐ…",
+ "li_bad": "⚠️ मोबाइल / Gmail जां PIN गलत",
+ "li_nouser": "⚠️ इस मोबाइल नंबर दा कोई खाता नेईं मिलेआ — नंबर जांचो, जां Gmail कन्नै लॉगिन करो",
+ "li_many": "⚠️ मते बारी गलत — किश मिंट रुकी ते फ्ही कोशश करो",
+ "li_net": "⚠️ इंटरनैट नेईं — कनैक्ट करियै फ्ही कोशश करो",
+ "li_auth_off": "⚠️ Firebase → Authentication च Email/Password साइन-इन चालू नेईं",
+ "li_need_pin": "अपना PIN पाओ (घट्ट-घट्ट 6 अंक)",
+ "li_restored": "✅ फ्ही जी आयां गी! {0} लोन खाते बापस आई गे",
+ "li_empty": "✅ लॉगिन होई गेआ। आटो बैकअप चालू ऐ।",
+ "li_reset_sent": "📧 PIN रीसैट लिंक {0} पर भेजेआ। मेल खोल्लो, उत्थें नमां 6 अंकें दा PIN लिखो, फ्ही इत्थें लॉगिन करो।",
+ "li_merge_h": "☁️ क्लाउड च डेटा मिलेआ",
+ "li_merge_t": "क्लाउड: {0} लोन खाते ({1} गी सेव)। इस फोन च: {2} लोन खाते। केह् करचै?",
+ "li_use_cloud": "☁️ क्लाउड डेटा बरतो (सलाह)",
+ "li_merge": "📱 इस फोन दा डेटा रक्खो + क्लाउड दे खाते जोड़ो",
+ "ag_pin1": "🔑 लॉगिन PIN (6 अंक) *",
+ "ag_pin2": "PIN फ्ही *",
+ "ag_pin_note": "मोबाइल नंबर + एह् PIN कुसै बी फोन पर तुंदा डेटा खोलदे न। सब किश अपने-आप बैकअप होंदा ऐ।",
+ "ag_pin_bad": "PIN 6–12 अंकें दा होऐ ते दोऐ इक्कै नेह् होन",
+ "ag_pin_weak": "एह् PIN सौखा अंदाजा लग्गी सकदा ऐ (जि'यां 123456 / 000000) — होर चुनो",
+ "ag_acc_exists": "इस Gmail दा खाता पैह्लें थमां ऐ — उस्सै कन्नै लॉगिन करो (PIN भुल्ली गे? Gmail कन्नै रीसैट)",
+ "ag_acc_ok": "☁️ खाता बनी गेआ — आटो बैकअप चालू",
+ "cl_h": "☁️ खाता · आटो बैकअप · लाइव सिंक",
+ "cl_acc": "👤 खाता",
+ "cl_bk": "☁️ आटो बैकअप",
+ "cl_bk_ok": "✅ सेव होआ {0}",
+ "cl_bk_wait": "⏳ सेव होआ करदा ऐ…",
+ "cl_bk_pend": "🟠 {0} बदलाऽ — इंटरनैट औंदे गै अपलोड",
+ "cl_bk_off": "⚪ बंद",
+ "cl_rules": "⚠️ इक बारी दा कम्म: आटो बैकअप आस्तै Firebase rules अपडेट करने न। “📋 Copy Firebase rules” दबाओ → Firebase → Realtime Database → Rules → पेस्ट → Publish।",
+ "cl_fix": "⚠️ आटो बैकअप रुके दा ऐ — Firebase rules इक बारी अपडेट करने न",
+ "cl_setpin_box": "🔑 6 अंकें दा लॉगिन PIN बनाओ — फ्ही कुसै बी फोन पर मोबाइल नंबर कन्नै लॉगिन करी सकदे ओ।",
+ "cl_setpin": "🔑 लॉगिन PIN बनाओ",
+ "cl_chpin": "🔑 PIN बदलो",
+ "cl_oldpw": "मौजूदा सिंक पासवर्ड",
+ "cl_oldpin": "मौजूदा PIN",
+ "cl_newpin": "नमां PIN (6 अंक)",
+ "cl_pin_save": "✅ PIN सेव करो",
+ "cl_pin_ok": "✅ PIN सेव होई गेआ। कुसै बी फोन पर {0} + PIN कन्नै लॉगिन करो।",
+ "cl_logout": "🚪 लॉगआउट",
+ "cl_logout_cf": "इस फोन थमां लॉगआउट करना ऐ?\n\nतुंदा डेटा क्लाउड च सुरक्खत ऐ। इस फोन दी कापी हटी जाग — कदें बी मोबाइल + PIN कन्नै फ्ही लॉगिन करो।",
+ "cl_logout_pend": "{0} बदलाऽ अजें अपलोड नेईं होए (इंटरनैट नेईं)। फ्ही बी लॉगआउट? ओह् बदलाऽ गुआची जाङन।",
+ "cl_login_btn": "🔐 लॉगिन / नमां खाता",
+ "cl_relogin": "🔑 आटो बैकअप चालू रक्खने आस्तै फ्ही लॉगिन करो",
+ "cl_note": "☁️ आटो बैकअप चालू: हर बदलाऽ किश सकिंटें च तुंदे अपने Firebase (Google) खाते च सेव होंदा ऐ। नमें फोन पर मोबाइल + PIN कन्नै लॉगिन करो, सब बापस आई जाग।",
+ "cl_manual": "📁 मैनुअल बैकअप फाइल (मर्जी मताबक)",
+ "lv_adv": "⚙️ एडवांस्ड: Firebase प्रोजैक्ट / सिंक पासवर्ड",
+ "pb_due_today": "अज्ज देना ऐ",
+ "pburl_db": "⚠️ एह् तुंदा Firebase डेटाबेस पता ऐ, ऐप दी वैबसाइट नेईं। इसगी खाल्ली छोड़ो, जां अपना GitHub Pages / Vercel पता पाओ।",
+ "pburl_move2": "💡 इस्सै पते थमां ऐप खोल्लो ते मोबाइल + PIN कन्नै लॉगिन करो — तुंदा डेटा अपने-आप आई जाग।",
+ "ci_install": "📲 पासबुक ऐप इंस्टाल करो",
+ "ci_ios": "📲 इस पासबुक गी ऐप आंगर रक्खो: Share ⬆️ → “Add to Home Screen” दबाओ",
+ "ci_and": "📲 इस पासबुक गी ऐप आंगर रक्खो: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इंस्टाल होई गेआ — होम स्क्रीन पर “Passbook” खोल्लो",
+ "ci_mine": "📒 मेरियां पासबुकां",
+ "ci_none": "अपनी पासबुक दा QR स्कैन करो जां WhatsApp आह्ला लिंक इक बारी खोल्लो — एह् इत्थें अपने-आप दिक्खग।"
 };
 I18N.sd = {
  "hdr_sub": "روزانو ۽ هفتيوار فائنانس وصولي",
@@ -7805,7 +9045,73 @@ I18N.sd = {
  "lv_reset": "🔄 نئون لنڪ (پراڻو بند ٿي ويندو)",
  "lv_note": "🔴 لائيو لنڪ: باقي رقم، واجب الادا ۽ تاريخ پاڻمرادو اپڊيٽ ٿين ٿا. گراهڪ جون درخواستون 📥 گراهڪن جون درخواستون ۾ ڏسجن ٿيون.",
  "lv_rules_ok": "✅ ضابطا ڪاپي ٿي ويا — Firebase → Realtime Database → Rules ۾ پيسٽ ڪري Publish دٻايو",
- "lv_rules_lock": "🔒 لاڪ ٿيل ضابطا ڪاپي ٿيا (رڳو توهان جو کاتو لکي سگهندو) — Firebase → Rules ۾ پيسٽ ڪري Publish دٻايو"
+ "lv_rules_lock": "🔒 لاڪ ٿيل ضابطا ڪاپي ٿيا (رڳو توهان جو کاتو لکي سگهندو) — Firebase → Rules ۾ پيسٽ ڪري Publish دٻايو",
+ "li_h": "🔐 لاگ اِن",
+ "li_sub": "پنهنجي موبائل نمبر ۽ PIN سان لاگ اِن ٿيو — توهان جو سمورو ڊيٽا پاڻمرادو واپس ايندو.",
+ "li_m": "📱 موبائل",
+ "li_g": "✉️ Gmail",
+ "li_pin": "لاگ اِن PIN",
+ "li_go": "🔐 لاگ اِن",
+ "li_forgot": "PIN وسري ويو؟",
+ "li_new": "➕ نئون کاتو",
+ "li_off": "کاتي کان سواءِ استعمال ڪريو (ڊيٽا رڳو هن فون ۾)",
+ "li_have": "اڳ ۾ ئي کاتو آهي؟ لاگ اِن",
+ "li_cfg": "⚙️ ڪلائوڊ سيٽ اپ (Firebase config)",
+ "li_busy": "لاگ اِن ٿي رهيو آهي، توهان جو ڊيٽا واپس اچي رهيو آهي…",
+ "li_bad": "⚠️ موبائل / Gmail يا PIN غلط",
+ "li_nouser": "⚠️ هن موبائل نمبر جو ڪو کاتو نه مليو — نمبر چيڪ ڪريو، يا Gmail سان لاگ اِن ٿيو",
+ "li_many": "⚠️ گهڻا ڀيرا غلط — ڪجهه منٽ ترسي ٻيهر ڪوشش ڪريو",
+ "li_net": "⚠️ انٽرنيٽ ناهي — ڪنيڪٽ ڪري ٻيهر ڪوشش ڪريو",
+ "li_auth_off": "⚠️ Firebase → Authentication ۾ Email/Password سائن اِن چالو ناهي",
+ "li_need_pin": "پنهنجو PIN لکو (گهٽ ۾ گهٽ 6 انگ)",
+ "li_restored": "✅ ڀلي ڪري آيا! {0} قرض کاتا واپس آيا",
+ "li_empty": "✅ لاگ اِن ٿي ويو. آٽو بيڪ اپ چالو آهي.",
+ "li_reset_sent": "📧 PIN ري سيٽ لنڪ {0} تي موڪليو ويو. ميل کوليو، اتي نئون 6 انگن جو PIN لکو، پوءِ هتي لاگ اِن ٿيو.",
+ "li_merge_h": "☁️ ڪلائوڊ ۾ ڊيٽا مليو",
+ "li_merge_t": "ڪلائوڊ: {0} قرض کاتا ({1} تي محفوظ). هن فون ۾: {2} قرض کاتا. ڇا ڪجي؟",
+ "li_use_cloud": "☁️ ڪلائوڊ ڊيٽا استعمال ڪريو (صلاح)",
+ "li_merge": "📱 هن فون جو ڊيٽا رکو + ڪلائوڊ جا کاتا ملايو",
+ "ag_pin1": "🔑 لاگ اِن PIN (6 انگ) *",
+ "ag_pin2": "PIN ٻيهر *",
+ "ag_pin_note": "موبائل نمبر + هي PIN ڪنهن به فون تي توهان جو ڊيٽا کولين ٿا. سڀ ڪجهه پاڻمرادو بيڪ اپ ٿئي ٿو.",
+ "ag_pin_bad": "PIN 6–12 انگن جو هجي ۽ ٻئي هڪجهڙا هجن",
+ "ag_pin_weak": "هي PIN آسانيءَ سان اندازو لڳائي سگهجي ٿو (جهڙوڪ 123456 / 000000) — ٻيو چونڊيو",
+ "ag_acc_exists": "هن Gmail جو کاتو اڳ ۾ ئي آهي — انهيءَ سان لاگ اِن ٿيو (PIN وسري ويو؟ Gmail سان ري سيٽ)",
+ "ag_acc_ok": "☁️ کاتو ٺهي ويو — آٽو بيڪ اپ چالو",
+ "cl_h": "☁️ کاتو · آٽو بيڪ اپ · لائيو سنڪ",
+ "cl_acc": "👤 کاتو",
+ "cl_bk": "☁️ آٽو بيڪ اپ",
+ "cl_bk_ok": "✅ محفوظ ٿيو {0}",
+ "cl_bk_wait": "⏳ محفوظ ٿي رهيو آهي…",
+ "cl_bk_pend": "🟠 {0} تبديليون — انٽرنيٽ ايندي ئي اپ لوڊ",
+ "cl_bk_off": "⚪ بند",
+ "cl_rules": "⚠️ هڪ ڀيري جو ڪم: آٽو بيڪ اپ لاءِ Firebase rules اپڊيٽ ڪرڻا آهن. “📋 Copy Firebase rules” دٻايو → Firebase → Realtime Database → Rules → پيسٽ → Publish.",
+ "cl_fix": "⚠️ آٽو بيڪ اپ رڪيل آهي — Firebase rules هڪ ڀيرو اپڊيٽ ڪرڻا آهن",
+ "cl_setpin_box": "🔑 6 انگن جو لاگ اِن PIN رکو — پوءِ ڪنهن به فون تي موبائل نمبر سان لاگ اِن ٿي سگهو ٿا.",
+ "cl_setpin": "🔑 لاگ اِن PIN رکو",
+ "cl_chpin": "🔑 PIN بدلايو",
+ "cl_oldpw": "موجوده سنڪ پاسورڊ",
+ "cl_oldpin": "موجوده PIN",
+ "cl_newpin": "نئون PIN (6 انگ)",
+ "cl_pin_save": "✅ PIN محفوظ ڪريو",
+ "cl_pin_ok": "✅ PIN محفوظ ٿيو. ڪنهن به فون تي {0} + PIN سان لاگ اِن ٿيو.",
+ "cl_logout": "🚪 لاگ آئوٽ",
+ "cl_logout_cf": "هن فون مان لاگ آئوٽ ڪجي؟\n\nتوهان جو ڊيٽا ڪلائوڊ ۾ محفوظ آهي. هن فون جي ڪاپي هٽائي ويندي — ڪڏهن به موبائل + PIN سان ٻيهر لاگ اِن ٿيو.",
+ "cl_logout_pend": "{0} تبديليون اڃا اپ لوڊ نه ٿيون آهن (انٽرنيٽ ناهي). پوءِ به لاگ آئوٽ؟ اهي تبديليون ضايع ٿي وينديون.",
+ "cl_login_btn": "🔐 لاگ اِن / نئون کاتو",
+ "cl_relogin": "🔑 آٽو بيڪ اپ جاري رکڻ لاءِ ٻيهر لاگ اِن ٿيو",
+ "cl_note": "☁️ آٽو بيڪ اپ چالو: هر تبديلي ڪجهه سيڪنڊن ۾ توهان جي پنهنجي Firebase (Google) کاتي ۾ محفوظ ٿئي ٿي. نئين فون تي موبائل + PIN سان لاگ اِن ٿيو، سڀ ڪجهه واپس ايندو.",
+ "cl_manual": "📁 دستي بيڪ اپ فائل (اختياري)",
+ "lv_adv": "⚙️ ايڊوانسڊ: Firebase پروجيڪٽ / سنڪ پاسورڊ",
+ "pb_due_today": "اڄ ڏيڻو آهي",
+ "pburl_db": "⚠️ هي توهان جو Firebase ڊيٽابيس پتو آهي، ايپ جي ويب سائيٽ نه. هن کي خالي ڇڏيو، يا پنهنجو GitHub Pages / Vercel پتو وجهو.",
+ "pburl_move2": "💡 هن ئي پتي تان ايپ کوليو ۽ موبائل + PIN سان لاگ اِن ٿيو — توهان جو ڊيٽا پاڻمرادو ايندو.",
+ "ci_install": "📲 پاس بڪ ايپ انسٽال ڪريو",
+ "ci_ios": "📲 هن پاس بڪ کي ايپ وانگر رکو: Share ⬆️ → “Add to Home Screen” دٻايو",
+ "ci_and": "📲 هن پاس بڪ کي ايپ وانگر رکو: Chrome مينيو ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ انسٽال ٿي وئي — هوم اسڪرين تي “Passbook” کوليو",
+ "ci_mine": "📒 منهنجا پاس بڪ",
+ "ci_none": "پنهنجي پاس بڪ جو QR اسڪين ڪريو يا WhatsApp وارو لنڪ هڪ ڀيرو کوليو — اهو هتي پاڻمرادو ڏسبو."
 };
 I18N.ks = {
  "hdr_sub": "روزانہ تہٕ ہفتہٕ وار فائنانس وصولی",
@@ -8201,7 +9507,73 @@ I18N.ks = {
  "lv_reset": "🔄 نوو لنک (پرانہٕ گژھہِ بند)",
  "lv_note": "🔴 لائیو لنک: باقی رقم، واجب الادا تہٕ تاریخ چھِ پانہٕ اپڈیٹ گژھان۔ گراہکن ہٕنٛد درخواست چھِ 📥 گراہکن ہٕنٛد درخواست منز ظٲہِر گژھان۔",
  "lv_rules_ok": "✅ رولز کاپی گیہ — Firebase → Realtime Database → Rules منز پیسٹ کٔرِتھ Publish دبٲیو",
- "lv_rules_lock": "🔒 لاک کرنہٕ آمتۍ رولز کاپی گیہ (صرف تُہنٛد اکاؤنٹ ہیکہِ لیکھتھ) — Firebase → Rules منز پیسٹ کٔرِتھ Publish دبٲیو"
+ "lv_rules_lock": "🔒 لاک کرنہٕ آمتۍ رولز کاپی گیہ (صرف تُہنٛد اکاؤنٹ ہیکہِ لیکھتھ) — Firebase → Rules منز پیسٹ کٔرِتھ Publish دبٲیو",
+ "li_h": "🔐 لاگ اِن",
+ "li_sub": "پنُن موبائل نمبر تہٕ PIN استعمال کٔرِتھ لاگ اِن کٔرِو — توٚہیہٕ سُند سورُے ڈیٹا یِیہِ پانہٕ واپس۔",
+ "li_m": "📱 موبائل",
+ "li_g": "✉️ Gmail",
+ "li_pin": "لاگ اِن PIN",
+ "li_go": "🔐 لاگ اِن",
+ "li_forgot": "PIN مَشِتھ گوو؟",
+ "li_new": "➕ نوٚو کھاتہٕ",
+ "li_off": "کھاتس روٚس استعمال کٔرِو (ڈیٹا صِرف یتھ فونس منٛز)",
+ "li_have": "گۄڈٕے کھاتہٕ چھُو؟ لاگ اِن",
+ "li_cfg": "⚙️ کلاوڈ سیٹ اپ (Firebase config)",
+ "li_busy": "لاگ اِن گژھان، توٚہیہٕ سُند ڈیٹا واپس انان…",
+ "li_bad": "⚠️ موبائل / Gmail یا PIN غلط",
+ "li_nouser": "⚠️ یتھ موبائل نمبرس کانٛہہ کھاتہٕ مۆلُن نہٕ — نمبر وُچھِو، یا Gmail سٟتۍ لاگ اِن کٔرِو",
+ "li_many": "⚠️ واریاہ لٹہٕ غلط — کیٚنٛہہ مِنَٹ رُکِتھ دوبارٕ کوشِش کٔرِو",
+ "li_net": "⚠️ انٹرنیٹ چھُنہٕ — کنیکٹ کٔرِتھ دوبارٕ کوشِش کٔرِو",
+ "li_auth_off": "⚠️ Firebase → Authentication منٛز چھُنہٕ Email/Password سائن اِن آن",
+ "li_need_pin": "پنُن PIN لیکھِو (کم از کم 6 ہِندسہٕ)",
+ "li_restored": "✅ دوبارٕ خوش آمدید! {0} قرض کھاتہٕ آیہِ واپس",
+ "li_empty": "✅ لاگ اِن گوو۔ آٹو بیک اپ چھُ آن۔",
+ "li_reset_sent": "📧 PIN ری سیٹ لِنک سوٗزُن {0} پیٹھ۔ میل کھولِو، تَتہِ لیکھِو نوٚو 6 ہِندسن ہُند PIN، پَتہٕ کٔرِو یتہِ لاگ اِن۔",
+ "li_merge_h": "☁️ کلاوڈس منٛز مۆلُن ڈیٹا",
+ "li_merge_t": "کلاوڈ: {0} قرض کھاتہٕ ({1} محفوظ)۔ یتھ فونس منٛز: {2} قرض کھاتہٕ۔ کیاہ کرٛو؟",
+ "li_use_cloud": "☁️ کلاوڈ ڈیٹا استعمال کٔرِو (صلاح)",
+ "li_merge": "📱 یتھ فونٕچ ڈیٹا تھٲوِو + کلاوڈٕکۍ کھاتہٕ جوڑِو",
+ "ag_pin1": "🔑 لاگ اِن PIN (6 ہِندسہٕ) *",
+ "ag_pin2": "PIN دوبارٕ *",
+ "ag_pin_note": "موبائل نمبر + یہِ PIN کھولان توٚہیہٕ سُند ڈیٹا کُنہِ تہِ فونس پیٹھ۔ سورُے گژھان پانہٕ بیک اپ۔",
+ "ag_pin_bad": "PIN گژھہِ 6–12 ہِندسن ہُند آسُن تہٕ زٕنوے گژھن اکھ ہیوٚو آسٕنۍ",
+ "ag_pin_weak": "یہِ PIN ہیٚکہِ آسٲنی سان اندازٕ لگاونہٕ (یِتھہٕ 123456 / 000000) — بیٚیہ ژارِو",
+ "ag_acc_exists": "یتھ Gmail ہُند کھاتہٕ چھُ گۄڈٕے — تمِے سٟتۍ کٔرِو لاگ اِن (PIN مَشِتھ گوو؟ Gmail سٟتۍ ری سیٹ)",
+ "ag_acc_ok": "☁️ کھاتہٕ بنیوو — آٹو بیک اپ آن",
+ "cl_h": "☁️ کھاتہٕ · آٹو بیک اپ · لائیو سنک",
+ "cl_acc": "👤 کھاتہٕ",
+ "cl_bk": "☁️ آٹو بیک اپ",
+ "cl_bk_ok": "✅ محفوظ گوو {0}",
+ "cl_bk_wait": "⏳ محفوظ گژھان…",
+ "cl_bk_pend": "🟠 {0} تبدیلی — انٹرنیٹ یِتھٕے اپ لوڈ",
+ "cl_bk_off": "⚪ بند",
+ "cl_rules": "⚠️ اکہِ لٹہٕ کرُن: آٹو بیک اپ خٲطرٕ چھِ Firebase rules اپ ڈیٹ کرٕنۍ۔ “📋 Copy Firebase rules” دبٲوِو → Firebase → Realtime Database → Rules → پیسٹ → Publish۔",
+ "cl_fix": "⚠️ آٹو بیک اپ چھُ رۄکمُت — Firebase rules چھِ اکہِ لٹہٕ اپ ڈیٹ کرٕنۍ",
+ "cl_setpin_box": "🔑 6 ہِندسن ہُند لاگ اِن PIN بناوِو — پَتہٕ ہیٚکِو کُنہِ تہِ فونس پیٹھ موبائل نمبرٕ سٟتۍ لاگ اِن کٔرِتھ۔",
+ "cl_setpin": "🔑 لاگ اِن PIN بناوِو",
+ "cl_chpin": "🔑 PIN بدلٲوِو",
+ "cl_oldpw": "موجودٕ سنک پاس ورڈ",
+ "cl_oldpin": "موجودٕ PIN",
+ "cl_newpin": "نوٚو PIN (6 ہِندسہٕ)",
+ "cl_pin_save": "✅ PIN محفوظ کٔرِو",
+ "cl_pin_ok": "✅ PIN گوو محفوظ۔ کُنہِ تہِ فونس پیٹھ کٔرِو {0} + PIN سٟتۍ لاگ اِن۔",
+ "cl_logout": "🚪 لاگ آؤٹ",
+ "cl_logout_cf": "یتھ فونہٕ پیٹھٕ لاگ آؤٹ کرُن؟\n\nتوٚہیہٕ سُند ڈیٹا چھُ کلاوڈس منٛز محفوظ۔ یتھ فونٕچ کاپی کڑنہٕ یِیہِ — کُنہِ تہِ وَقتہٕ کٔرِو موبائل + PIN سٟتۍ دوبارٕ لاگ اِن۔",
+ "cl_logout_pend": "{0} تبدیلی چھِ نہٕ وُنہِ اپ لوڈ گٔمٕژ (انٹرنیٹ چھُنہٕ)۔ تیٚلہِ تہِ لاگ آؤٹ؟ تِم تبدیلی گژھن ضایع۔",
+ "cl_login_btn": "🔐 لاگ اِن / نوٚو کھاتہٕ",
+ "cl_relogin": "🔑 آٹو بیک اپ جٲری تھاونہٕ خٲطرٕ کٔرِو دوبارٕ لاگ اِن",
+ "cl_note": "☁️ آٹو بیک اپ آن: پرٛتھ تبدیلی گژھان کیٚنٛہہ سیکنڈن منٛز توٚہیہٕ سٕندِس پننِس Firebase (Google) کھاتس منٛز محفوظ۔ نٔوِس فونس پیٹھ کٔرِو موبائل + PIN سٟتۍ لاگ اِن، سورُے یِیہِ واپس۔",
+ "cl_manual": "📁 دستی بیک اپ فائل (اختیٲری)",
+ "lv_adv": "⚙️ ایڈوانسڈ: Firebase پروجیکٹ / سنک پاس ورڈ",
+ "pb_due_today": "اَز دِنُن",
+ "pburl_db": "⚠️ یہِ چھُ توٚہیہٕ سُند Firebase ڈیٹا بیس پتہٕ، ایپٕچ ویب سائٹ نہٕ۔ یہِ تھٲوِو خٲلی، یا لیکھِو پنُن GitHub Pages / Vercel پتہٕ۔",
+ "pburl_move2": "💡 یتھ پتس پیٹھٕ کھولِو ایپ تہٕ کٔرِو موبائل + PIN سٟتۍ لاگ اِن — توٚہیہٕ سُند ڈیٹا یِیہِ پانہٕ۔",
+ "ci_install": "📲 پاس بُک ایپ انسٹال کٔرِو",
+ "ci_ios": "📲 یہِ پاس بُک ایپ ہِشہٕ تھاونہٕ خٲطرٕ: Share ⬆️ → “Add to Home Screen” دبٲوِو",
+ "ci_and": "📲 یہِ پاس بُک ایپ ہِشہٕ تھاونہٕ خٲطرٕ: Chrome مینیو ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ انسٹال گیہِ — ہوم اسکرینس پیٹھ کھولِو “Passbook”",
+ "ci_mine": "📒 میٲنۍ پاس بُک",
+ "ci_none": "پنٕنۍ پاس بُکٕچ QR اسکین کٔرِو یا WhatsApp وول لِنک اکہِ لٹہٕ کھولِو — یہِ یِیہِ یتہِ پانہٕ نظرِ۔"
 };
 I18N.mni = {
  "hdr_sub": "নুমিৎ খুদিংগী অমসুং হপ্তা খুদিংগী ফাইনান্স শেল খোমজিনবা",
@@ -8597,7 +9969,73 @@ I18N.mni = {
  "lv_reset": "🔄 অনৌবা লিংক (মমাংবা লোইগনি)",
  "lv_note": "🔴 লাইভ লিংক: লেফম শেল, পীবা অমসুং খঙদবা পুম্নমক ঙমখৈনা অপডেট ওইরি। গ্রাহকগী ঙাইরিবা 📥 গ্রাহকগী ঙাইরিবাদা উবা ফংই।",
  "lv_rules_ok": "✅ নিয়ম কপি তৌরে — Firebase → Realtime Database → Rules দা পেস্ট তৌনা Publish তৌবিযু",
- "lv_rules_lock": "🔒 লক তৌবা নিয়ম কপি তৌরে (নহাকপা একাউন্ট অমলগা ইনা ঙমই) — Firebase → Rules দা পেস্ট তৌনা Publish তৌবিযু"
+ "lv_rules_lock": "🔒 লক তৌবা নিয়ম কপি তৌরে (নহাকপা একাউন্ট অমলগা ইনা ঙমই) — Firebase → Rules দা পেস্ট তৌনা Publish তৌবিযু",
+ "li_h": "🔐 লগইন",
+ "li_sub": "নহাক্কী মোবাইল নম্বর অমসুং PIN শিজিন্নদুনা লগইন তৌবিযু — নহাক্কী ডেটা পুম্নমক মথন্তা হল্লকগনি।",
+ "li_m": "📱 মোবাইল",
+ "li_g": "✉️ Gmail",
+ "li_pin": "লগইন PIN",
+ "li_go": "🔐 লগইন",
+ "li_forgot": "PIN কাউখ্রবরা?",
+ "li_new": "➕ অনৌবা একাউন্ট",
+ "li_off": "একাউন্ট য়াওদনা শিজিন্নবিযু (ডেটা ফোন অসিদা খক্তা)",
+ "li_have": "হান্নদগী একাউন্ট লৈরে? লগইন",
+ "li_cfg": "⚙️ ক্লাউদ সেতঅপ (Firebase config)",
+ "li_busy": "লগইন তৌরি, নহাক্কী ডেটা হল্লক্লি…",
+ "li_bad": "⚠️ মোবাইল / Gmail নত্রগা PIN অরানবা",
+ "li_nouser": "⚠️ মোবাইল নম্বর অসিগী একাউন্ট ফংদ্রে — নম্বর য়েংবিযু, নত্রগা Gmail না লগইন তৌবিযু",
+ "li_many": "⚠️ মতম কয়া অরানবা — মিনিট খরা ঙাইরম্লগা অমুক হন্না হোৎনবিযু",
+ "li_net": "⚠️ ইন্তরনেট লৈতে — কনেক্ত তৌরগা অমুক হন্না হোৎনবিযু",
+ "li_auth_off": "⚠️ Firebase → Authentication দা Email/Password সাইন-ইন অন তৌদ্রি",
+ "li_need_pin": "নহাক্কী PIN ইবিযু (অচৌবদগী 6 মশিং)",
+ "li_restored": "✅ অমুক হন্না তরাম্না ওকচরি! লোন একাউন্ট {0} হল্লকখ্রে",
+ "li_empty": "✅ লগইন তৌরে। অতো বেকঅপ অন তৌরি।",
+ "li_reset_sent": "📧 PIN রিসেত লিংক {0} দা থাখ্রে। মেল হাংদোকপিযু, মফম অদুদা অনৌবা 6 মশিংগী PIN ইবিযু, মতুংদা মফম অসিদা লগইন তৌবিযু।",
+ "li_merge_h": "☁️ ক্লাউদতা ডেটা ফংখ্রে",
+ "li_merge_t": "ক্লাউদ: লোন একাউন্ট {0} ({1} দা সেভ)। ফোন অসিদা: লোন একাউন্ট {2}। করি তৌগদগে?",
+ "li_use_cloud": "☁️ ক্লাউদ ডেটা শিজিন্নবিযু (পাউতাক)",
+ "li_merge": "📱 ফোন অসিগী ডেটা থম্বিযু + ক্লাউদকী একাউন্টশিং হাপচিল্লু",
+ "ag_pin1": "🔑 লগইন PIN (6 মশিং) *",
+ "ag_pin2": "PIN অমুক হন্না *",
+ "ag_pin_note": "মোবাইল নম্বর + PIN অসিনা করিগুম্বা ফোন অমদা নহাক্কী ডেটা হাংদোকই। পুম্নমক মথন্তা বেকঅপ তৌই।",
+ "ag_pin_bad": "PIN 6–12 মশিং ওইগদবনি অমসুং অনিমক মান্নগদবনি",
+ "ag_pin_weak": "PIN অসি লায়না খনবা ঙম্মি (123456 / 000000 মদুগুম্বা) — অতোপ্পা খনবিযু",
+ "ag_acc_exists": "Gmail অসিগী একাউন্ট হান্নদগী লৈরে — মদুনা লগইন তৌবিযু (PIN কাউখ্রবরা? Gmail না রিসেত)",
+ "ag_acc_ok": "☁️ একাউন্ট শেমখ্রে — অতো বেকঅপ অন",
+ "cl_h": "☁️ একাউন্ট · অতো বেকঅপ · লাইভ সিংক",
+ "cl_acc": "👤 একাউন্ট",
+ "cl_bk": "☁️ অতো বেকঅপ",
+ "cl_bk_ok": "✅ সেভ তৌরে {0}",
+ "cl_bk_wait": "⏳ সেভ তৌরি…",
+ "cl_bk_pend": "🟠 অহোংবা {0} — ইন্তরনেট লাক্পা মতমদা অপলোদ",
+ "cl_bk_off": "⚪ অফ",
+ "cl_rules": "⚠️ অমুক্তং তৌগদবা: অতো বেকঅপকীদমক Firebase rules অপদেত তৌগদবনি। “📋 Copy Firebase rules” নম্বিযু → Firebase → Realtime Database → Rules → পেস্ত → Publish।",
+ "cl_fix": "⚠️ অতো বেকঅপ লেপ্লি — Firebase rules অমুক্তং অপদেত তৌগদবনি",
+ "cl_setpin_box": "🔑 6 মশিংগী লগইন PIN থম্বিযু — মতুংদা করিগুম্বা ফোন অমদা মোবাইল নম্বরনা লগইন তৌবা ঙমগনি।",
+ "cl_setpin": "🔑 লগইন PIN থম্বিযু",
+ "cl_chpin": "🔑 PIN হোংদোকপিযু",
+ "cl_oldpw": "হৌজিক্কী সিংক পাসওয়ার্দ",
+ "cl_oldpin": "হৌজিক্কী PIN",
+ "cl_newpin": "অনৌবা PIN (6 মশিং)",
+ "cl_pin_save": "✅ PIN সেভ তৌবিযু",
+ "cl_pin_ok": "✅ PIN সেভ তৌরে। করিগুম্বা ফোন অমদা {0} + PIN না লগইন তৌবিযু।",
+ "cl_logout": "🚪 লগআউত",
+ "cl_logout_cf": "ফোন অসিদগী লগআউত তৌগদ্রা?\n\nনহাক্কী ডেটা ক্লাউদতা ঙাক্তনা লৈ। ফোন অসিগী কপি লৌথোকখিগনি — মোবাইল + PIN না মতম পুম্নমক্তা অমুক হন্না লগইন তৌবিযু।",
+ "cl_logout_pend": "অহোংবা {0} হৌজিক ফাওবা অপলোদ তৌদ্রি (ইন্তরনেট লৈতে)। মরম অদুনা লগআউত তৌগদ্রা? অহোংবা অদুশিং মাংগনি।",
+ "cl_login_btn": "🔐 লগইন / অনৌবা একাউন্ট",
+ "cl_relogin": "🔑 অতো বেকঅপ চৎথনবা অমুক হন্না লগইন তৌবিযু",
+ "cl_note": "☁️ অতো বেকঅপ অন: অহোংবা খুদিংমক সেকেন্দ খরাগী মনুংদা নহাক্কী মশাগী Firebase (Google) একাউন্টতা সেভ তৌই। অনৌবা ফোনদা মোবাইল + PIN না লগইন তৌরবদি পুম্নমক হল্লকই।",
+ "cl_manual": "📁 মেনুএল বেকঅপ ফাইল (পাম্লবদি)",
+ "lv_adv": "⚙️ এদভান্সদ: Firebase প্রোজেক্ত / সিংক পাসওয়ার্দ",
+ "pb_due_today": "ঙসি পীগদবা",
+ "pburl_db": "⚠️ মসি নহাক্কী Firebase ডেটাবেস এদ্রেস নি, এপকী ৱেবসাইত নত্তে। মসি অহাংবা থম্বিযু, নত্রগা নহাক্কী GitHub Pages / Vercel এদ্রেস ইবিযু।",
+ "pburl_move2": "💡 এদ্রেস অসিদগী এপ হাংদোকপিযু অমসুং মোবাইল + PIN না লগইন তৌবিযু — নহাক্কী ডেটা মথন্তা লাক্কনি।",
+ "ci_install": "📲 পাসবুক এপ ইনস্তল তৌবিযু",
+ "ci_ios": "📲 পাসবুক অসি এপ মদুগুম্না থম্নবা: Share ⬆️ → “Add to Home Screen” নম্বিযু",
+ "ci_and": "📲 পাসবুক অসি এপ মদুগুম্না থম্নবা: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ইনস্তল তৌরে — হোম স্ক্রিনদা “Passbook” হাংদোকপিযু",
+ "ci_mine": "📒 এইগী পাসবুকশিং",
+ "ci_none": "নহাক্কী পাসবুককী QR স্কেন তৌবিযু নত্রগা WhatsApp কী লিংক অমুক্তং হাংদোকপিযু — মসি মফম অসিদা মথন্তা উৎকনি।"
 };
 I18N.sat = {
  "hdr_sub": "ᱢᱟᱦᱟᱸ ᱢᱟᱦᱟᱸ ᱟᱨ ᱦᱟᱯᱛᱟ ᱦᱟᱯᱛᱟ ᱯᱷᱟᱭᱤᱱᱟᱱᱥ ᱛᱟᱠᱟ ᱡᱟᱣᱨᱟ",
@@ -8993,7 +10431,73 @@ I18N.sat = {
  "lv_reset": "🔄 ᱱᱟᱣᱟ ᱞᱤᱝᱠ (ᱥᱟᱱᱟᱢ ᱵᱚᱸᱫᱚ ᱠᱟᱛᱮ)",
  "lv_note": "🔴 ᱞᱟᱭᱤᱵ ᱞᱤᱝᱠ: ᱵᱟᱠᱤ ᱛᱟᱠᱟ, ᱵᱚᱠᱮᱭᱟ ᱟᱨ ᱤᱛᱤᱦᱟᱥ ᱟᱡ ᱛᱮ ᱱᱟᱣᱟ ᱦᱚᱪᱚ ᱟ᱾ ᱜᱨᱟᱦᱚᱠ ᱵᱟᱰᱟᱭ 📥 ᱜᱨᱟᱦᱚᱠ ᱵᱟᱰᱟᱭ ᱨᱮ ᱧᱮᱞᱚᱜ ᱟ᱾",
  "lv_rules_ok": "✅ ᱱᱤᱭᱚᱢ ᱠᱚᱯᱤ ᱮᱱᱟ — Firebase → Realtime Database → Rules ᱨᱮ ᱯᱮᱥᱴ ᱠᱟᱛᱮ Publish ᱢᱮ",
- "lv_rules_lock": "🔒 ᱞᱚᱠ ᱠᱟᱱᱟ ᱱᱤᱭᱚᱢ ᱠᱚᱯᱤ ᱮᱱᱟ (ᱟᱢᱟᱜ ᱠᱷᱟᱛᱟ ᱜᱮ ᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ) — Firebase → Rules ᱨᱮ ᱯᱮᱥᱴ ᱠᱟᱛᱮ Publish ᱢᱮ"
+ "lv_rules_lock": "🔒 ᱞᱚᱠ ᱠᱟᱱᱟ ᱱᱤᱭᱚᱢ ᱠᱚᱯᱤ ᱮᱱᱟ (ᱟᱢᱟᱜ ᱠᱷᱟᱛᱟ ᱜᱮ ᱚᱞ ᱫᱟᱲᱮᱭᱟᱜ) — Firebase → Rules ᱨᱮ ᱯᱮᱥᱴ ᱠᱟᱛᱮ Publish ᱢᱮ",
+ "li_h": "🔐 ᱞᱚᱜᱤᱱ",
+ "li_sub": "ᱟᱢᱟᱜ ᱢᱚᱵᱟᱭᱤᱞ ᱱᱚᱢᱵᱚᱨ ᱟᱨ PIN ᱛᱮ ᱞᱚᱜᱤᱱ ᱢᱮ — ᱟᱢᱟᱜ ᱥᱟᱱᱟᱢ ᱰᱟᱴᱟ ᱟᱡ ᱛᱮᱜᱮ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜᱼᱟ᱾",
+ "li_m": "📱 ᱢᱚᱵᱟᱭᱤᱞ",
+ "li_g": "✉️ Gmail",
+ "li_pin": "ᱞᱚᱜᱤᱱ PIN",
+ "li_go": "🔐 ᱞᱚᱜᱤᱱ",
+ "li_forgot": "PIN ᱦᱤᱲᱤᱧ ᱮᱱᱟ?",
+ "li_new": "➕ ᱱᱟᱶᱟ ᱮᱠᱟᱣᱩᱱᱴ",
+ "li_off": "ᱮᱠᱟᱣᱩᱱᱴ ᱵᱮᱜᱚᱨ ᱵᱮᱵᱷᱟᱨ ᱢᱮ (ᱰᱟᱴᱟ ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱨᱮᱜᱮ)",
+ "li_have": "ᱢᱟᱲᱟᱝ ᱠᱷᱚᱱ ᱮᱠᱟᱣᱩᱱᱴ ᱢᱮᱱᱟᱜ ᱛᱟᱢᱟ? ᱞᱚᱜᱤᱱ",
+ "li_cfg": "⚙️ ᱠᱞᱟᱣᱩᱰ ᱥᱮᱴᱚᱯ (Firebase config)",
+ "li_busy": "ᱞᱚᱜᱤᱱ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ, ᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱨᱩᱣᱟᱹᱲ ᱟᱹᱜᱩ ᱠᱟᱱᱟ…",
+ "li_bad": "⚠️ ᱢᱚᱵᱟᱭᱤᱞ / Gmail ᱟᱨᱵᱟᱝ PIN ᱵᱷᱩᱞ",
+ "li_nouser": "⚠️ ᱱᱚᱶᱟ ᱢᱚᱵᱟᱭᱤᱞ ᱱᱚᱢᱵᱚᱨ ᱨᱮᱭᱟᱜ ᱮᱠᱟᱣᱩᱱᱴ ᱵᱟᱝ ᱧᱟᱢ ᱞᱮᱱᱟ — ᱱᱚᱢᱵᱚᱨ ᱧᱮᱞ ᱢᱮ, ᱟᱨᱵᱟᱝ Gmail ᱛᱮ ᱞᱚᱜᱤᱱ ᱢᱮ",
+ "li_many": "⚠️ ᱟᱭᱢᱟ ᱥᱮᱫ ᱵᱷᱩᱞ — ᱛᱤᱱᱟᱹᱜ ᱢᱤᱱᱤᱴ ᱛᱟᱹᱝᱜᱤ ᱠᱟᱛᱮ ᱫᱚᱦᱲᱟ ᱪᱮᱥᱴᱟᱭ ᱢᱮ",
+ "li_net": "⚠️ ᱤᱱᱴᱟᱨᱱᱮᱴ ᱵᱟᱹᱱᱩᱜᱼᱟ — ᱡᱚᱲᱟᱣ ᱠᱟᱛᱮ ᱫᱚᱦᱲᱟ ᱪᱮᱥᱴᱟᱭ ᱢᱮ",
+ "li_auth_off": "⚠️ Firebase → Authentication ᱨᱮ Email/Password ᱥᱟᱭᱤᱱ-ᱤᱱ ᱚᱱ ᱵᱟᱝ ᱦᱩᱭ ᱟᱠᱟᱱᱟ",
+ "li_need_pin": "ᱟᱢᱟᱜ PIN ᱮᱢ ᱢᱮ (ᱟᱞᱜᱟ ᱠᱷᱚᱱ 6 ᱮᱞ)",
+ "li_restored": "✅ ᱫᱚᱦᱲᱟ ᱥᱟᱹᱜᱩᱱ ᱫᱟᱨᱟᱢ! {0} ᱨᱤᱱ ᱮᱠᱟᱣᱩᱱᱴ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜ ᱮᱱᱟ",
+ "li_empty": "✅ ᱞᱚᱜᱤᱱ ᱮᱱᱟ᱾ ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱚᱱ ᱢᱮᱱᱟᱜᱼᱟ᱾",
+ "li_reset_sent": "📧 PIN ᱨᱤᱥᱮᱴ ᱞᱤᱝᱠ {0} ᱛᱮ ᱠᱚᱞ ᱮᱱᱟ᱾ ᱢᱮᱞ ᱡᱷᱤᱡᱽ ᱢᱮ, ᱚᱱᱰᱮ ᱱᱟᱶᱟ 6 ᱮᱞ PIN ᱚᱞ ᱢᱮ, ᱛᱟᱭᱚᱢ ᱱᱚᱸᱰᱮ ᱞᱚᱜᱤᱱ ᱢᱮ᱾",
+ "li_merge_h": "☁️ ᱠᱞᱟᱣᱩᱰ ᱨᱮ ᱰᱟᱴᱟ ᱧᱟᱢ ᱮᱱᱟ",
+ "li_merge_t": "ᱠᱞᱟᱣᱩᱰ: {0} ᱨᱤᱱ ᱮᱠᱟᱣᱩᱱᱴ ({1} ᱥᱮᱵᱷ)᱾ ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱨᱮ: {2} ᱨᱤᱱ ᱮᱠᱟᱣᱩᱱᱴ᱾ ᱪᱮᱫ ᱦᱩᱭᱩᱜ?",
+ "li_use_cloud": "☁️ ᱠᱞᱟᱣᱩᱰ ᱰᱟᱴᱟ ᱵᱮᱵᱷᱟᱨ ᱢᱮ (ᱥᱟᱞᱟᱦ)",
+ "li_merge": "📱 ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱨᱮᱭᱟᱜ ᱰᱟᱴᱟ ᱫᱚᱦᱚᱭ ᱢᱮ + ᱠᱞᱟᱣᱩᱰ ᱮᱠᱟᱣᱩᱱᱴ ᱥᱮᱞᱮᱫ ᱢᱮ",
+ "ag_pin1": "🔑 ᱞᱚᱜᱤᱱ PIN (6 ᱮᱞ) *",
+ "ag_pin2": "PIN ᱫᱚᱦᱲᱟ *",
+ "ag_pin_note": "ᱢᱚᱵᱟᱭᱤᱞ ᱱᱚᱢᱵᱚᱨ + ᱱᱚᱶᱟ PIN ᱡᱟᱦᱟᱸ ᱯᱷᱚᱱ ᱨᱮ ᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱡᱷᱤᱡᱽ ᱮᱫᱟ᱾ ᱥᱟᱱᱟᱢ ᱟᱡ ᱛᱮᱜᱮ ᱵᱮᱠᱟᱯ ᱦᱩᱭᱩᱜᱼᱟ᱾",
+ "ag_pin_bad": "PIN 6–12 ᱮᱞ ᱦᱩᱭᱩᱜ ᱞᱟᱹᱠᱛᱤ ᱟᱨ ᱵᱟᱨᱭᱟᱜ ᱢᱤᱫ ᱞᱮᱠᱟ ᱦᱩᱭᱩᱜ ᱞᱟᱹᱠᱛᱤ",
+ "ag_pin_weak": "ᱱᱚᱶᱟ PIN ᱟᱞᱜᱟ ᱛᱮ ᱟᱸᱫᱟᱡᱽ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ (ᱡᱮᱞᱮᱠᱟ 123456 / 000000) — ᱮᱴᱟᱜ ᱵᱟᱪᱷᱟᱣ ᱢᱮ",
+ "ag_acc_exists": "ᱱᱚᱶᱟ Gmail ᱨᱮᱭᱟᱜ ᱮᱠᱟᱣᱩᱱᱴ ᱢᱟᱲᱟᱝ ᱠᱷᱚᱱ ᱢᱮᱱᱟᱜᱼᱟ — ᱚᱱᱟ ᱛᱮᱜᱮ ᱞᱚᱜᱤᱱ ᱢᱮ (PIN ᱦᱤᱲᱤᱧ ᱮᱱᱟ? Gmail ᱛᱮ ᱨᱤᱥᱮᱴ)",
+ "ag_acc_ok": "☁️ ᱮᱠᱟᱣᱩᱱᱴ ᱵᱮᱱᱟᱣ ᱮᱱᱟ — ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱚᱱ",
+ "cl_h": "☁️ ᱮᱠᱟᱣᱩᱱᱴ · ᱚᱴᱚ ᱵᱮᱠᱟᱯ · ᱞᱟᱭᱤᱵ ᱥᱤᱝᱠ",
+ "cl_acc": "👤 ᱮᱠᱟᱣᱩᱱᱴ",
+ "cl_bk": "☁️ ᱚᱴᱚ ᱵᱮᱠᱟᱯ",
+ "cl_bk_ok": "✅ ᱥᱮᱵᱷ ᱮᱱᱟ {0}",
+ "cl_bk_wait": "⏳ ᱥᱮᱵᱷ ᱦᱩᱭᱩᱜ ᱠᱟᱱᱟ…",
+ "cl_bk_pend": "🟠 {0} ᱵᱚᱫᱚᱞ — ᱤᱱᱴᱟᱨᱱᱮᱴ ᱦᱮᱡ ᱠᱷᱟᱱ ᱟᱯᱞᱚᱰ",
+ "cl_bk_off": "⚪ ᱵᱚᱱᱫᱚ",
+ "cl_rules": "⚠️ ᱢᱤᱫ ᱥᱮᱫ ᱠᱟᱹᱢᱤ: ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱞᱟᱹᱜᱤᱫ Firebase rules ᱟᱯᱰᱮᱴ ᱞᱟᱹᱠᱛᱤᱭᱟ᱾ “📋 Copy Firebase rules” ᱚᱛᱚᱭ ᱢᱮ → Firebase → Realtime Database → Rules → ᱯᱮᱥᱴ → Publish᱾",
+ "cl_fix": "⚠️ ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱛᱟᱹᱝᱜᱤ ᱢᱮᱱᱟᱜᱼᱟ — Firebase rules ᱢᱤᱫ ᱥᱮᱫ ᱟᱯᱰᱮᱴ ᱞᱟᱹᱠᱛᱤᱭᱟ",
+ "cl_setpin_box": "🔑 6 ᱮᱞ ᱞᱚᱜᱤᱱ PIN ᱫᱚᱦᱚᱭ ᱢᱮ — ᱛᱟᱭᱚᱢ ᱡᱟᱦᱟᱸ ᱯᱷᱚᱱ ᱨᱮ ᱢᱚᱵᱟᱭᱤᱞ ᱱᱚᱢᱵᱚᱨ ᱛᱮ ᱞᱚᱜᱤᱱ ᱫᱟᱲᱮᱭᱟᱜᱼᱟ᱾",
+ "cl_setpin": "🔑 ᱞᱚᱜᱤᱱ PIN ᱫᱚᱦᱚᱭ ᱢᱮ",
+ "cl_chpin": "🔑 PIN ᱵᱚᱫᱚᱞ ᱢᱮ",
+ "cl_oldpw": "ᱱᱤᱛᱚᱜᱟᱜ ᱥᱤᱝᱠ ᱯᱟᱥᱣᱟᱨᱰ",
+ "cl_oldpin": "ᱱᱤᱛᱚᱜᱟᱜ PIN",
+ "cl_newpin": "ᱱᱟᱶᱟ PIN (6 ᱮᱞ)",
+ "cl_pin_save": "✅ PIN ᱥᱮᱵᱷ ᱢᱮ",
+ "cl_pin_ok": "✅ PIN ᱥᱮᱵᱷ ᱮᱱᱟ᱾ ᱡᱟᱦᱟᱸ ᱯᱷᱚᱱ ᱨᱮ {0} + PIN ᱛᱮ ᱞᱚᱜᱤᱱ ᱢᱮ᱾",
+ "cl_logout": "🚪 ᱞᱚᱜᱟᱣᱩᱴ",
+ "cl_logout_cf": "ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱠᱷᱚᱱ ᱞᱚᱜᱟᱣᱩᱴ ᱢᱮ?\n\nᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱠᱞᱟᱣᱩᱰ ᱨᱮ ᱨᱩᱠᱷᱤᱭᱟᱹ ᱢᱮᱱᱟᱜᱼᱟ᱾ ᱱᱚᱶᱟ ᱯᱷᱚᱱ ᱨᱮᱭᱟᱜ ᱠᱚᱯᱤ ᱚᱪᱚᱜ ᱦᱩᱭᱩᱜᱼᱟ — ᱡᱟᱦᱟᱸ ᱚᱠᱛᱚ ᱢᱚᱵᱟᱭᱤᱞ + PIN ᱛᱮ ᱫᱚᱦᱲᱟ ᱞᱚᱜᱤᱱ ᱢᱮ᱾",
+ "cl_logout_pend": "{0} ᱵᱚᱫᱚᱞ ᱱᱤᱛ ᱦᱚᱸ ᱟᱯᱞᱚᱰ ᱵᱟᱝ ᱦᱩᱭ ᱟᱠᱟᱱᱟ (ᱤᱱᱴᱟᱨᱱᱮᱴ ᱵᱟᱹᱱᱩᱜᱼᱟ)᱾ ᱮᱱᱦᱚᱸ ᱞᱚᱜᱟᱣᱩᱴ? ᱚᱱᱟ ᱵᱚᱫᱚᱞ ᱟᱫ ᱦᱩᱭᱩᱜᱼᱟ᱾",
+ "cl_login_btn": "🔐 ᱞᱚᱜᱤᱱ / ᱱᱟᱶᱟ ᱮᱠᱟᱣᱩᱱᱴ",
+ "cl_relogin": "🔑 ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱪᱟᱹᱞᱩ ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ ᱫᱚᱦᱲᱟ ᱞᱚᱜᱤᱱ ᱢᱮ",
+ "cl_note": "☁️ ᱚᱴᱚ ᱵᱮᱠᱟᱯ ᱚᱱ: ᱡᱚᱛᱚ ᱵᱚᱫᱚᱞ ᱛᱤᱱᱟᱹᱜ ᱥᱮᱠᱮᱱᱰ ᱨᱮ ᱟᱢᱟᱜ ᱟᱡᱟᱜ Firebase (Google) ᱮᱠᱟᱣᱩᱱᱴ ᱨᱮ ᱥᱮᱵᱷ ᱦᱩᱭᱩᱜᱼᱟ᱾ ᱱᱟᱶᱟ ᱯᱷᱚᱱ ᱨᱮ ᱢᱚᱵᱟᱭᱤᱞ + PIN ᱛᱮ ᱞᱚᱜᱤᱱ ᱞᱮᱠᱷᱟᱱ ᱥᱟᱱᱟᱢ ᱨᱩᱣᱟᱹᱲ ᱦᱤᱡᱩᱜᱼᱟ᱾",
+ "cl_manual": "📁 ᱛᱤ ᱛᱮ ᱵᱮᱠᱟᱯ ᱯᱷᱟᱭᱤᱞ (ᱢᱚᱱᱮ ᱞᱮᱠᱟ)",
+ "lv_adv": "⚙️ ᱮᱰᱵᱷᱟᱱᱥᱰ: Firebase ᱯᱨᱚᱡᱮᱠᱴ / ᱥᱤᱝᱠ ᱯᱟᱥᱣᱟᱨᱰ",
+ "pb_due_today": "ᱛᱮᱦᱮᱧ ᱮᱢ ᱞᱟᱹᱠᱛᱤ",
+ "pburl_db": "⚠️ ᱱᱚᱶᱟ ᱫᱚ ᱟᱢᱟᱜ Firebase ᱰᱟᱴᱟᱵᱮᱥ ᱴᱷᱤᱠᱟᱹᱱᱟ, ᱮᱯ ᱨᱮᱭᱟᱜ ᱣᱮᱵᱥᱟᱭᱤᱴ ᱫᱚ ᱵᱟᱝ᱾ ᱱᱚᱶᱟ ᱠᱷᱟᱹᱞᱤ ᱫᱚᱦᱚᱭ ᱢᱮ, ᱟᱨᱵᱟᱝ ᱟᱢᱟᱜ GitHub Pages / Vercel ᱴᱷᱤᱠᱟᱹᱱᱟ ᱮᱢ ᱢᱮ᱾",
+ "pburl_move2": "💡 ᱱᱚᱶᱟ ᱴᱷᱤᱠᱟᱹᱱᱟ ᱠᱷᱚᱱ ᱮᱯ ᱡᱷᱤᱡᱽ ᱠᱟᱛᱮ ᱢᱚᱵᱟᱭᱤᱞ + PIN ᱛᱮ ᱞᱚᱜᱤᱱ ᱢᱮ — ᱟᱢᱟᱜ ᱰᱟᱴᱟ ᱟᱡ ᱛᱮᱜᱮ ᱦᱤᱡᱩᱜᱼᱟ᱾",
+ "ci_install": "📲 ᱯᱟᱥᱵᱩᱠ ᱮᱯ ᱤᱱᱥᱴᱚᱞ ᱢᱮ",
+ "ci_ios": "📲 ᱱᱚᱶᱟ ᱯᱟᱥᱵᱩᱠ ᱮᱯ ᱞᱮᱠᱟ ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ: Share ⬆️ → “Add to Home Screen” ᱚᱛᱚᱭ ᱢᱮ",
+ "ci_and": "📲 ᱱᱚᱶᱟ ᱯᱟᱥᱵᱩᱠ ᱮᱯ ᱞᱮᱠᱟ ᱫᱚᱦᱚ ᱞᱟᱹᱜᱤᱫ: Chrome ᱢᱮᱱᱩ ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ ᱤᱱᱥᱴᱚᱞ ᱮᱱᱟ — ᱦᱚᱢ ᱥᱠᱨᱤᱱ ᱨᱮ “Passbook” ᱡᱷᱤᱡᱽ ᱢᱮ",
+ "ci_mine": "📒 ᱤᱧᱟᱜ ᱯᱟᱥᱵᱩᱠ",
+ "ci_none": "ᱟᱢᱟᱜ ᱯᱟᱥᱵᱩᱠ ᱨᱮᱭᱟᱜ QR ᱥᱠᱮᱱ ᱢᱮ ᱟᱨᱵᱟᱝ WhatsApp ᱞᱤᱝᱠ ᱢᱤᱫ ᱥᱮᱫ ᱡᱷᱤᱡᱽ ᱢᱮ — ᱱᱚᱸᱰᱮ ᱟᱡ ᱛᱮᱜᱮ ᱧᱮᱞᱚᱜᱼᱟ᱾"
 };
 I18N.brx = {
  "hdr_sub": "सानफ्रोम आरो सप्ताहफ्रोम फाइनान्स रां बुथुमनाय",
@@ -9389,7 +10893,73 @@ I18N.brx = {
  "lv_reset": "🔄 नाजा लिंक (गोदान बन्द जागोन)",
  "lv_note": "🔴 लाइभ लिंक: बाखि रां, गोनांथि आरो इतिहास गावखौ नाजा जायो। ग्राहकनि खबर 📥 ग्राहकनि खबरआव नुनो।",
  "lv_rules_ok": "✅ नियम कपि जाबाय — Firebase → Realtime Database → Rules आव पेस्ट खालामनानै Publish खालामदो",
- "lv_rules_lock": "🔒 लक खालामनाय नियम कपि जाबाय (नोंथांनि खाताखौ बेयो लिरनो थाङो) — Firebase → Rules आव पेस्ट खालामनानै Publish खालामदो"
+ "lv_rules_lock": "🔒 लक खालामनाय नियम कपि जाबाय (नोंथांनि खाताखौ बेयो लिरनो थाङो) — Firebase → Rules आव पेस्ट खालामनानै Publish खालामदो",
+ "li_h": "🔐 लगइन",
+ "li_sub": "नोंथांनि मबाइल नम्बर आरो PIN जों लगइन खालाम — नोंथांनि गासै डेटा गावनो गावथो फिन फैगोन।",
+ "li_m": "📱 मबाइल",
+ "li_g": "✉️ Gmail",
+ "li_pin": "लगइन PIN",
+ "li_go": "🔐 लगइन",
+ "li_forgot": "PIN बावगारनाय?",
+ "li_new": "➕ गोदान एकाउन्ट",
+ "li_off": "एकाउन्ट गैयि बाहायनो (डेटा बे फोनावल')",
+ "li_have": "सिगाङावनो एकाउन्ट दं? लगइन",
+ "li_cfg": "⚙️ क्लाउड सेटआप (Firebase config)",
+ "li_busy": "लगइन जागासिनो दं, नोंथांनि डेटा फिन लाबोदों…",
+ "li_bad": "⚠️ मबाइल / Gmail एबा PIN गोरोन्थि",
+ "li_nouser": "⚠️ बे मबाइल नम्बरनि एकाउन्ट मोनाखै — नम्बर नायफिन, एबा Gmail जों लगइन खालाम",
+ "li_many": "⚠️ बांसिन खेब गोरोन्थि — मिनिट खायसे नेथासिनो फिन नाजा",
+ "li_net": "⚠️ इन्टारनेट गैया — फोनांजाबना फिन नाजा",
+ "li_auth_off": "⚠️ Firebase → Authentication आव Email/Password साइन-इन अन खालामा",
+ "li_need_pin": "नोंथांनि PIN हो (गोजोनसो 6 अनजिमा)",
+ "li_restored": "✅ फिन बरायनाय! {0} दाहार एकाउन्ट फिन फैबाय",
+ "li_empty": "✅ लगइन जाबाय। अटो बेकआप अन दं।",
+ "li_reset_sent": "📧 PIN रिसेट लिंक {0} आव दैथाय होबाय। मेल खेव, बेयाव गोदान 6 अनजिमानि PIN लिर, उनाव बेयाव लगइन खालाम।",
+ "li_merge_h": "☁️ क्लाउडआव डेटा मोनबाय",
+ "li_merge_t": "क्लाउड: {0} दाहार एकाउन्ट ({1} आव सेभ)। बे फोनाव: {2} दाहार एकाउन्ट। मा खालामनो?",
+ "li_use_cloud": "☁️ क्लाउड डेटा बाहाय (बिथोन)",
+ "li_merge": "📱 बे फोननि डेटा दोन + क्लाउडनि एकाउन्ट फोनांजाब",
+ "ag_pin1": "🔑 लगइन PIN (6 अनजिमा) *",
+ "ag_pin2": "PIN फिन *",
+ "ag_pin_note": "मबाइल नम्बर + बे PIN आ जायखिजाया फोनाव नोंथांनि डेटा खेवो। गासैबो गावनो गावथो बेकआप जायो।",
+ "ag_pin_bad": "PIN 6–12 अनजिमा जानांगौ आरो मोननैबो मोनसे जानांगौ",
+ "ag_pin_weak": "बे PIN खौ गोरलैयै साननो हायो (बिदिन्थि 123456 / 000000) — गुबुन सायख",
+ "ag_acc_exists": "बे Gmail नि एकाउन्ट सिगाङावनो दं — बेजों लगइन खालाम (PIN बावगारनाय? Gmail जों रिसेट)",
+ "ag_acc_ok": "☁️ एकाउन्ट सोरजिबाय — अटो बेकआप अन",
+ "cl_h": "☁️ एकाउन्ट · अटो बेकआप · लाइभ सिंक",
+ "cl_acc": "👤 एकाउन्ट",
+ "cl_bk": "☁️ अटो बेकआप",
+ "cl_bk_ok": "✅ सेभ जाबाय {0}",
+ "cl_bk_wait": "⏳ सेभ जागासिनो दं…",
+ "cl_bk_pend": "🟠 {0} सोलायनाय — इन्टारनेट फैयोब्ला आपल'ड",
+ "cl_bk_off": "⚪ बन्द",
+ "cl_rules": "⚠️ मोनसेल' खालामनांगौ: अटो बेकआपनि थाखाय Firebase rules आपडेट खालामनांगौ। “📋 Copy Firebase rules” नेन → Firebase → Realtime Database → Rules → पेस्ट → Publish।",
+ "cl_fix": "⚠️ अटो बेकआप थाद' — Firebase rules मोनसेल' आपडेट खालामनांगौ",
+ "cl_setpin_box": "🔑 6 अनजिमानि लगइन PIN दोन — उनाव जायखिजाया फोनाव मबाइल नम्बरजों लगइन खालामनो हायो।",
+ "cl_setpin": "🔑 लगइन PIN दोन",
+ "cl_chpin": "🔑 PIN सोलाय",
+ "cl_oldpw": "दानि सिंक पासवर्ड",
+ "cl_oldpin": "दानि PIN",
+ "cl_newpin": "गोदान PIN (6 अनजिमा)",
+ "cl_pin_save": "✅ PIN सेभ खालाम",
+ "cl_pin_ok": "✅ PIN सेभ जाबाय। जायखिजाया फोनाव {0} + PIN जों लगइन खालाम।",
+ "cl_logout": "🚪 लगआउट",
+ "cl_logout_cf": "बे फोनआव लगआउट खालामनो?\n\nनोंथांनि डेटा क्लाउडआव रैखाथि दं। बे फोननि कपि हुखुमोर जागोन — जेब्लाबो मबाइल + PIN जों फिन लगइन खालाम।",
+ "cl_logout_pend": "{0} सोलायनाय दासिम आपल'ड जायाखै (इन्टारनेट गैया)। बिबो लगआउट? बेफोर सोलायनाय गोमागोन।",
+ "cl_login_btn": "🔐 लगइन / गोदान एकाउन्ट",
+ "cl_relogin": "🔑 अटो बेकआप थाखाय फिन लगइन खालाम",
+ "cl_note": "☁️ अटो बेकआप अन: गासै सोलायनाय सेकेन्ड खायसेनि गेजेराव नोंथांनि गावनि Firebase (Google) एकाउन्टआव सेभ जायो। गोदान फोनाव मबाइल + PIN जों लगइन खालामोब्ला गासैबो फिन फैयो।",
+ "cl_manual": "📁 आखाइजों बेकआप फाइल (गोसोजों)",
+ "lv_adv": "⚙️ एडभान्सड: Firebase प्रजेक्ट / सिंक पासवर्ड",
+ "pb_due_today": "दिनै होनांगौ",
+ "pburl_db": "⚠️ बेयो नोंथांनि Firebase डेटाबेस थाखोनाय, एपनि वेबसाइट नङा। बेखौ लांदां दोन, एबा नोंथांनि GitHub Pages / Vercel थाखोनाय हो।",
+ "pburl_move2": "💡 बे थाखोनायनिफ्राय एप खेवना मबाइल + PIN जों लगइन खालाम — नोंथांनि डेटा गावनो गावथो फैगोन।",
+ "ci_install": "📲 पासबुक एप इनस्टल खालाम",
+ "ci_ios": "📲 बे पासबुकखौ एपनि बादि दोननो: Share ⬆️ → “Add to Home Screen” नेन",
+ "ci_and": "📲 बे पासबुकखौ एपनि बादि दोननो: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”",
+ "ci_done": "✅ इनस्टल जाबाय — होम स्क्रिनआव “Passbook” खेव",
+ "ci_mine": "📒 आंनि पासबुकफोर",
+ "ci_none": "नोंथांनि पासबुकनि QR स्केन खालाम एबा WhatsApp नि लिंक मोनसेल' खेव — बेयो बेयाव गावनो गावथो नुजागोन।"
 };
 // </i18n-packs>
 
@@ -9633,7 +11203,7 @@ function renderColl() {
   const need = c => !c.done && c.paidToday <= 0 && c.behind > 0;
   list.sort((x, y) => (need(y.c) - need(x.c)) || (y.c.overdue - x.c.overdue) || (y.c.dueToday - x.c.dueToday) || String(x.l.name).localeCompare(String(y.l.name)));
   $('c-cnt').textContent = tt('n_acc', list.length);
-  const cf0 = cfg(), lastSave = Math.max(cf0.bk || 0, cf0.gd || 0);
+  const cf0 = cfg(), lastSave = Math.max(cf0.bk || 0, cf0.gd || 0, lvOn() ? Date.now() : 0);   // ఆటో బ్యాకప్ ఆన్ అయితే ఈ హెచ్చరిక అవసరం లేదు
   $('c-inbox').innerHTML = lvBannerHtml();
   $('c-banner').innerHTML = all.length && Date.now() - lastSave > 7 * 864e5 ? `<div class="banner warn">${tt('bk_warn')}<br><button type="button" class="btn btn-sm" data-go="share">${tt('bk_now')}</button></div>` : '';
   $('c-list').innerHTML = list.slice(0, 300).map(({ l, c }) => {
@@ -9653,9 +11223,8 @@ function loanModal(id) {
   let grid = '';
   for (let k = 1; k <= c.N; k++) {
     const ia = instAmt(l, k), p = c.pa[k] || 0, dt = c.d[k - 1], sk = l.sk && l.sk[k];
-    const cls = p >= ia - 0.001 ? 'paid' : p > 0 ? 'part' : sk ? 'skip' : dt <= t0 ? 'due' : '';
-    const s = cls === 'paid' ? '✓ ' + rs(p) : cls === 'part' ? rs(p) + '/' + ia : cls === 'skip' ? '⏭️' : cls === 'due' ? rs(ia) : '';
-    grid += `<div class="cell ${cls}${dt === t0 ? ' today' : ''}" data-k="${k}"${cls === 'paid' ? '' : ' role="button" tabindex="0"'}><b>${esc(instLbl(l, k))}</b><span class="d">${dm(dt)}</span><div class="s">${s || '&nbsp;'}</div></div>`;
+    const cls = p >= ia - 0.001 ? 'paid' : p > 0 ? 'part' : sk ? 'skip' : dt <= t0 ? 'due' : 'fut';
+    grid += `<div class="cell ${cls}${dt === t0 ? ' today' : ''}" data-k="${k}"${cls === 'paid' ? '' : ' role="button" tabindex="0"'}><b>${esc(instLbl(l, k))}</b><span class="d">${dm(dt)}</span><div class="s">${cellAmt(cls, p, ia)}</div></div>`;
   }
   const hist = (l.lg || []).slice().reverse().map(e => `<div><span>${bdi(dmyhm(e.t))} · ${esc(modeTxt(e.m))}${e.r ? ' ' + bdi(esc(e.r)) : ''} · ${esc(instLbl(l, e.k || 1))}→</span><b>${rs(e.a)}</b></div>`).join('');
   const B = (act, cls, txt) => `<button type="button" class="btn ${cls}" data-act="${act}" data-id="${esc(l.id)}">${txt}</button>`;
@@ -9665,7 +11234,7 @@ function loanModal(id) {
     row(tt('w_inst'), `${rs(c.emi)} × ${c.N} (${esc(freqTxt(l))})${l.ns ? ' · ' + esc(tt('no_sun_s')) : ''}`) +
     row(tt('w_from') + ' / ' + tt('w_to'), `${dmy(c.d[0])} → ${dmy(c.end)}`) +
     row(tt('w_total'), `${rs(c.got)} (${tt('cnt_fps', c.full, c.part, c.skipN)})`, 'color:var(--ok)') +
-    (c.behind > 0 ? row(tt('behind_s', c.behindN), rs(c.behind), 'color:var(--er)') : '') +
+    dueRows(c, row) +
     (c.ahead > 0 ? row(tt('ahead_s'), rs(c.ahead), 'color:var(--ok)') : '') +
     (reliab(l).tot >= 3 ? row('⭐ ' + tt('sc_h'), `${reliab(l).pct}% · ${tt('sc_n', reliab(l).on, reliab(l).tot)}`) : '') +
     row(tt('w_bal'), rs(c.bal), 'font-size:14px') + `</div>` +
@@ -9675,8 +11244,20 @@ function loanModal(id) {
     (hist ? `<div class="legend">${tt('hist_h', (l.lg || []).length)}</div><div class="hist">${hist}</div>` : '') +
     `<div class="foot-links">${(l.lg || []).length ? `<button type="button" data-act="undo" data-id="${esc(l.id)}">${tt('btn_undo_last')}</button>` : '<span></span>'}` +
     `<button type="button" class="del" data-act="del" data-id="${esc(l.id)}">${tt('btn_del_loan')}</button></div>`);
-  const todayCell = $('l-grid').querySelector('.cell.today') || $('l-grid').querySelector(`.cell[data-k="${c.first || 1}"]`);
-  if (todayCell) $('l-grid').scrollTop = Math.max(0, todayCell.offsetTop - $('l-grid').offsetTop - 60);
+  gridSnap($('l-grid'), c);
+}
+// ఏజెంట్ ఖాతా వివరాల్లో పొడవైన షెడ్యూల్: సరిగ్గా 6 పూర్తి వరుసలు (రోజు బాక్స్ సగం కట్ అవ్వదు) + ఈరోజు వరుస కనిపించేలా
+function gridSnap(g, c) {
+  if (!g) return;
+  const cs = g.children, cols = (getComputedStyle(g).gridTemplateColumns || '').split(' ').filter(Boolean).length || 5;
+  if (cs.length <= cols * 7) return;
+  let mh = 0; for (const x of cs) mh = Math.max(mh, x.offsetHeight);
+  if (!(mh > 0)) return;
+  g.style.gridAutoRows = mh + 'px';                                   // అన్ని వరుసలు ఒకే ఎత్తు → స్క్రోల్ ఎప్పుడూ పూర్తి వరుస దగ్గరే ఆగుతుంది
+  const pitch = cs[cols].offsetTop - cs[0].offsetTop; if (!(pitch > 0)) return;
+  g.classList.add('snap'); g.style.maxHeight = (pitch * 6 + 7) + 'px';
+  const tc = g.querySelector('.cell.today') || g.querySelector(`.cell[data-k="${c.first || 1}"]`);
+  if (tc) g.scrollTop = Math.max(0, Math.round((tc.offsetTop - cs[0].offsetTop) / pitch) - 1) * pitch;
 }
 function payModal(id, k, ret) {
   const l = loanBy(id); if (!l) return;
@@ -9687,7 +11268,7 @@ function payModal(id, k, ret) {
   UI.ret = ret || null; UPIQ = { id: l.id };
   const chips = [[tt('q_inst'), Math.min(c.emi, c.bal)], [tt('q_behind'), c.behind], [tt('q_all'), c.bal]].filter((x, i, a) => x[1] > 0 && a.findIndex(y => y[1] === x[1]) === i);
   openModal(`<h3>💰 ${bdi(esc(l.name))} · ${esc(instLbl(l, kk))} (${dm(c.d[kk - 1])})</h3>` +
-    `<div class="kv">${tt('inst_info', rs(ia))}${cur ? ' · ' + tt('already', rs(cur)) : ''} · ${tt('bal_s', rs(c.bal))}${c.behind ? ` · <b style="color:var(--er)">${tt('behind_s', c.behindN)} ${rs(c.behind)}</b>` : ''}</div>` +
+    `<div class="kv">${tt('inst_info', rs(ia))}${cur ? ' · ' + tt('already', rs(cur)) : ''} · ${tt('bal_s', rs(c.bal))}${c.overdue > 0 ? ` · <b style="color:var(--er)">${tt('behind_s', c.overN)} ${rs(c.overdue)}</b>` : ''}${c.dueToday > 0 ? ` · <b style="color:#c2410c">${tt('pb_due_today')} ${rs(c.dueToday)}</b>` : ''}</div>` +
     `<label for="p-amt">${tt('amt_paid')}</label><input id="p-amt" type="number" inputmode="decimal" min="0" step="any" value="${def}">` +
     `<div class="qamt">${chips.map(([lb, v]) => `<button type="button" data-v="${v}">${esc(lb)} ${rs(v)}</button>`).join('')}</div>` +
     `<label class="mt8">${tt('pay_mode')}</label><div class="mode-row" id="p-mode">${MODES.map((m, i) => `<button type="button" data-m="${m}" class="${i ? '' : 'on'}">${esc(modeTxt(m, true))}</button>`).join('')}</div>` +
@@ -9883,8 +11464,7 @@ function renderSettings() {
   $('s-theme').innerHTML = Object.keys(THEME_SW).map(k => `<button type="button" class="sw${(c.theme || 'emerald') === k ? ' on' : ''}" data-th="${k}" style="background:${THEME_SW[k]}" aria-label="${k}"></button>`).join('');
   gdPreload();
   const all = loans(), act = all.filter(l => !calc(l).done).length;
-  $('s-info').innerHTML = `<div class="row"><span>${tt('bk_last')}</span><b>${c.bk ? dmyhm(c.bk) : tt('bk_never')}</b></div>` +
-    `<div class="row"><span>${tt('info_counts', all.length, act)}</span></div><div class="row"><span>${tt('gd_last')}</span><b>${c.gd ? dmyhm(c.gd) : tt('bk_never')}</b></div><div class="row"><span>${tt('info_store')}</span><b>${storeInfo()}</b></div>`;
+  $('s-info').innerHTML = clInfoHtml(c, all, act);
 }
 function saveCfgField(el) {
   const k = el.dataset.cfg; let v = el.value;
@@ -9902,8 +11482,10 @@ function setLang(l) { const bc = langInfo(l).bcp; setCfg({ lang: l, vlang: bc })
 
 // ---------------------------------------------------------------- ట్యాబ్‌లు / రిఫ్రెష్
 function switchTab(tab) {
-  if (tab !== 'agent' && !agentOK()) { tab = 'agent'; toast(tt('ag_first'), false, 5000); }
+  if (tab !== 'agent' && tab !== 'login' && !agentOK()) { tab = 'agent'; toast(tt('ag_first'), false, 5000); }
   curTab = tab;
+  document.body.classList.toggle('lgn', tab === 'login');
+  if (tab === 'login') liPaint();
   $$('.tab').forEach(s => s.classList.toggle('on', s.id === 't-' + tab));
   $$('.bnav button').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
   if (tab === 'coll') renderColl();
@@ -9947,6 +11529,7 @@ function legacyImport() {
 // ---------------------------------------------------------------- బూట్
 async function boot() {
   if (/^#(pb|lv)=/.test(location.hash)) { passbookMode(); return; }
+  if (/[?&]app=c(&|$)/.test(location.search)) { custHome(); return; }   // కస్టమర్ పాస్‌బుక్ యాప్ ఐకాన్
   bindCommon();
   fillLangSel();
   await DB.init();
@@ -9994,8 +11577,8 @@ async function boot() {
   });
   $('s-cutu').addEventListener('click', e => { const b = e.target.closest('[data-u]'); if (b) { setCfg({ cutU: b.dataset.u }); renderSettings(); } });
   $('s-pburl').addEventListener('input', paintPbStatus);
-  bindLvSettings(); DB.onPut(lvMark);
-  $('c-inbox').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'lvinbox') lvInbox(); else if (b.dataset.go === 'rmq') rmOpen(); });
+  bindLvSettings(); bindLogin(); DB.onPut(k => { lvMark(k); clMark(k); });
+  $('c-inbox').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (!b) return; if (b.dataset.go === 'lvinbox') lvInbox(); else if (b.dataset.go === 'rmq') rmOpen(); else clGo(b.dataset.go); });
   $('a-restore').onclick = () => $('s-file').click();   // కొత్త (హోస్ట్ చేసిన) లింక్‌లో మొదటిసారి: ప్రొఫైల్ నింపకుండానే బ్యాకప్ రీస్టోర్
   $('s-ns').addEventListener('change', e => setCfg({ ns: e.target.checked }));
   $('s-lang').onchange = e => setLang(e.target.value);
@@ -10069,8 +11652,9 @@ async function boot() {
   newFormReset();
   refreshAll();
   if ((DB.get('meta') || {}).v !== 2) DB.put('meta', { v: 2, at: Date.now() });
-  if (!agentOK()) switchTab('agent');
-  lvStart();
+  if (!agentOK()) switchTab(clFresh() ? 'login' : 'agent');
+  lvStart(); clStart();
+  { const n = lvLS.get('dfp_li_ok'); if (n != null) { lvLS.set('dfp_li_ok', null); setTimeout(() => toast(tt('li_restored', n), true, 8000), 300); } }
   try { if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !lvLoop(location.origin)) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {}
   if (imp) toast(tt('d_old_import', imp), true, 7000);
   else if (DB.mode === 'mem') toast(tt('d_private'), false, 9000);
@@ -10132,28 +11716,15 @@ function fillAgentForm() {
   $('a-st').innerHTML = `<option value="">${esc(tt('ag_state_ph'))}</option>` + STATES.map(x => `<option value="${esc(x)}">${esc(x)}</option>`).join('');
   $('a-name').value = a.name || ''; $('a-ph').value = a.ph || ''; $('a-em').value = a.em || '';
   $('a-st').value = a.state || ''; $('a-di').value = a.dist || ''; $('a-tn').value = a.town || ''; $('a-pin').value = a.pin || '';
-  $('a-restore').hidden = loans().length > 0;   // ఖాళీ యాప్ (కొత్త లింక్ / కొత్త ఫోన్) అయితేనే
+  $('a-restore').hidden = loans().length > 0 || clNeedPin() || lvOn();   // ఖాళీ యాప్ + ఖాతా లేనప్పుడే (ఖాతా ఉంటే లాగిన్‌తోనే డేటా వస్తుంది)
+  clAgentPaint();
 }
 function regPost(a) {   // ఐచ్ఛికం: మీ Google Apps Script వెబ్‌హుక్‌కు ఏజెంట్ రిజిస్ట్రేషన్ పంపుతుంది
   const u = String(cfg().reg || '').trim();
   if (!/^https:\/\//i.test(u)) return;
   try { fetch(u, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ app: APP.ns, agent: a, biz: bizName(), at: Date.now() }) }); } catch (e) {}
 }
-function saveAgent() {
-  const g = id => $(id).value.trim();
-  const a = { name: g('a-name'), ph: phone10(g('a-ph')), em: g('a-em'), state: $('a-st').value, dist: g('a-di'), town: g('a-tn'), pin: g('a-pin') };
-  if (!a.name) return toast(tt('ag_bad_nm'), false);
-  if (a.ph.length !== 10) return toast(tt('ag_bad_ph'), false);
-  if (!EMAIL_RE.test(a.em)) return toast(tt('ag_bad_em'), false);
-  if (!a.state) return toast(tt('ag_bad_st'), false);
-  if (!a.dist || !a.town) return toast(tt('ag_bad_dt'), false);
-  if (!/^[1-9]\d{5}$/.test(a.pin)) return toast(tt('ag_bad_pin'), false);
-  const old = DB.get('agent'), wasOK = agentOK();
-  a.t = (old && old.t) || Date.now(); a.u = Date.now();
-  DB.put('agent', a); regPost(a); hdrPaint();
-  toast(tt('ag_saved'));
-  if (!wasOK) switchTab('coll');
-}
+// saveAgent() → <cloud-ui> (ఖాతా + PIN తో)
 
 // ---------------------------------------------------------------- 📖 QR పాస్‌బుక్ (స్వీయ-ముగింపు; బ్యాకెండ్ అవసరం లేదు)
 // QR లో లోన్ స్నాప్‌షాట్ లింక్ ఉంటుంది: <ఈ ఫైల్ హోస్ట్ URL>#pb=<డేటా>. కస్టమర్ ఫోన్‌లో తెరిస్తే చదవడానికి మాత్రమే పాస్‌బుక్ వ్యూ వస్తుంది;
@@ -10164,6 +11735,7 @@ const b64d = str => { str = str.replace(/-/g, '+').replace(/_/g, '/'); while (st
 function pbUrlNorm(v) {
   v = String(v || '').trim().split('#')[0];
   if (/^[a-z0-9-]+(\.[a-z0-9-]+)+(\/|$)/i.test(v)) v = 'https://' + v;
+  if (/^https?:\/\/[^/]*\.(firebaseio\.com|firebasedatabase\.app)(\/|$)/i.test(v)) return '';   // అది డేటాబేస్ అడ్రస్, వెబ్‌సైట్ కాదు
   return /^https?:\/\/[^\s/?#]+\.[^\s/?#]+/i.test(v) ? v : '';
 }
 const pbBase = () => pbUrlNorm(cfg().pbUrl) || (/^https?:$/.test(location.protocol) ? location.href.split('#')[0] : '');
@@ -10172,12 +11744,12 @@ function paintPbStatus() {
   const raw = String(($('s-pburl') || {}).value != null ? $('s-pburl').value : cfg().pbUrl || '').trim(), norm = pbUrlNorm(raw);
   const base = norm || (/^https?:$/.test(location.protocol) ? location.href.split('#')[0] : '');
   let h;
-  if (raw && !norm) h = `<span class="er">${tt('pburl_bad')}</span>`;
+  if (raw && !norm) h = `<span class="er">${tt(/firebaseio\.com|firebasedatabase\.app/i.test(raw) ? 'pburl_db' : 'pburl_bad')}</span>`;
   else if (!base) h = `<span class="er">${tt('pburl_none')}</span>`;
   else {
     h = `<span class="ok">${tt('pburl_ok')}</span>`;
     let same = true; try { same = new URL(base).origin === location.origin; } catch (e) {}
-    if (!same) h += `<br><span>${tt('pburl_move')}</span>`;
+    if (!same) h += `<br><span>${tt(lvOn() ? 'pburl_move2' : 'pburl_move')}</span>`;
   }
   el.innerHTML = h;
 }
@@ -10211,7 +11783,7 @@ function pbText(l) {
     `${tt('w_loan')}: ${rs(c.amt)}`, `${tt('w_inst')}: ${rs(c.emi)} × ${c.N} (${freqTxt(l)})`,
     `${tt('w_total')}: ${rs(c.got)} (${c.full}/${c.N})`, c.part || c.skipN ? tt('cnt_fps', c.full, c.part, c.skipN) : null,
     c.first ? `${tt('pb_next')}: ${dmy(c.d[c.first - 1])} · ${rs(nx)}` : null,
-    c.behind > 0 ? `${tt('behind_s', c.behindN)}: ${rs(c.behind)}` : null,
+    c.overdue > 0 ? `${tt('behind_s', c.overN)}: ${rs(c.overdue)}` : null, c.dueToday > 0 ? `${tt('pb_due_today')}: ${rs(c.dueToday)}` : null,
     c.ahead > 0 ? `${tt('ahead_n', aheadN(c))}: ${rs(c.ahead)}` : null,
     `${tt('w_bal')}: ${rs(c.bal)}`, vpa ? 'UPI: ' + vpa : null, '', tt('pb_snap', dmyhm(Date.now())), ph ? 'Ph: ' + ph : null]);
 }
@@ -10336,6 +11908,8 @@ function passbookMode() {
   document.body.classList.add('pbmode');
   applyI18n(pbLangPick(p));
   const host = document.createElement('div'); host.id = 'pbv'; host.className = 'wrap'; document.body.appendChild(host);
+  swReg();
+  window.addEventListener('hashchange', () => { if (/^#(pb|lv)=/.test(location.hash)) location.reload(); });   // వేరే పాస్‌బుక్ లింక్ అదే ట్యాబ్‌లో తెరిస్తే
   if (live) { lvCustomer(host); return; }
   pbRender(host, p, null);
 }
@@ -10350,19 +11924,21 @@ function pbRender(host, p, env) {
   const c = calc(l), expired = Date.now() >= parseIso(p.x) + 864e5, tel = digits(p.ph);
   const langSel = `<select id="pb-lang" aria-label="Language" style="width:auto;max-width:44%;padding:6px 8px;font-size:12.5px;border-radius:8px;border:1px solid #cbd5e1;background:#fff">${LANGS.map(x => `<option value="${x.code}"${x.code === LANG ? ' selected' : ''}>${esc(x.name)}</option>`).join('')}</select>`;
   const head = `<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><h2 style="border:0;margin:0;padding:0">🏦 ${esc(p.b || 'Daily Finance')}</h2>${langSel}</div>` +
-    `${tel ? `<a class="btn btn-sec full" style="margin-top:8px" href="tel:${esc(tel)}">${tt('pb_call')}</a>` : ''}</div>`;
+    `${tel ? `<a class="btn btn-sec full" style="margin-top:8px" href="tel:${esc(tel)}">${tt('pb_call')}</a>` : ''}` +
+    (cuMine().length > 1 ? `<a class="btn btn-sec full" style="margin-top:8px" href="./?app=c">${tt('ci_mine')} (${cuMine().length})</a>` : '') + `<div id="cu-inst"></div></div>`;
   const bindLang = () => { $('pb-lang').onchange = e => { lvLS.set('dfp_pb_lg', e.target.value); applyI18n(e.target.value); if (env && env.redo) env.redo(); else pbRender(host, p, env); }; };
   if (c.done || expired) {
+    cuForget(p);
     host.innerHTML = head + `<div class="card" style="text-align:center"><h2 style="border:0">${bdi(esc(l.name))} · ${bdi(esc(l.id))}</h2><div style="font-size:15px;margin:10px 0;font-weight:700">${tt(c.done ? 'pb_closed' : 'pb_expired')}</div><div class="note">${tt('pb_closed_note')}</div></div>`;
     bindLang(); return;
   }
+  cuRemember(p);
   const t0 = today0(), row = (a, b, st) => `<div class="row"${st ? ` style="${st}"` : ''}><span>${a}</span><b>${b}</b></div>`;
   let grid = '';
   for (let k = 1; k <= c.N; k++) {
     const ia = instAmt(l, k), pp = c.pa[k] || 0, dt = c.d[k - 1], sk = l.sk[k];
-    const cls = pp >= ia - 0.001 ? 'paid' : pp > 0 ? 'part' : sk ? 'skip' : dt <= t0 ? 'due' : '';
-    const sx = cls === 'paid' ? '✓ ' + rs(pp) : cls === 'part' ? rs(pp) + '/' + ia : cls === 'skip' ? '⏭️' : cls === 'due' ? rs(ia) : '';
-    grid += `<div class="cell ${cls}${dt === t0 ? ' today' : ''}"><b>${esc(instLbl(l, k))}</b><span class="d">${dm(dt)}</span><div class="s">${sx || '&nbsp;'}</div></div>`;
+    const cls = pp >= ia - 0.001 ? 'paid' : pp > 0 ? 'part' : sk ? 'skip' : dt <= t0 ? 'due' : 'fut';
+    grid += `<div class="cell ${cls}${dt === t0 ? ' today' : ''}"><b>${esc(instLbl(l, k))}</b><span class="d">${dm(dt)}</span><div class="s">${cellAmt(cls, pp, ia)}</div></div>`;
   }
   const nx = c.first ? Math.min(r2(instAmt(l, c.first) - (c.pa[c.first] || 0)), c.bal) : 0;
   const hist = (Array.isArray(p.h) ? p.h : []).slice().reverse().map(h => { const t = parseIso(String(h[0] || '')); return `<div><span>${bdi(esc(isFinite(t) ? dmy(t) : String(h[0] || '')))}</span><b>${rs(h[1])}</b></div>`; }).join('');
@@ -10396,14 +11972,14 @@ function pbRender(host, p, env) {
     row(tt('w_total'), `${rs(c.got)} (${tt('w_full_n', c.full)})`, 'color:var(--ok)') +
     `<div class="row"><span>${tt('cnt_fps', c.full, c.part, c.skipN)}</span></div>` +
     (c.first ? row(tt('pb_next'), `${dmy(c.d[c.first - 1])} · ${rs(nx)}`) : '') +
-    (c.behind > 0 ? row(tt('behind_s', c.behindN), rs(c.behind), 'color:var(--er)') : '') +
+    dueRows(c, row) +
     (c.ahead > 0 ? row(tt('ahead_n', aheadN(c)), rs(c.ahead), 'color:var(--ok)') : '') +
     (isFinite(prDate) && prDate >= t0 ? `<div class="row"><span>${esc(tt('lv_k_prom', dmy(prDate)))}</span></div>` : '') +
     row(tt('w_bal'), rs(c.bal), 'font-size:15px') + `</div>` + payBox + liveBox +
     `<div class="legend">${tt('legend', c.N)}</div><div class="grid">${grid}</div>` +
     (hist ? `<div class="legend">${tt('hist_h', (Array.isArray(p.h) ? p.h : []).length)}</div><div class="hist">${hist}</div>` : '') +
     `<div class="note left"><span id="lv-st">${lvStLine(env, p)}</span> · ${tt('pb_valid', dmy(parseIso(p.x)))}</div></div>`;
-  bindLang();
+  bindLang(); cuPaintInstall();
   const pn = String(p.b || 'Daily Finance'), cleanRef = v => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 35);
   if (live) {
     const sentBtn = (id, ok) => { const b = $(id); if (b) b.disabled = !ok; };
@@ -10502,6 +12078,63 @@ async function lvCustSend(env, cl) {
   return cid;
 }
 
+// 📅 షెడ్యూల్ బాక్స్‌లో అమౌంట్ (ప్రతి రోజుకీ — కట్ అవ్వకుండా రెండు లైన్లు వరకు)
+function cellAmt(cls, pp, ia) {
+  if (cls === 'paid') return '✓ ' + rs(pp);
+  if (cls === 'part') return rs(pp) + `<small>/ ${rs(ia)}</small>`;
+  if (cls === 'skip') return '⏭️ ' + rs(ia);
+  return rs(ia);
+}
+// నిన్నటి వరకు కట్టనిది = బాకీ (ఎరుపు) · ఈరోజు వాయిదా = ఈరోజు కట్టాల్సినది (నారింజ) — ఈరోజుది బాకీ కాదు
+const dueRows = (c, row) => (c.overdue > 0 ? row(tt('behind_s', c.overN), rs(c.overdue), 'color:var(--er)') : '') +
+  (c.dueToday > 0 ? row(tt('pb_due_today'), rs(c.dueToday), 'color:#c2410c') : '');
+// ---------------------------------------------------------------- 📲 కస్టమర్ పాస్‌బుక్ యాప్ (హోమ్ స్క్రీన్ ఐకాన్ → నేరుగా లైవ్ పాస్‌బుక్)
+const CU = { bip: null, inst: false };
+window.addEventListener('beforeinstallprompt', e => { if (!/^#(pb|lv)=/.test(location.hash) && !/[?&]app=c(&|$)/.test(location.search)) return; e.preventDefault(); CU.bip = e; cuPaintInstall(); });   // ఏజెంట్ యాప్‌లో Chrome సొంత ఇన్‌స్టాల్ UI
+window.addEventListener('appinstalled', () => { CU.bip = null; CU.inst = true; cuPaintInstall(); });
+function swReg() { try { if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !lvLoop(location.origin)) navigator.serviceWorker.register('sw.js').catch(() => {}); } catch (e) {} }
+const cuStandalone = () => { try { return matchMedia('(display-mode: standalone)').matches || navigator.standalone === true; } catch (e) { return false; } };
+const cuIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const cuMine = () => { const a = lvLS.get('dfp_my_pb'); return Array.isArray(a) ? a.filter(x => x && typeof x.h === 'string' && /^#(lv|pb)=/.test(x.h)) : []; };
+function cuKey(p) {
+  const h = location.hash;
+  if (/^#lv=/.test(h)) { try { const L = JSON.parse(b64d(h.slice(4))); return 'lv/' + L.a + '/' + L.t; } catch (e) {} }
+  return 'pb/' + String((p && p.b) || '') + '/' + String((p && p.id) || '');
+}
+// ఈ ఫోన్‌లో ఒకసారి తెరిచిన పాస్‌బుక్ గుర్తు (యాప్ ఐకాన్ నుండి తెరిస్తే నేరుగా ఇదే)
+function cuRemember(p) {
+  if (!p || !p.id || !/^#(lv|pb)=/.test(location.hash)) return;
+  const key = cuKey(p), L = cuMine().filter(x => x.key !== key);
+  L.unshift({ key, h: location.hash, nm: String(p.nm || '').slice(0, 60), id: String(p.id).slice(0, 30), b: String(p.b || '').slice(0, 60), t: Date.now() });
+  lvLS.set('dfp_my_pb', L.slice(0, 12));
+}
+function cuForget(p) { const key = cuKey(p); lvLS.set('dfp_my_pb', cuMine().filter(x => x.key !== key)); }
+function cuPaintInstall() {
+  const el = document.getElementById('cu-inst'); if (!el) return;
+  if (cuStandalone()) { el.innerHTML = ''; return; }
+  if (CU.inst) { el.innerHTML = `<div class="note left" style="color:var(--pd);font-weight:700;font-size:12.5px">${tt('ci_done')}</div>`; return; }
+  if (CU.bip) {
+    el.innerHTML = `<button type="button" class="btn btn-p full" style="margin-top:8px" id="cu-go">${tt('ci_install')}</button>`;
+    $('cu-go').onclick = async () => { const ev = CU.bip; if (!ev) return; CU.bip = null; try { ev.prompt(); const r = await ev.userChoice; if (r && r.outcome === 'accepted') CU.inst = true; } catch (e) {} cuPaintInstall(); };
+    return;
+  }
+  el.innerHTML = /^https:$/.test(location.protocol) ? `<div class="note left" style="font-size:12px">${tt(cuIOS() ? 'ci_ios' : 'ci_and')}</div>` : '';
+}
+// యాప్ ఐకాన్ (./?app=c) తెరిస్తే: ఒకే పాస్‌బుక్ అయితే నేరుగా అది · ఎక్కువైతే జాబితా
+function custHome() {
+  ['header.top', 'main.wrap', 'nav.bnav', '#float-mic-btn'].forEach(q => { const el = document.querySelector(q); if (el) el.hidden = true; });
+  document.body.classList.add('pbmode');
+  const L = cuMine(), open = h => { try { history.replaceState(null, '', location.pathname + location.search + h); } catch (e) { location.hash = h; } location.reload(); };
+  if (L.length === 1) { try { history.replaceState(null, '', location.pathname + location.search + L[0].h); } catch (e) {} passbookMode(); return; }
+  applyI18n(pbLangPick(null)); swReg();
+  const host = document.createElement('div'); host.id = 'cuh'; host.className = 'wrap'; host.style.paddingTop = '14px'; document.body.appendChild(host);
+  host.dir = (LANGS.find(x => x.code === LANG) || {}).rtl ? 'rtl' : 'ltr';
+  host.innerHTML = `<div class="card"><h2>${tt('ci_mine')}</h2>` + (L.length ? L.map((x, i) =>
+    `<button type="button" class="btn btn-sec full" style="margin-top:8px;text-align:start" data-i="${i}">🏦 ${esc(x.b || 'Daily Finance')}<br><small>👤 ${bdi(esc(x.nm))} · ${bdi(esc(x.id))}</small></button>`).join('') :
+    `<div class="note left" style="font-size:13px">${tt('ci_none')}</div>`) + `</div>`;
+  host.addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b && L[+b.dataset.i]) open(L[+b.dataset.i].h); });
+}
+
 // కస్టమర్‌కు ఒకే సంఖ్య: ఈరోజు వరకు కట్టాల్సినది (క్రింది "బాకీ" వరుస, చెల్లింపు మొత్తం కూడా ఇదే)
 function pbPill(c, pt) {
   if (pt > 0) return `<span class="pill ok">${tt('st_paid_today', rs(pt))}</span>`;
@@ -10588,12 +12221,13 @@ async function lvToken(role, c) {
   throw new Error('NEEDS_LOGIN');
 }
 // RTDB REST: GET / PUT / PATCH / DELETE  (auth = ID టోకెన్)
-async function lvDb(role, c, method, path, body, again) {
+async function lvDb(role, c, method, path, body, again, opt) {   // opt: { silent: జవాబులో డేటా వద్దు (print=silent → 204), keepalive: యాప్ మూస్తున్నప్పుడు కూడా పంపు }
+  opt = opt || {};
   const t = await lvToken(role, c);
-  const r = await lvFetch(lvBase(c.d) + '/' + path + '.json?auth=' + encodeURIComponent(t.idt),
-    { method, headers: body === undefined ? undefined : { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
+  const r = await lvFetch(lvBase(c.d) + '/' + path + '.json?auth=' + encodeURIComponent(t.idt) + (opt.silent ? '&print=silent' : ''),
+    { method, keepalive: !!opt.keepalive, headers: body === undefined ? undefined : { 'Content-Type': 'application/json' }, body: body === undefined ? undefined : JSON.stringify(body) });
   const txt = await r.text(); let j = null; try { j = txt ? JSON.parse(txt) : null; } catch (e) {}
-  if (r.status === 401 && !again) { t.exp = 0; return lvDb(role, c, method, path, body, true); }
+  if (r.status === 401 && !again) { t.exp = 0; return lvDb(role, c, method, path, body, true, opt); }
   if (!r.ok) { const e = new Error(r.status === 401 || r.status === 403 ? 'PERMISSION_DENIED' : String((j && j.error) || 'HTTP ' + r.status).slice(0, 80)); e.status = r.status; throw e; }
   return j;
 }
@@ -10636,7 +12270,7 @@ window.addEventListener('online', () => { try { if (LV.es) LV.es.reopen(); lvFlu
 
 // ---------------------------------------------------------------- ఏజెంట్ వైపు: కనెక్ట్ · పుష్ క్యూ · లింక్
 async function lvConnect(cfgTxt, pw) {
-  const old = lvCfg(), c = lvParseCfg(cfgTxt) || (old.k && old.d ? { k: old.k, d: old.d } : null);
+  const old = lvCfg(), c = lvParseCfg(cfgTxt) || (old.k && old.d ? { k: old.k, d: old.d } : FB_DEF);
   if (!c) throw new Error('BAD_CFG');
   if (String(pw || '').length < 6) throw new Error('BAD_PW');
   const email = String((DB.get('agent') || {}).em || '').trim().toLowerCase();
@@ -10645,7 +12279,7 @@ async function lvConnect(cfgTxt, pw) {
   if (old.uid && old.uid !== t.uid) loans().forEach(l => { if (l.lt) { const x = loanCopy(l.id); delete x.lt; DB.put('ln:' + x.id, x); } });   // వేరే ఖాతా → పాత టోకెన్లు చెల్లవు
   DB.put('live', { on: 1, k: c.k, d: c.d, e: email, uid: t.uid, at: Date.now() });
   try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {}
-  lvStart();
+  lvStart(); clStart();
 }
 function lvDisconnect() {
   if (LV.es) { LV.es.close(); LV.es = null; }
@@ -10812,23 +12446,47 @@ const LV_RULES = `{
           }
         }
       }
+    },
+    "bk": {
+      "$aid": {
+        ".read": "auth != null && auth.uid === $aid",
+        ".write": "auth != null && auth.uid === $aid",
+        "m": { "$dev": { ".validate": "$dev.matches(/^[A-Za-z0-9_-]{6,40}$/) && newData.isNumber()" } },
+        "d": { "$k": { ".validate": "newData.isString() && newData.val().length < 5000000" } },
+        "$other": { ".validate": false }
+      }
+    },
+    "dir": {
+      "$ph": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() || data.child('u').val() === auth.uid) && (!newData.exists() || newData.child('u').val() === auth.uid)",
+        ".validate": "$ph.matches(/^[0-9]{10}$/) && newData.hasChildren(['e','u','t'])",
+        "e": { ".validate": "newData.isString() && newData.val().length < 120" },
+        "u": { ".validate": "newData.isString()" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
     }
   }
 }`;
 // 🔒 కనెక్ట్ అయ్యాక: rules ను ఈ ఏజెంట్ uid కే లాక్ చేసిన వెర్షన్ (మరెవరూ తమ uid కింద డేటా నింపలేరు). కనెక్ట్ కాకపోతే సాధారణ rules.
 function lvRulesText() {
   let uid = ''; try { const c = lvCfg(); uid = c && /^[A-Za-z0-9]{10,40}$/.test(String(c.uid || '')) ? c.uid : ''; } catch (e) {}
-  return uid ? LV_RULES.split('auth.uid === $aid').join("auth.uid === $aid && $aid === '" + uid + "'") : LV_RULES;
+  return uid ? LV_RULES.split('auth.uid === $aid').join("auth.uid === $aid && $aid === '" + uid + "'")
+    .split("\"auth != null && (!data.exists()").join("\"auth != null && auth.uid === '" + uid + "' && (!data.exists()") : LV_RULES;
 }
-const lvErrTxt = m => ({ BAD_CFG: tt('lv_bad_cfg'), BAD_PW: tt('lv_bad_pw'), BAD_EMAIL: tt('ag_bad_em'), WRONG_PASSWORD: tt('lv_wrong_pw') }[m] || String(m));
-function lvPaint() {
-  const on = lvOn(), dot = $('hdr-lv');
-  if (dot) { dot.hidden = !on; dot.textContent = LV.err ? '🔴' : LV.st === 'on' ? '🟢' : '🟠'; }
-  const el = $('s-lvst'); if (!el) return;
-  el.innerHTML = !on ? `<span>${tt('lv_st_none')}</span>` : LV.err ? `<span class="er">${tt('lv_st_err', esc(LV.err))}</span>` :
-    LV.st === 'on' ? `<span class="ok">${tt('lv_st_ok', LV.sync ? bdi(hm(LV.sync)) : '…')}</span>` : `<span>${tt('lv_st_off')}</span>`;
-  if ($('s-lvoff')) $('s-lvoff').hidden = !on;
-  if ($('s-lvgo')) $('s-lvgo').textContent = tt('lv_connect');
+const lvErrTxt = m => ({ BAD_CFG: tt('lv_bad_cfg'), BAD_PW: tt('lv_bad_pw'), BAD_EMAIL: tt('ag_bad_em'), WRONG_PASSWORD: tt('lv_wrong_pw'), PERMISSION_DENIED: 'Firebase rules', NEEDS_LOGIN: tt('cl_relogin') }[m] || String(m));
+function lvPaint() {   // 🟢 లైవ్ · 🟠 ఆఫ్‌లైన్ (ఇంటర్నెట్ లేదు — తర్వాత పంపుతుంది) · 🔴 చర్య కావాలి (rules / మళ్లీ లాగిన్)
+  const on = lvOn(), dot = $('hdr-lv'), bad = [LV.err, CL.err].some(m => m && !clNet(m));
+  if (dot) { dot.hidden = !on; dot.textContent = bad ? '🔴' : LV.st === 'on' ? '🟢' : '🟠'; }
+  const el = $('s-lvst');
+  if (el) {
+    el.innerHTML = !on ? `<span>${tt('lv_st_none')}</span>` : LV.err && !clNet(LV.err) ? `<span class="er">${tt('lv_st_err', esc(lvErrTxt(LV.err)))}</span>` :
+      LV.st === 'on' ? `<span class="ok">${tt('lv_st_ok', LV.sync ? bdi(hm(LV.sync)) : '…')}</span>` : `<span>${tt('lv_st_off')}</span>`;
+    if ($('s-lvoff')) $('s-lvoff').hidden = !on;
+    if ($('s-lvgo')) $('s-lvgo').textContent = tt('lv_connect');
+  }
+  try { clCard(); } catch (e) {}
 }
 function bindLvSettings() {
   $('hdr-lv').onclick = () => { switchTab('set'); setTimeout(() => { const f = $('s-lv'); if (f) f.scrollIntoView({ block: 'start' }); }, 120); };
@@ -10961,10 +12619,413 @@ function scPill(l) {
 }
 function lvBannerHtml() {
   const n = lvOn() ? lvPending().length : 0, rm = rmList().filter(x => !x.sent).length;
-  return (n ? `<button type="button" class="btn btn-p full" data-go="lvinbox" style="margin-bottom:8px">${tt('lv_inbox_n', n)}</button>` : '') +
+  return clBannerHtml() + (n ? `<button type="button" class="btn btn-p full" data-go="lvinbox" style="margin-bottom:8px">${tt('lv_inbox_n', n)}</button>` : '') +
     (rm ? `<button type="button" class="btn btn-sec full" data-go="rmq" style="margin-bottom:8px">${tt('rm_n', rm)}</button>` : '');
 }
 // </live-ui>
+
+// <cloud>
+// ---------------------------------------------------------------- ☁️ ఖాతా + ఆటో క్లౌడ్ బ్యాకప్ (మీ సొంత Firebase): మొబైల్ / Gmail + PIN తో లాగిన్ → డేటా తనంతట తానే తిరిగి వస్తుంది
+// డేటా మోడల్ (లైవ్ సింక్ వాడే అదే Firebase ఖాతా):
+//   bk/<uid>/d/<కీ>       = ఆ కీ విలువ (JSON స్ట్రింగ్) — మార్పు జరిగిన కీ మాత్రమే అప్‌లోడ్ అవుతుంది (కొన్ని KB)
+//   bk/<uid>/m/<పరికరం>  = ఆ ఫోన్ చివరి అప్‌లోడ్ సమయం (వేరే ఫోన్ మార్చిందో తెలుసుకోవడానికి)
+//   dir/<మొబైల్>          = { e: Gmail, u: uid, t } — మొబైల్ నంబర్‌తో లాగిన్ కోసం (ఈమెయిల్ మాత్రమే; డేటా కాదు)
+// PIN = Firebase ఖాతా పాస్‌వర్డ్ — యాప్ ఎక్కడా సేవ్ చేయదు (టోకెన్ మాత్రమే). మర్చిపోతే Gmail కు రీసెట్ లింక్.
+// ఈ డిప్లాయ్‌మెంట్ Firebase వెబ్ config (పబ్లిక్‌గానే ఉండేది — భద్రత database rules లో). base64 = కోడ్ స్కానర్లు "లీక్ అయిన సీక్రెట్" అని తప్పుగా అలర్ట్ ఇవ్వకుండా మాత్రమే.
+const FB_DEF = (() => { try { const c = JSON.parse(atob('eyJrIjoiQUl6YVN5RHByQjVoNGZjLXM2dlZjZHlvZ1NsVmdLWVhWUTItRzE0IiwiZCI6Imh0dHBzOi8vZGFpbHktZmluYW5jZS1zeW5jLWRlZmF1bHQtcnRkYi5hc2lhLXNvdXRoZWFzdDEuZmlyZWJhc2VkYXRhYmFzZS5hcHAifQ==')); return c && c.k && c.d ? { k: String(c.k), d: lvBase(c.d) } : null; } catch (e) { return null; } })();
+const fbCfg = () => { const c = lvCfg(); return c.k && c.d ? { k: c.k, d: c.d } : FB_DEF; };
+const CL = { dirty: new Set(), seen: {}, at: 0, busy: false, t: 0, fail: 0, err: '', chk: 0, pulling: false };
+const CL_SKIP = new Set(['live']);                 // ఈ ఫోన్ సెషన్ మాత్రమే — క్లౌడ్‌కు వెళ్లదు
+const clOn = () => lvOn();
+const clDev = () => { let d = lvLS.get('dfp_dev'); if (!/^[A-Za-z0-9_-]{6,40}$/.test(String(d || ''))) { d = lvRand(9); lvLS.set('dfp_dev', d); } return d; };
+const clSK = () => 'dfp_cl_' + String(lvCfg().uid || '').slice(0, 14);
+// RTDB కీలలో . $ # [ ] / పనికిరావు → %XX
+const clEnc = k => String(k).replace(/[.$#[\]/%\x00-\x1f\x7f]/g, ch => '%' + ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, '0'));
+const clDec = k => String(k).replace(/%([0-9A-F]{2})/g, (m, h) => String.fromCharCode(parseInt(h, 16)));
+const clNet = m => /^NET$|Failed to fetch|NetworkError|Load failed|network|AbortError|aborted|timeout/i.test(String(m || ''));
+function clLoad() { const s = lvLS.get(clSK()) || {}; CL.dirty = new Set(Array.isArray(s.dirty) ? s.dirty : []); CL.seen = s.seen && typeof s.seen === 'object' ? s.seen : {}; CL.at = num(s.at); }
+function clSave() { if (lvCfg().uid) lvLS.set(clSK(), { dirty: [...CL.dirty], seen: CL.seen, at: CL.at }); }
+function clMark(k) { if (!clOn() || CL.pulling || CL_SKIP.has(k)) return; CL.dirty.add(k); clSave(); clFlushSoon(); }
+function clMarkAll() { Object.keys(DB.dump()).forEach(k => { if (!CL_SKIP.has(k)) CL.dirty.add(k); }); clSave(); clFlushSoon(300); }
+function clFlushSoon(ms) { if (!clOn()) return; clearTimeout(CL.t); CL.t = setTimeout(clFlush, ms == null ? 2500 : ms); }
+// ⬆️ మారిన కీలు మాత్రమే ఒకే PATCH లో (అన్నీ ఒకేసారి — సగం అప్‌లోడ్ కాదు)
+async function clFlush(keep) {
+  if (!clOn() || CL.busy || !CL.dirty.size) return;
+  const c = lvCfg(), keys = [...CL.dirty], upd = {}, sent = {}; let size = 0;
+  for (const k of keys) { const v = DB.get(k), s = v === undefined ? null : JSON.stringify(v); upd['d/' + clEnc(k)] = s; sent[k] = s; size += s ? s.length : 0; }
+  const at = Date.now(); upd['m/' + clDev()] = at;
+  CL.busy = true; clPaint();
+  try {
+    await lvDb('agent', c, 'PATCH', 'bk/' + c.uid, upd, false, { silent: true, keepalive: !!keep && size < 60000 });
+    for (const k of keys) { const v = DB.get(k), s = v === undefined ? null : JSON.stringify(v); if (s === sent[k]) CL.dirty.delete(k); }   // అప్‌లోడ్ అవుతుండగా మళ్లీ మారితే — మళ్లీ పంపుతాం
+    CL.at = at; CL.seen[clDev()] = at; CL.err = ''; CL.fail = 0; clSave();
+  } catch (e) {
+    CL.fail++; CL.err = e.message === 'PERMISSION_DENIED' ? 'RULES' : clNet(e.message) ? 'NET' : String(e.message || e);
+    clFlushSoon(Math.min(120000, 5000 * 2 ** Math.min(CL.fail, 5)));
+  } finally { CL.busy = false; clPaint(); if (CL.dirty.size && !CL.fail) clFlushSoon(); }
+}
+// ⬇️ వేరే ఫోన్ (అదే ఖాతా) మార్చిందా? m లో ఆ ఫోన్ సమయం కొత్తదైతే మాత్రమే డేటా తెస్తాం (లేకపోతే చిన్న m మాత్రమే — కొన్ని బైట్లు)
+async function clCheck(force) {
+  if (!clOn() || CL.pulling) return;
+  if (!force && CL.err !== 'RULES' && Date.now() - CL.chk < 30000) { clFlushSoon(0); return; }   // rules సరిచేస్తుంటే వెంటనే మళ్లీ చూడు
+  CL.chk = Date.now();
+  const c = lvCfg(); let m;
+  try { m = await lvDb('agent', c, 'GET', 'bk/' + c.uid + '/m'); }
+  catch (e) { CL.err = e.message === 'PERMISSION_DENIED' ? 'RULES' : clNet(e.message) ? 'NET' : String(e.message || e); clPaint(); return; }
+  if (CL.err === 'RULES') CL.err = '';
+  if (!m || typeof m !== 'object') { clMarkAll(); clPaint(); return; }   // క్లౌడ్ ఖాళీ (మొదటిసారి / ఎవరైనా తొలగించారు) → అంతా మళ్లీ అప్‌లోడ్
+  const me = clDev(), newer = Object.keys(m).filter(d => d !== me && num(m[d]) > num(CL.seen[d]));
+  if (newer.length) { try { await clPull(c, m); } catch (e) { CL.err = clNet(e.message) ? 'NET' : String(e.message || e); } }
+  if (!CL.at && !num(m[me])) clMarkAll();
+  clFlushSoon(0); clPaint();
+}
+async function clPull(c, m) {
+  const d = await lvDb('agent', c, 'GET', 'bk/' + c.uid + '/d') || {};
+  let ch = 0; CL.pulling = true;
+  try {
+    const rk = new Set();
+    for (const ek of Object.keys(d)) {
+      const k = clDec(ek); rk.add(k);
+      if (CL_SKIP.has(k) || CL.dirty.has(k) || typeof d[ek] !== 'string') continue;   // ఈ ఫోన్‌లో ఇంకా అప్‌లోడ్ కాని మార్పు గెలుస్తుంది
+      const cur = DB.get(k); if (cur !== undefined && JSON.stringify(cur) === d[ek]) continue;
+      let v; try { v = JSON.parse(d[ek]); } catch (e) { continue; }
+      DB.put(k, v); ch++;
+    }
+    // క్లౌడ్‌లో లేని కీలు: కొన్నే అయితే (వేరే ఫోన్‌లో తొలగించినవి) ఇక్కడా తొలగింపు; ఎక్కువైతే అనుమానం → ఉంచి మళ్లీ అప్‌లోడ్ (డేటా ఎప్పుడూ పోదు)
+    const gone = Object.keys(DB.dump()).filter(k => !rk.has(k) && !CL_SKIP.has(k) && !CL.dirty.has(k));
+    if (gone.length && gone.length <= 5 && rk.size >= 3) { gone.forEach(k => DB.del(k)); ch += gone.length; }
+    else gone.forEach(k => CL.dirty.add(k));
+    Object.keys(m).forEach(dv => { CL.seen[dv] = Math.max(num(CL.seen[dv]), num(m[dv])); });
+    clSave();
+  } finally { CL.pulling = false; }
+  if (ch) { try { refreshAll(); paintNewForm(); } catch (e) {} }
+  return ch;
+}
+// మొత్తం క్లౌడ్ కాపీ (లాగిన్ / కొత్త ఫోన్)
+async function clFetchAll(c, uid) {
+  const b = await lvDb('agent', c, 'GET', 'bk/' + uid);
+  if (!b || !b.d || typeof b.d !== 'object') return null;
+  const data = {};
+  for (const ek of Object.keys(b.d)) { const k = clDec(ek); if (CL_SKIP.has(k) || typeof b.d[ek] !== 'string') continue; try { data[k] = JSON.parse(b.d[ek]); } catch (e) {} }
+  return Object.keys(data).length ? { data, m: b.m && typeof b.m === 'object' ? b.m : {} } : null;
+}
+function clStart() {
+  if (!clOn()) { clPaint(); return; }
+  clLoad(); clPaint();
+  clCheck(true).catch(() => {});
+  const ag = DB.get('agent') || {};
+  if (phone10(ag.ph).length === 10 && lvCfg().ph !== phone10(ag.ph)) clDirPut().catch(() => {});
+}
+document.addEventListener('visibilitychange', () => { if (!clOn()) return; if (document.visibilityState === 'hidden') { clearTimeout(CL.t); clFlush(true); } else clCheck(); });
+window.addEventListener('pagehide', () => { if (clOn() && CL.dirty.size) clFlush(true); });
+window.addEventListener('online', () => { if (clOn()) { CL.fail = 0; clCheck(true); } });
+setInterval(() => { if (clOn() && !document.hidden && CL.err && CL.err !== 'NEEDS_LOGIN') clCheck(true).catch(() => {}); }, 60000);   // సమస్య ఉన్నంతసేపు నిమిషానికోసారి మళ్లీ ప్రయత్నం
+// ---------------------------------------------------------------- 🔐 లాగిన్ / కొత్త ఖాతా / PIN
+function lvSaveTok(c, j, role) {
+  const t = { idt: j.idToken, rt: j.refreshToken, uid: j.localId, exp: Date.now() + num(j.expiresIn || 3600) * 1000 }, key = lvTkKey(role || 'agent', c);
+  LV.tok[key] = t; lvLS.set(key, t); return t;
+}
+async function clAuth(c, ep, body) {
+  let r; try { r = await lvPost(lvAuthUrl(c, ep), body); } catch (e) { throw new Error('NET'); }
+  if (!r.ok) throw new Error(lvErrCode(r.j));
+  return r.j;
+}
+// మొబైల్ → Gmail (dir/<మొబైల్> — rules లో ఆ ఒక్క నంబర్ మాత్రమే చదవగలరు, జాబితా కాదు)
+async function clEmailFor(id, c) {
+  id = String(id || '').trim();
+  if (id.includes('@')) { if (!EMAIL_RE.test(id)) throw new Error('BAD_EMAIL'); return id.toLowerCase(); }
+  const m = phone10(id); if (m.length !== 10) throw new Error('BAD_PH');
+  let r; try { r = await lvFetch(lvBase(c.d) + '/dir/' + m + '.json', {}); } catch (e) { throw new Error('NET'); }
+  const j = r.ok ? await r.json().catch(() => null) : null;
+  if (!j || typeof j.e !== 'string' || !EMAIL_RE.test(j.e)) throw new Error('NO_USER');
+  return j.e.toLowerCase();
+}
+async function clDirPut(mobile) {
+  const c = lvCfg(), m = phone10(mobile || (DB.get('agent') || {}).ph);
+  if (m.length !== 10 || !c.uid || !c.e) return;
+  if (c.ph && c.ph !== m) { try { await lvDb('agent', c, 'DELETE', 'dir/' + c.ph, undefined, false, { silent: true }); } catch (e) {} }
+  await lvDb('agent', c, 'PUT', 'dir/' + m, { e: c.e, u: c.uid, t: Date.now() }, false, { silent: true });
+  DB.put('live', Object.assign({}, lvCfg(), { ph: m }));
+}
+function clSession(c, email, t, extra) {
+  DB.put('live', Object.assign({ on: 1, k: c.k, d: c.d, e: email, uid: t.uid, at: Date.now() }, extra || {}));
+}
+const clPinErr = (a, b) => !/^\d{6,12}$/.test(String(a)) || a !== b ? 'ag_pin_bad' :
+  (/^(\d)\1+$/.test(a) || '01234567890123456789'.includes(a) || '98765432109876543210'.includes(a)) ? 'ag_pin_weak' : '';
+async function clSignup(email, pin) {
+  const c = fbCfg(); if (!c) throw new Error('BAD_CFG');
+  const j = await clAuth(c, 'accounts:signUp', { email: String(email).trim().toLowerCase(), password: String(pin), returnSecureToken: true });
+  return { c, email: String(email).trim().toLowerCase(), t: lvSaveTok(c, j) };
+}
+// లాగిన్ → క్లౌడ్ డేటా ఉంటే ఈ ఫోన్‌లో పెట్టి యాప్ మళ్లీ తెరుస్తుంది
+async function clLoginFlow(id, pin, ask) {
+  const c = fbCfg(); if (!c) throw new Error('BAD_CFG');
+  if (String(pin || '').length < 6) throw new Error('BAD_PIN');
+  const email = await clEmailFor(id, c);
+  const j = await clAuth(c, 'accounts:signInWithPassword', { email, password: String(pin), returnSecureToken: true });
+  const t = lvSaveTok(c, j);
+  let cloud = null, rules = false;
+  try { cloud = await clFetchAll(c, t.uid); } catch (e) { if (e.message === 'PERMISSION_DENIED') rules = true; else if (clNet(e.message)) throw new Error('NET'); else throw e; }
+  const live = { on: 1, k: c.k, d: c.d, e: email, uid: t.uid, at: Date.now(), pin: /^\d{6,12}$/.test(String(pin)) ? 1 : 0 };   // పాత సింక్ పాస్‌వర్డ్‌తో వస్తే PIN పెట్టమని అడుగుతాం
+  const nLocal = loans().length, mine = Object.keys(DB.dump()).filter(k => !CL_SKIP.has(k) && k !== 'cfg' && k !== 'meta').length;
+  if (cloud) {
+    let data = cloud.data, merged = false;
+    if (nLocal || (mine && agentOK())) {
+      const ch = ask ? await ask(Object.keys(data).filter(k => k.startsWith('ln:')).length, Math.max(0, ...Object.values(cloud.m).map(num)), nLocal) : 'cloud';
+      if (!ch) { throw new Error('CANCEL'); }
+      if (ch === 'merge') { data = clMerge(cloud.data, DB.dump()); merged = true; }
+    }
+    data = Object.assign({}, data); data.live = live;
+    lvLS.set('dfp_cl_' + t.uid.slice(0, 14), { dirty: merged ? Object.keys(data).filter(k => !CL_SKIP.has(k)) : [], seen: cloud.m, at: Date.now() });
+    await DB.replaceAll(data);
+    return { st: 'restored', n: Object.keys(data).filter(k => k.startsWith('ln:')).length };
+  }
+  DB.put('live', live); clLoad(); CL.err = rules ? 'RULES' : ''; clMarkAll(); lvStart(); clStart();
+  return { st: rules ? 'rules' : 'empty' };
+}
+// ఫోన్ డేటా + క్లౌడ్ డేటా కలపడం: ఖాతా వివరాలు (agent / cfg) క్లౌడ్‌వి; అదే లోన్ అయితే చెల్లింపులు కలిపి;
+// అదే లోన్ నంబర్ వేరే కస్టమర్‌కు ఉంటే ఫోన్ ఖాతాకు కొత్త నంబర్ — ఏ ఖాతా, ఏ చెల్లింపు పోదు
+const clSameLoan = (a, b) => !!(a && b && normTxt(a.name) === normTxt(b.name) && String(a.start) === String(b.start) && num(a.amt) === num(b.amt));
+function clMerge(cd, ld) {
+  const out = Object.assign({}, ld, cd);
+  for (const k of Object.keys(ld)) {
+    if (!k.startsWith('ln:') || !(k in cd) || JSON.stringify(ld[k]) === JSON.stringify(cd[k])) continue;
+    const a = cd[k], b = ld[k];
+    if (clSameLoan(a, b)) {
+      const m = JSON.parse(JSON.stringify(a)), seen = new Set((m.lg || []).map(e => e.t + '|' + e.a));
+      m.lg = m.lg || []; (b.lg || []).forEach(e => { if (!seen.has(e.t + '|' + e.a)) m.lg.push(e); });
+      m.lg.sort((x, y) => x.t - y.t); m.sk = Object.assign({}, b.sk || {}, a.sk || {});
+      out[k] = m; continue;
+    }
+    const l = JSON.parse(JSON.stringify(b)), mm = String(l.id).match(/^(.*?)(\d+)$/), pre = mm ? mm[1] : String(l.id) + '-', w = mm ? mm[2].length : 2;
+    let n = mm ? parseInt(mm[2], 10) : 1, nid;
+    do { n++; nid = pre + String(n).padStart(w, '0'); } while (out['ln:' + nid]);
+    l.id = nid; out['ln:' + nid] = l;
+  }
+  return out;
+}
+async function clForgot(id) {
+  const c = fbCfg(); if (!c) throw new Error('BAD_CFG');
+  const email = await clEmailFor(id, c);
+  await clAuth(c, 'accounts:sendOobCode', { requestType: 'PASSWORD_RESET', email });
+  return email;
+}
+// PIN మార్పు / మొదటిసారి PIN (పాత సింక్ పాస్‌వర్డ్ → 6 అంకెల PIN): తాజా సైన్-ఇన్ తర్వాతే మార్చగలం
+async function clChangePin(oldPw, pin) {
+  const c = lvCfg(); if (!c.e) throw new Error('BAD_EMAIL');
+  const j1 = await clAuth(c, 'accounts:signInWithPassword', { email: c.e, password: String(oldPw), returnSecureToken: true });
+  const j2 = await clAuth(c, 'accounts:update', { idToken: j1.idToken, password: String(pin), returnSecureToken: true });
+  lvSaveTok(c, Object.assign({ localId: j1.localId, expiresIn: j1.expiresIn }, j2));
+  DB.put('live', Object.assign({}, lvCfg(), { pin: 1 }));
+  LV.err = ''; CL.err = ''; lvStart(); clStart();
+  clDirPut().catch(() => {});
+}
+async function clRelogin(pin) {
+  const c = lvCfg(); if (!c.e) throw new Error('BAD_EMAIL');
+  const j = await clAuth(c, 'accounts:signInWithPassword', { email: c.e, password: String(pin), returnSecureToken: true });
+  const t = lvSaveTok(c, j);
+  if (c.uid && t.uid !== c.uid) throw new Error('OTHER_ACCOUNT');
+  if (/^\d{6,12}$/.test(String(pin)) && c.pin !== 1) DB.put('live', Object.assign({}, lvCfg(), { pin: 1 }));
+  LV.err = ''; CL.err = ''; CL.fail = 0; lvStart(); clStart();
+}
+async function clLogout() {
+  if (!confirm(tt('cl_logout_cf'))) return;
+  busy(true, '⏳');
+  try { for (let i = 0; i < 25 && CL.busy; i++) await new Promise(r => setTimeout(r, 200)); await clFlush(); } catch (e) {} finally { busy(false); }
+  if (CL.dirty.size && !confirm(tt('cl_logout_pend', CL.dirty.size))) return;
+  const c = lvCfg();
+  if (LV.es) { LV.es.close(); LV.es = null; }
+  const key = lvTkKey('agent', c); LV.tok[key] = null; lvLS.set(key, null); lvLS.set(clSK(), null);
+  try { await DB.replaceAll({}); } catch (e) {}
+  location.reload();
+}
+const clMask = e => String(e || '').replace(/^(.)(.*)(@.*)$/, (m, a, b, d) => a + '•'.repeat(Math.min(6, Math.max(2, b.length))) + d);
+const clErrTxt = m => ({
+  INVALID_LOGIN_CREDENTIALS: tt('li_bad'), INVALID_PASSWORD: tt('li_bad'), EMAIL_NOT_FOUND: tt('li_bad'), INVALID_EMAIL: tt('ag_bad_em'),
+  NO_USER: tt('li_nouser'), TOO_MANY_ATTEMPTS_TRY_LATER: tt('li_many'), NET: tt('li_net'), BAD_CFG: tt('lv_bad_cfg'), BAD_PH: tt('ag_bad_ph'), BAD_EMAIL: tt('ag_bad_em'),
+  BAD_PIN: tt('li_need_pin'), EMAIL_EXISTS: tt('ag_acc_exists'), WEAK_PASSWORD: tt('ag_pin_bad'), OPERATION_NOT_ALLOWED: tt('li_auth_off'), CONFIGURATION_NOT_FOUND: tt('li_auth_off'),
+  PERMISSION_DENIED: tt('cl_rules'), RULES: tt('cl_rules'), USER_DISABLED: tt('li_bad')
+}[String(m || '').split(/[\s:]/)[0]] || (clNet(m) ? tt('li_net') : '⚠️ ' + esc(String(m || 'ERROR'))));
+// </cloud>
+
+// <cloud-ui>
+// ---------------------------------------------------------------- ☁️ ఖాతా UI: లాగిన్ పేజీ · ప్రొఫైల్ PIN · సెట్టింగ్స్ కార్డ్ · బ్యానర్లు
+const clNeedPin = () => !!fbCfg() && !lvOn() && !cfg().offline;                 // ప్రొఫైల్‌లో PIN అడగాలా (కొత్త ఖాతా)
+const clFresh = () => clNeedPin() && !loans().length && !agentOK();             // కొత్త / ఖాళీ ఫోన్ → ముందు లాగిన్ పేజీ
+const LI = { m: 'm' };
+function liPaint() {
+  const m = LI.m, id = $('li-id');
+  $$('#li-mode button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+  if (m === 'm') { id.type = 'tel'; id.inputMode = 'numeric'; id.maxLength = 14; id.placeholder = '98765 43210'; id.autocomplete = 'tel'; }
+  else { id.type = 'email'; id.inputMode = 'email'; id.maxLength = 80; id.placeholder = 'name@gmail.com'; id.autocomplete = 'email'; }
+  $('li-pin').inputMode = m === 'm' ? 'numeric' : 'text';   // Gmail తో: పాత సింక్ పాస్‌వర్డ్ (అక్షరాలు) కూడా టైప్ చేయొచ్చు
+  $('li-cfgw').hidden = !!fbCfg();
+}
+function liPrefill(v) { v = String(v || ''); LI.m = v.includes('@') ? 'g' : 'm'; $('li-id').value = v; liPaint(); }
+const liId = () => { const v = $('li-id').value.trim(); return LI.m === 'm' ? phone10(v) : v.toLowerCase(); };
+function liCheckId() {
+  const v = liId();
+  if (LI.m === 'm' ? v.length !== 10 : !EMAIL_RE.test(v)) { toast(tt(LI.m === 'm' ? 'ag_bad_ph' : 'ag_bad_em'), false); $('li-id').focus(); return ''; }
+  return v;
+}
+function liUseCfg() {   // జెనరిక్ బిల్డ్: config ఇక్కడే అతికించవచ్చు
+  if (fbCfg()) return true;
+  const c = lvParseCfg($('li-cfg').value);
+  if (!c) { toast(tt('lv_bad_cfg'), false, 6000); $('li-cfgw').open = true; return false; }
+  DB.put('live', { on: 0, k: c.k, d: c.d }); return true;
+}
+// క్లౌడ్ + ఫోన్ రెండింట్లో డేటా ఉంటే అడుగుతుంది
+function clAsk(nCloud, atCloud, nLocal) {
+  return new Promise(res => {
+    openModal(`<h3>${tt('li_merge_h')}</h3><div class="note left" style="font-size:13px">${tt('li_merge_t', nCloud, atCloud ? dmyhm(atCloud) : '—', nLocal)}</div>` +
+      `<button type="button" class="btn btn-p full mt12" id="ma-cloud">${tt('li_use_cloud')}</button><button type="button" class="btn btn-sec full mt8" id="ma-merge">${tt('li_merge')}</button>`);
+    let done = false; const fin = v => { if (done) return; done = true; obs.disconnect(); closeModal(); res(v); };
+    $('ma-cloud').onclick = () => fin('cloud'); $('ma-merge').onclick = () => fin('merge');
+    const obs = new MutationObserver(() => { if ($('modal').hidden) fin(null); }); obs.observe($('modal'), { attributes: true, attributeFilter: ['hidden'] });
+  });
+}
+async function liLogin() {
+  const id = liCheckId(); if (!id) return;
+  const pin = $('li-pin').value;
+  if (pin.length < 6) { toast(tt('li_need_pin'), false); $('li-pin').focus(); return; }
+  if (!liUseCfg()) return;
+  busy(true, tt('li_busy'));
+  let r;
+  try { r = await clLoginFlow(id, pin, (a, b, c) => { busy(false); return clAsk(a, b, c).then(v => { busy(true, tt('li_busy')); return v; }); }); }
+  catch (e) { busy(false); if (e.message !== 'CANCEL') toast(clErrTxt(e.message), false, 9000); return; }
+  $('li-pin').value = '';
+  if (r.st === 'restored') { lvLS.set('dfp_li_ok', r.n); location.reload(); return; }
+  busy(false);
+  toast(r.st === 'rules' ? tt('cl_rules') : tt('li_empty'), r.st !== 'rules', 9000);
+  switchTab(agentOK() ? 'coll' : 'agent');
+}
+async function liForgot() {
+  const id = liCheckId(); if (!id) return;
+  if (!liUseCfg()) return;
+  busy(true, '📧 …');
+  try { const em = await clForgot(id); toast(tt('li_reset_sent', esc(clMask(em))), true, 14000); }
+  catch (e) { toast(clErrTxt(e.message), false, 9000); } finally { busy(false); }
+}
+function bindLogin() {
+  $('li-mode').addEventListener('click', e => { const b = e.target.closest('[data-m]'); if (!b || b.dataset.m === LI.m) return; LI.m = b.dataset.m; $('li-id').value = ''; liPaint(); $('li-id').focus(); });
+  $('li-go').onclick = liLogin;
+  $('li-pin').addEventListener('keydown', e => { if (e.key === 'Enter') liLogin(); });
+  $('li-forgot').onclick = liForgot;
+  $('li-new').onclick = () => { setCfg({ offline: 0 }); switchTab('agent'); setTimeout(() => { const f = $('a-name'); if (f) f.focus(); }, 120); };
+  $('li-off').onclick = () => { setCfg({ offline: 1 }); switchTab('agent'); };
+  $('a-login').onclick = () => { liPrefill(phone10($('a-ph').value) || ''); switchTab('login'); };
+  $('s-clpin').onclick = () => clPinModal();
+  $('s-clout').onclick = () => clLogout();
+  $('s-cllogin').onclick = () => clGo('cllogin');
+  $('s-clwarn').addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) clGo(b.dataset.go); });
+  liPaint();
+}
+// 👤 ప్రొఫైల్: ఖాతా లేకపోతే PIN ఫీల్డ్లు (సేవ్ చేస్తే ఖాతా + ఆటో బ్యాకప్ మొదలు)
+function clAgentPaint() {
+  const need = clNeedPin();
+  $('a-pinw').hidden = !need; $('a-login').hidden = !need;
+}
+async function saveAgent() {
+  const g = id => $(id).value.trim();
+  const a = { name: g('a-name'), ph: phone10(g('a-ph')), em: g('a-em').toLowerCase(), state: $('a-st').value, dist: g('a-di'), town: g('a-tn'), pin: g('a-pin') };
+  if (!a.name) return toast(tt('ag_bad_nm'), false);
+  if (a.ph.length !== 10) return toast(tt('ag_bad_ph'), false);
+  if (!EMAIL_RE.test(a.em)) return toast(tt('ag_bad_em'), false);
+  if (!a.state) return toast(tt('ag_bad_st'), false);
+  if (!a.dist || !a.town) return toast(tt('ag_bad_dt'), false);
+  if (!/^[1-9]\d{5}$/.test(a.pin)) return toast(tt('ag_bad_pin'), false);
+  const old = DB.get('agent'), wasOK = agentOK();
+  let acc = null;
+  if (clNeedPin()) {
+    const p1 = $('a-pin1').value, p2 = $('a-pin2').value, pe = clPinErr(p1, p2);
+    if (pe) { toast(tt(pe), false, 7000); $('a-pin1').focus(); return; }
+    busy(true, '☁️ …');
+    try { acc = await clSignup(a.em, p1); }
+    catch (e) {
+      busy(false);
+      if (e.message === 'EMAIL_EXISTS') { toast(tt('ag_acc_exists'), false, 10000); liPrefill(a.ph); switchTab('login'); return; }
+      toast(clErrTxt(e.message), false, 9000); return;
+    }
+    busy(false); $('a-pin1').value = ''; $('a-pin2').value = '';
+  }
+  a.t = (old && old.t) || Date.now(); a.u = Date.now();
+  DB.put('agent', a); regPost(a); hdrPaint();
+  if (acc) { clSession(acc.c, acc.email, acc.t, { pin: 1 }); clLoad(); clMarkAll(); lvStart(); clStart(); toast(tt('ag_acc_ok'), true, 7000); }
+  else { toast(tt('ag_saved')); if (lvOn() && old && phone10(old.ph) !== a.ph) clDirPut(a.ph).catch(() => {}); }
+  if (!wasOK) switchTab('coll'); else fillAgentForm();
+}
+// ⚙️ సెట్టింగ్స్ కార్డ్
+const clBkTxt = () => !clOn() ? tt('cl_bk_off') : CL.err && CL.err !== 'NET' ? '⚠️ ' + esc(CL.err === 'RULES' ? 'Firebase rules' : CL.err === 'NEEDS_LOGIN' ? tt('cl_relogin') : CL.err) :
+  CL.busy ? tt('cl_bk_wait') : CL.dirty.size ? tt('cl_bk_pend', CL.dirty.size) : CL.at ? tt('cl_bk_ok', bdi(hm(CL.at) + (ymd(CL.at) === ymd(Date.now()) ? '' : ' · ' + dmy(CL.at)))) : tt('cl_bk_wait');
+function clPaint() { lvPaint(); }   // హెడర్ చుక్క + లైవ్ స్థితి + ఈ కార్డ్ (lvPaint చివర్లో clCard)
+function clCard() {
+  const st = $('s-clst'); if (!st) return;
+  const on = clOn(), c = lvCfg(), ag = DB.get('agent') || {};
+  const who = [c.ph || phone10(ag.ph), clMask(c.e)].filter(Boolean).join(' · ');
+  st.innerHTML = (on ? `<div class="row"><span>${tt('cl_acc')}</span><b dir="ltr">${esc(who)}</b></div>` : '') + `<div class="row"><span>${tt('cl_bk')}</span><b>${clBkTxt()}</b></div>`;
+  const w = [];
+  if (on && (CL.err === 'RULES' || LV.err === 'PERMISSION_DENIED')) w.push(`<div class="warnbox">${tt('cl_rules')}</div>`);
+  if (on && [CL.err, LV.err].includes('NEEDS_LOGIN')) w.push(`<div class="warnbox">${tt('cl_relogin')}<button type="button" class="btn btn-p full mt8" data-go="relogin">🔑 ${tt('li_go')}</button></div>`);
+  if (on && c.pin !== 1) w.push(`<div class="banner warn">${tt('cl_setpin_box')}<br><button type="button" class="btn btn-p btn-sm" data-go="clpin">${tt('cl_setpin')}</button></div>`);
+  $('s-clwarn').innerHTML = w.join('');
+  $('s-clbtns').hidden = !on; $('s-cllogin').hidden = on || !fbCfg();
+  $('s-clpin').textContent = tt(c.pin === 1 ? 'cl_chpin' : 'cl_setpin');
+  if ($('s-clnote')) { $('s-clnote').hidden = !on; $('iso-note').hidden = on; }
+  if (CL.lastOn !== on) { CL.lastOn = on; const mb = $('s-manual'); if (mb) mb.open = !on; }
+  try { if (curTab === 'coll') $('c-inbox').innerHTML = lvBannerHtml(); } catch (e) {}
+}
+function clInfoHtml(c, all, act) {
+  const row = (a, b) => `<div class="row"><span>${a}</span><b>${b}</b></div>`;
+  return (clOn() ? row(tt('cl_bk'), clBkTxt()) : row(tt('bk_last'), c.bk ? dmyhm(c.bk) : tt('bk_never'))) +
+    `<div class="row"><span>${tt('info_counts', all.length, act)}</span></div>` + (c.gd ? row(tt('gd_last'), dmyhm(c.gd)) : '') + row(tt('info_store'), storeInfo());
+}
+// కలెక్ట్ ట్యాబ్ పైన: మళ్లీ లాగిన్ / rules / PIN / ఆటో బ్యాకప్ ఆఫ్
+function clBannerHtml() {
+  const on = lvOn(), c = lvCfg();
+  if (on && [LV.err, CL.err].includes('NEEDS_LOGIN')) return `<div class="banner err">${tt('cl_relogin')}<br><button type="button" class="btn btn-p btn-sm" data-go="relogin">🔑 ${tt('li_go')}</button></div>`;
+  if (on && CL.err === 'RULES') return `<div class="banner err">${tt('cl_fix')}<br><button type="button" class="btn btn-sm" data-go="clfix">📋 ${tt('lv_rules')}</button></div>`;
+  if (on && c.pin !== 1) return `<div class="banner warn">${tt('cl_setpin_box')}<br><button type="button" class="btn btn-sm" data-go="clpin">${tt('cl_setpin')}</button></div>`;
+  if (!on && fbCfg() && !cfg().offline && loans().length) return `<div class="banner warn">${tt('cl_bk')}: ${tt('cl_bk_off')}<br><button type="button" class="btn btn-sm" data-go="cllogin">${tt('cl_login_btn')}</button></div>`;
+  return '';
+}
+function clGo(g) {
+  if (g === 'relogin') clReloginModal();
+  else if (g === 'clpin') clPinModal();
+  else if (g === 'cllogin') { setCfg({ offline: 0 }); liPrefill(phone10((DB.get('agent') || {}).ph)); switchTab('login'); }
+  else if (g === 'clfix') { switchTab('set'); setTimeout(() => { const f = $('s-lv'); if (f) { f.scrollIntoView({ block: 'start' }); flash(f); } }, 150); }
+}
+function clPinModal() {
+  if (!lvOn()) return;
+  const first = lvCfg().pin !== 1;
+  openModal(`<h3>${tt(first ? 'cl_setpin' : 'cl_chpin')}</h3>` + (first ? `<div class="note left">${tt('cl_setpin_box')}</div>` : '') +
+    `<label for="cp-old" class="mt8">${tt(first ? 'cl_oldpw' : 'cl_oldpin')}</label><input id="cp-old" type="password" autocomplete="current-password"${first ? '' : ' inputmode="numeric"'}>` +
+    `<label for="cp-new" class="mt8">${tt('cl_newpin')}</label><input id="cp-new" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password">` +
+    `<label for="cp-new2" class="mt8">${tt('ag_pin2')}</label><input id="cp-new2" type="password" inputmode="numeric" maxlength="12" autocomplete="new-password">` +
+    `<button type="button" class="btn btn-p full mt12" id="cp-go">${tt('cl_pin_save')}</button>` +
+    `<button type="button" class="lnk lg-forgot" id="cp-forgot">${tt('li_forgot')}</button>`);
+  $('cp-go').onclick = async () => {
+    const o = $('cp-old').value, n = $('cp-new').value, pe = clPinErr(n, $('cp-new2').value);
+    if (o.length < 6) { toast(tt('li_need_pin'), false); return; }
+    if (pe) { toast(tt(pe), false, 7000); return; }
+    busy(true, '🔑 …');
+    try { await clChangePin(o, n); closeModal(); toast(tt('cl_pin_ok', esc(lvCfg().ph || phone10((DB.get('agent') || {}).ph) || clMask(lvCfg().e))), true, 9000); renderIfColl(); }
+    catch (e) { toast(clErrTxt(e.message), false, 9000); } finally { busy(false); clPaint(); }
+  };
+  $('cp-forgot').onclick = async () => { busy(true, '📧 …'); try { const em = await clForgot(lvCfg().e); toast(tt('li_reset_sent', esc(clMask(em))), true, 14000); } catch (e) { toast(clErrTxt(e.message), false); } finally { busy(false); } };
+}
+function clReloginModal() {
+  const c = lvCfg();
+  openModal(`<h3>${tt('cl_relogin')}</h3><div class="note left" dir="ltr">${esc(c.ph || clMask(c.e))}</div>` +
+    `<label for="rl-pin" class="mt8">${tt('li_pin')}</label><input id="rl-pin" type="password" inputmode="numeric" autocomplete="current-password">` +
+    `<button type="button" class="btn btn-p full mt12" id="rl-go">${tt('li_go')}</button><button type="button" class="lnk lg-forgot" id="rl-forgot">${tt('li_forgot')}</button>`);
+  $('rl-go').onclick = async () => {
+    const p = $('rl-pin').value; if (p.length < 6) { toast(tt('li_need_pin'), false); return; }
+    busy(true, '🔑 …');
+    try { await clRelogin(p); closeModal(); toast('✅', true); renderIfColl(); } catch (e) { toast(clErrTxt(e.message), false, 9000); } finally { busy(false); clPaint(); }
+  };
+  $('rl-forgot').onclick = async () => { busy(true, '📧 …'); try { const em = await clForgot(c.e); toast(tt('li_reset_sent', esc(clMask(em))), true, 14000); } catch (e) { toast(clErrTxt(e.message), false); } finally { busy(false); } };
+}
+// </cloud-ui>
 
 // ---------------------------------------------------------------- ☁️ Google Drive 1-క్లిక్ సింక్ (drive.appdata — దాచిన యాప్ ఫోల్డర్)
 // 1-ట్యాప్ Drive బ్యాకప్ — Client ID అవసరం లేదు: ఫోన్ షేర్ జాబితాలో "Drive" ఎంచుకుంటే చాలు (షేర్ లేని చోట ఫైల్ డౌన్‌లోడ్ + Drive లింక్)

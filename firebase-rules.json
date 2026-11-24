@@ -36,6 +36,26 @@
           }
         }
       }
+    },
+    "bk": {
+      "$aid": {
+        ".read": "auth != null && auth.uid === $aid",
+        ".write": "auth != null && auth.uid === $aid",
+        "m": { "$dev": { ".validate": "$dev.matches(/^[A-Za-z0-9_-]{6,40}$/) && newData.isNumber()" } },
+        "d": { "$k": { ".validate": "newData.isString() && newData.val().length < 5000000" } },
+        "$other": { ".validate": false }
+      }
+    },
+    "dir": {
+      "$ph": {
+        ".read": true,
+        ".write": "auth != null && (!data.exists() || data.child('u').val() === auth.uid) && (!newData.exists() || newData.child('u').val() === auth.uid)",
+        ".validate": "$ph.matches(/^[0-9]{10}$/) && newData.hasChildren(['e','u','t'])",
+        "e": { ".validate": "newData.isString() && newData.val().length < 120" },
+        "u": { ".validate": "newData.isString()" },
+        "t": { ".validate": "newData.isNumber()" },
+        "$other": { ".validate": false }
+      }
     }
   }
 }
