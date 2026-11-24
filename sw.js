@@ -2,7 +2,7 @@
    • Network-first: online అయితే ఎప్పుడూ తాజా వెర్షన్ (GitHub/Vercel లో కొత్త ఫైల్ పెడితే వెంటనే అప్‌డేట్).
    • ఆఫ్‌లైన్ అయితే చివరిసారి సేవ్ అయిన కాపీ నుంచి తెరుచుకుంటుంది (పాస్‌బుక్ లింక్ కూడా).
    • ఇదే ఆరిజిన్ GET అభ్యర్థనలు మాత్రమే — Firebase / Google / WhatsApp కాల్స్‌ను ఇది ఎప్పుడూ ముట్టుకోదు. */
-const V = 'dfp-v31';
+const V = 'dfp-v32';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'customer.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-pb-192.png', 'icon-pb-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(V).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
