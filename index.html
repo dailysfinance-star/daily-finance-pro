@@ -3,6 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+function vmGet(){try{var v=localStorage.getItem('dfp_vm');return v==='m'||v==='d'?v:'';}catch(e){return '';}}
+function vmApply(){var v=vmGet(),h=document.documentElement,mt=document.querySelector('meta[name=viewport]');
+ if(/^#(pb|lv)=/.test(location.hash)||/[?&]app=c(&|$)/.test(location.search))v='';
+ h.classList.toggle('vm-m',v==='m');h.classList.toggle('vm-d',v==='d');h.style.zoom='';
+ if(mt)mt.setAttribute('content',v==='d'&&screen.width<768?'width=1200':'width=device-width, initial-scale=1, viewport-fit=cover');
+ var W=window.innerWidth,S=Math.min(screen.width,screen.height)||W,ph=S<768&&W>S*1.4;
+ h.classList.toggle('vm-wide',v==='m'&&W>=768&&!ph);
+ if(v==='m'&&ph)h.style.zoom=String(Math.round(W/screen.width*100)/100);}
+vmApply();addEventListener('resize',function(){if(vmGet()==='m')vmApply();});
+</script>
 <meta name="theme-color" content="#166534">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -246,21 +257,35 @@ body.pbmode{padding:0!important}
 .warnbox{background:#fff7ed;border:1.5px solid #fdba74;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:12.5px;line-height:1.55;font-weight:600;margin-bottom:10px}
 /* ===== v2: desktop / tablet sidebar ===== */
 @media (min-width:768px){
-  body{padding-bottom:0;padding-left:230px}
-  .bnav{top:0;right:auto;width:230px;flex-direction:column;justify-content:flex-start;padding:68px 10px 0;border-top:0;background:linear-gradient(180deg,var(--pd),var(--p));box-shadow:2px 0 10px rgba(0,0,0,.12)}
-  .bnav:before{content:"💰 Daily Finance Pro";position:absolute;top:20px;left:18px;color:#fff;font-weight:700;font-size:17px}
-  .bnav button{flex:none;flex-direction:row;gap:12px;padding:13px 14px;font-size:14px;color:rgba(255,255,255,.82);border-radius:9px;justify-content:flex-start;margin-bottom:4px}
-  .bnav button.on{background:rgba(255,255,255,.2);color:#fff}
-  .bnav button.on:before{display:none}
-  .bnav .bdg{position:static;margin-left:auto}
-  .wrap{max-width:1000px;padding:16px 20px}
-  .modal{align-items:center}
-  .sheet{border-radius:16px;max-width:580px}
-  .msg{bottom:24px;left:calc(50% + 115px)}
-  body.has-bar .msg{bottom:24px}
-  .float-mic{bottom:24px}
-  #c-dash{grid-template-columns:repeat(4,1fr)}
+  html:not(.vm-m) body{padding-bottom:0;padding-left:230px}
+  html:not(.vm-m) .bnav{top:0;right:auto;width:230px;flex-direction:column;justify-content:flex-start;padding:68px 10px 0;border-top:0;background:linear-gradient(180deg,var(--pd),var(--p));box-shadow:2px 0 10px rgba(0,0,0,.12)}
+  html:not(.vm-m) .bnav:before{content:"💰 Daily Finance Pro";position:absolute;top:20px;left:18px;color:#fff;font-weight:700;font-size:17px}
+  html:not(.vm-m) .bnav button{flex:none;flex-direction:row;gap:12px;padding:13px 14px;font-size:14px;color:rgba(255,255,255,.82);border-radius:9px;justify-content:flex-start;margin-bottom:4px}
+  html:not(.vm-m) .bnav button.on{background:rgba(255,255,255,.2);color:#fff}
+  html:not(.vm-m) .bnav button.on:before{display:none}
+  html:not(.vm-m) .bnav .bdg{position:static;margin-left:auto}
+  html:not(.vm-m) .wrap{max-width:1000px;padding:16px 20px}
+  html:not(.vm-m) .modal{align-items:center}
+  html:not(.vm-m) .sheet{border-radius:16px;max-width:580px}
+  html:not(.vm-m) .msg{bottom:24px;left:calc(50% + 115px)}
+  html:not(.vm-m) body.has-bar .msg{bottom:24px}
+  html:not(.vm-m) .float-mic{bottom:24px}
+  html:not(.vm-m) #c-dash{grid-template-columns:repeat(4,1fr)}
 }
+html.vm-d body{padding-bottom:0;padding-left:230px}
+html.vm-d .bnav{top:0;right:auto;width:230px;flex-direction:column;justify-content:flex-start;padding:68px 10px 0;border-top:0;background:linear-gradient(180deg,var(--pd),var(--p));box-shadow:2px 0 10px rgba(0,0,0,.12)}
+html.vm-d .bnav:before{content:"💰 Daily Finance Pro";position:absolute;top:20px;left:18px;color:#fff;font-weight:700;font-size:17px}
+html.vm-d .bnav button{flex:none;flex-direction:row;gap:12px;padding:13px 14px;font-size:14px;color:rgba(255,255,255,.82);border-radius:9px;justify-content:flex-start;margin-bottom:4px}
+html.vm-d .bnav button.on{background:rgba(255,255,255,.2);color:#fff}
+html.vm-d .bnav button.on:before{display:none}
+html.vm-d .bnav .bdg{position:static;margin-left:auto}
+html.vm-d .wrap{max-width:1000px;padding:16px 20px}
+html.vm-d .modal{align-items:center}
+html.vm-d .sheet{border-radius:16px;max-width:580px}
+html.vm-d .msg{bottom:24px;left:calc(50% + 115px)}
+html.vm-d body.has-bar .msg{bottom:24px}
+html.vm-d .float-mic{bottom:24px}
+html.vm-d #c-dash{grid-template-columns:repeat(4,1fr)}
 .cell .s{white-space:normal;overflow-wrap:anywhere;text-overflow:clip;font-variant-numeric:tabular-nums}
 .cell .s small{display:block;font-size:8.5px;font-weight:600;opacity:.85}
 .cell.fut .s{color:var(--mu);font-weight:600}
@@ -282,6 +307,15 @@ body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
 .snd-box{background:var(--card,#fff);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
 .snd-box h3{margin:0 0 4px}
 #snd .btn.done::after{content:' ✓'}
+body.lgn{padding-left:0!important}
+/* 📱 మొబైల్ వ్యూ పెద్ద స్క్రీన్‌పై: మధ్యలో ఫోన్ వెడల్పు */
+html.vm-m.vm-wide{background:#e5e7eb}
+html.vm-m.vm-wide body{max-width:480px;margin:0 auto;min-height:100vh;box-shadow:0 0 24px rgba(0,0,0,.12)}
+html.vm-m.vm-wide .bnav{left:50%;right:auto;width:480px;transform:translateX(-50%)}
+html.vm-m.vm-wide .float-mic{right:calc(50% - 224px)}
+html.vm-m.vm-wide .msg{left:50%;right:auto;width:440px;transform:translateX(-50%)}
+.hvm{flex:none;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.15);color:#fff;border-radius:8px;padding:3px 7px;font-size:15px;line-height:1.2;cursor:pointer}
+#li-vm{margin:14px 0 0}
 </style>
 </head>
 <body>
@@ -289,6 +323,7 @@ body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
   <div class="lg">💰</div>
   <h1><span class="nm" id="hdr-name" dir="auto">Daily Finance</span><small id="hdr-sub" dir="auto"></small></h1>
   <span id="hdr-lv" hidden role="button" tabindex="0" style="cursor:pointer;font-size:15px;margin:0 6px"></span>
+  <button type="button" class="hvm" id="hdr-vm" data-i18n-aria="vm_h" aria-label="View">📱</button>
   <select class="hsel" id="lang-sel" aria-label="Language"></select>
   <div class="dt" id="hdr-date"></div>
 </header>
@@ -382,6 +417,7 @@ body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
       <button type="button" class="btn btn-sec full" id="li-new" data-i18n="li_new">➕ New account</button>
       <button type="button" class="lnk lg-off" id="li-off" data-i18n="li_off">Use without account</button>
       <div class="ag-inst"></div>
+      <div class="seg" id="li-vm" role="group"><button type="button" data-vm="m" data-i18n="vm_m">📱 మొబైల్</button><button type="button" data-vm="d" data-i18n="vm_d">🖥️ డెస్క్‌టాప్</button></div>
       <details class="adv" id="li-cfgw" hidden><summary data-i18n="li_cfg">⚙️ Cloud setup (Firebase config)</summary><textarea id="li-cfg" rows="4" spellcheck="false" autocomplete="off" autocapitalize="none" style="width:100%;font-family:monospace;font-size:12px" placeholder='{ apiKey: "AIza…", databaseURL: "https://…firebasedatabase.app" }'></textarea></details>
     </div>
   </section>
@@ -446,6 +482,7 @@ body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
         <div><label for="s-voice" data-i18n="set_voice">కస్టమర్ చెల్లింపులు గట్టిగా చెప్పాలా?</label><select id="s-voice" data-cfg="voice"><option value="" data-i18n="opt_on">ఆన్</option><option value="0" data-i18n="opt_off">ఆఫ్</option></select></div>
         <div><label for="s-ch" data-i18n="set_ch">మెసేజ్‌లు ఎలా పంపాలి</label><select id="s-ch" data-cfg="ch"><option value="" data-i18n="ch_wa">WhatsApp</option><option value="sms" data-i18n="ch_sms">SMS (టెక్స్ట్)</option><option value="ask" data-i18n="ch_ask">ప్రతిసారి అడగాలి</option></select></div>
       </div>
+      <label for="s-vm" class="mt8" style="display:block" data-i18n="vm_h">స్క్రీన్ వ్యూ</label><select id="s-vm"><option value="" data-i18n="vm_auto">ఆటో</option><option value="m" data-i18n="vm_m">📱 మొబైల్</option><option value="d" data-i18n="vm_d">🖥️ డెస్క్‌టాప్</option></select>
       <button type="button" class="btn btn-sec full mt8" id="s-votest" data-i18n="vo_test">🔊 టెస్ట్ ప్రకటన</button>
       <div class="note left" data-i18n="set_vo_note"></div>
       <div class="ag-inst"></div>
@@ -487,7 +524,7 @@ body.lgn .bnav,body.lgn #float-mic-btn{display:none!important}
       <button type="button" class="btn btn-danger full" id="s-wipe" data-i18n="btn_wipe">🗑️ ఈ యాప్ డేటా మొత్తం తొలగించు</button>
       <div class="note left" id="iso-note" data-i18n="iso_note">ఈ డైలీ ఫైనాన్స్ యాప్ డేటా ఈ ఫోన్ బ్రౌజర్‌లో దాని సొంత స్టోరేజ్ (DAILY_FINANCE_PRO_V1) లో మాత్రమే ఉంటుంది — ల్యాబ్, పర్మిట్ రూమ్, ఇతర యాప్‌ల డేటాతో కలవదు. రోజూ / వారానికి ఒకసారి బ్యాకప్ తీసి Google Drive / WhatsApp లో దాచండి.</div>
     </div>
-    <div class="note">Daily Finance Pro v3.2</div>
+    <div class="note">Daily Finance Pro v3.3</div>
   </section>
 </main>
 
@@ -1076,7 +1113,11 @@ const I18N = {
     vo_test: '🔊 టెస్ట్ ప్రకటన',
     set_vo_note: 'కస్టమర్ పాస్‌బుక్‌లో “చెల్లించాను” నొక్కగానే యాప్ మీ భాషలో గట్టిగా చెబుతుంది. కస్టమర్లు తమ బాకీని తమ పాస్‌బుక్ భాషలో వింటారు. SMS నొక్కితే మెసేజ్ యాప్ టెక్స్ట్‌తో తెరుచుకుంటుంది — Send నొక్కండి.',
     ag_inst: '📲 యాప్ ఇన్‌స్టాల్ (Chrome లేకుండా ఫుల్ స్క్రీన్)',
-    ag_inst_and: '📲 ఫుల్ స్క్రీన్ యాప్‌లా వాడటానికి: Chrome మెనూ ⋮ → “Install app” / “Add to Home screen”'
+    ag_inst_and: '📲 ఫుల్ స్క్రీన్ యాప్‌లా వాడటానికి: Chrome మెనూ ⋮ → “Install app” / “Add to Home screen”',
+    vm_h: 'స్క్రీన్ వ్యూ',
+    vm_auto: 'ఆటో',
+    vm_m: '📱 మొబైల్',
+    vm_d: '🖥️ డెస్క్‌టాప్'
   },
   en: {
     hdr_sub: 'Daily & Weekly Finance Collection',
@@ -1338,7 +1379,11 @@ const I18N = {
     vo_test: '🔊 Test announcement',
     set_vo_note: 'When a customer taps “I have paid” in the passbook, the app announces it in your language. Customers hear their dues in their own passbook language. SMS opens your messages app with the text ready — just tap Send.',
     ag_inst: '📲 Install app (full screen, without Chrome)',
-    ag_inst_and: '📲 To use as a full-screen app: Chrome menu ⋮ → “Install app” / “Add to Home screen”'
+    ag_inst_and: '📲 To use as a full-screen app: Chrome menu ⋮ → “Install app” / “Add to Home screen”',
+    vm_h: 'Screen view',
+    vm_auto: 'Auto',
+    vm_m: '📱 Mobile',
+    vm_d: '🖥️ Desktop'
   }
 };
 // <i18n-packs>
@@ -1836,7 +1881,11 @@ I18N.hi = {
  "vo_test": "🔊 टेस्ट घोषणा",
  "set_vo_note": "ग्राहक पासबुक में “मैंने भुगतान किया” दबाते ही ऐप आपकी भाषा में बोलेगा। ग्राहक अपना बकाया अपनी पासबुक भाषा में सुनेंगे। SMS दबाने पर संदेश ऐप टेक्स्ट के साथ खुलेगा — Send दबाएँ।",
  "ag_inst": "📲 ऐप इंस्टॉल करें (Chrome के बिना फुल स्क्रीन)",
- "ag_inst_and": "📲 फुल स्क्रीन ऐप की तरह: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 फुल स्क्रीन ऐप की तरह: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रीन व्यू",
+ "vm_auto": "ऑटो",
+ "vm_m": "📱 मोबाइल",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.mr = {
  "hdr_sub": "दैनिक व साप्ताहिक फायनान्स वसुली",
@@ -2331,7 +2380,11 @@ I18N.mr = {
  "vo_test": "🔊 चाचणी घोषणा",
  "set_vo_note": "ग्राहकाने पासबुकमध्ये “मी भरले” दाबताच ॲप तुमच्या भाषेत सांगेल. ग्राहक त्यांची थकबाकी त्यांच्या पासबुक भाषेत ऐकतील. SMS दाबल्यावर संदेश ॲप मजकुरासह उघडेल — Send दाबा.",
  "ag_inst": "📲 ॲप इन्स्टॉल करा (Chrome शिवाय फुल स्क्रीन)",
- "ag_inst_and": "📲 फुल स्क्रीन ॲपसारखे वापरण्यासाठी: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 फुल स्क्रीन ॲपसारखे वापरण्यासाठी: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रीन दृश्य",
+ "vm_auto": "ऑटो",
+ "vm_m": "📱 मोबाइल",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.ta = {
  "hdr_sub": "தினசரி & வாராந்திர நிதி வசூல்",
@@ -2826,7 +2879,11 @@ I18N.ta = {
  "vo_test": "🔊 சோதனை அறிவிப்பு",
  "set_vo_note": "வாடிக்கையாளர் பாஸ்புக்கில் “செலுத்தினேன்” தட்டியதும் ஆப் உங்கள் மொழியில் அறிவிக்கும். வாடிக்கையாளர்கள் தங்கள் நிலுவையை தங்கள் பாஸ்புக் மொழியில் கேட்பார்கள். SMS தட்டினால் செய்தி ஆப் உரையுடன் திறக்கும் — Send தட்டவும்.",
  "ag_inst": "📲 ஆப்பை நிறுவு (Chrome இல்லாமல் முழுத் திரை)",
- "ag_inst_and": "📲 முழுத் திரை ஆப்பாகப் பயன்படுத்த: Chrome மெனு ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 முழுத் திரை ஆப்பாகப் பயன்படுத்த: Chrome மெனு ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "திரை காட்சி",
+ "vm_auto": "தானியங்கி",
+ "vm_m": "📱 மொபைல்",
+ "vm_d": "🖥️ டெஸ்க்டாப்"
 };
 I18N.kn = {
  "hdr_sub": "ದಿನನಿತ್ಯ & ವಾರದ ಫೈನಾನ್ಸ್ ವಸೂಲಿ",
@@ -3321,7 +3378,11 @@ I18N.kn = {
  "vo_test": "🔊 ಪರೀಕ್ಷಾ ಪ್ರಕಟಣೆ",
  "set_vo_note": "ಗ್ರಾಹಕರು ಪಾಸ್‌ಬುಕ್‌ನಲ್ಲಿ “ಪಾವತಿಸಿದ್ದೇನೆ” ಒತ್ತಿದ ತಕ್ಷಣ ಆ್ಯಪ್ ನಿಮ್ಮ ಭಾಷೆಯಲ್ಲಿ ಹೇಳುತ್ತದೆ. ಗ್ರಾಹಕರು ತಮ್ಮ ಬಾಕಿಯನ್ನು ತಮ್ಮ ಪಾಸ್‌ಬುಕ್ ಭಾಷೆಯಲ್ಲಿ ಕೇಳುತ್ತಾರೆ. SMS ಒತ್ತಿದರೆ ಸಂದೇಶ ಆ್ಯಪ್ ಪಠ್ಯದೊಂದಿಗೆ ತೆರೆಯುತ್ತದೆ — Send ಒತ್ತಿ.",
  "ag_inst": "📲 ಆ್ಯಪ್ ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ (Chrome ಇಲ್ಲದೆ ಪೂರ್ಣ ಪರದೆ)",
- "ag_inst_and": "📲 ಪೂರ್ಣ ಪರದೆ ಆ್ಯಪ್ ಆಗಿ ಬಳಸಲು: Chrome ಮೆನು ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 ಪೂರ್ಣ ಪರದೆ ಆ್ಯಪ್ ಆಗಿ ಬಳಸಲು: Chrome ಮೆನು ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "ಪರದೆ ನೋಟ",
+ "vm_auto": "ಸ್ವಯಂ",
+ "vm_m": "📱 ಮೊಬೈಲ್",
+ "vm_d": "🖥️ ಡೆಸ್ಕ್‌ಟಾಪ್"
 };
 I18N.ml = {
  "hdr_sub": "ദിവസ & ആഴ്ച ഫിനാൻസ് പിരിവ്",
@@ -3816,7 +3877,11 @@ I18N.ml = {
  "vo_test": "🔊 ടെസ്റ്റ് അറിയിപ്പ്",
  "set_vo_note": "ഉപഭോക്താവ് പാസ്‌ബുക്കിൽ “അടച്ചു” തൊട്ടാൽ ആപ്പ് നിങ്ങളുടെ ഭാഷയിൽ പറയും. ഉപഭോക്താക്കൾ അവരുടെ കുടിശ്ശിക അവരുടെ പാസ്‌ബുക്ക് ഭാഷയിൽ കേൾക്കും. SMS തൊട്ടാൽ സന്ദേശ ആപ്പ് ടെക്സ്റ്റോടെ തുറക്കും — Send തൊടുക.",
  "ag_inst": "📲 ആപ്പ് ഇൻസ്റ്റാൾ ചെയ്യുക (Chrome ഇല്ലാതെ പൂർണ്ണ സ്ക്രീൻ)",
- "ag_inst_and": "📲 പൂർണ്ണ സ്ക്രീൻ ആപ്പായി ഉപയോഗിക്കാൻ: Chrome മെനു ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 പൂർണ്ണ സ്ക്രീൻ ആപ്പായി ഉപയോഗിക്കാൻ: Chrome മെനു ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "സ്ക്രീൻ കാഴ്ച",
+ "vm_auto": "ഓട്ടോ",
+ "vm_m": "📱 മൊബൈൽ",
+ "vm_d": "🖥️ ഡെസ്ക്ടോപ്പ്"
 };
 I18N.bn = {
  "hdr_sub": "দৈনিক ও সাপ্তাহিক ফাইন্যান্স আদায়",
@@ -4311,7 +4376,11 @@ I18N.bn = {
  "vo_test": "🔊 পরীক্ষামূলক ঘোষণা",
  "set_vo_note": "গ্রাহক পাসবুকে “আমি দিয়েছি” চাপলেই অ্যাপ আপনার ভাষায় বলবে। গ্রাহকরা তাদের বকেয়া নিজেদের পাসবুকের ভাষায় শুনবেন। SMS চাপলে বার্তা অ্যাপ লেখাসহ খুলবে — Send চাপুন।",
  "ag_inst": "📲 অ্যাপ ইনস্টল করুন (Chrome ছাড়া পূর্ণ স্ক্রিন)",
- "ag_inst_and": "📲 পূর্ণ স্ক্রিন অ্যাপ হিসেবে: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 পূর্ণ স্ক্রিন অ্যাপ হিসেবে: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "স্ক্রিন ভিউ",
+ "vm_auto": "স্বয়ংক্রিয়",
+ "vm_m": "📱 মোবাইল",
+ "vm_d": "🖥️ ডেস্কটপ"
 };
 I18N.gu = {
  "hdr_sub": "દૈનિક અને સાપ્તાહિક ફાઇનાન્સ ઉઘરાણી",
@@ -4806,7 +4875,11 @@ I18N.gu = {
  "vo_test": "🔊 ટેસ્ટ જાહેરાત",
  "set_vo_note": "ગ્રાહક પાસબુકમાં “મેં ભર્યા” દબાવે કે તરત એપ તમારી ભાષામાં બોલશે. ગ્રાહકો પોતાની બાકી પોતાની પાસબુક ભાષામાં સાંભળશે. SMS દબાવતાં સંદેશ એપ લખાણ સાથે ખુલશે — Send દબાવો.",
  "ag_inst": "📲 એપ ઇન્સ્ટોલ કરો (Chrome વગર ફુલ સ્ક્રીન)",
- "ag_inst_and": "📲 ફુલ સ્ક્રીન એપ તરીકે: Chrome મેનૂ ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 ફુલ સ્ક્રીન એપ તરીકે: Chrome મેનૂ ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "સ્ક્રીન વ્યૂ",
+ "vm_auto": "ઑટો",
+ "vm_m": "📱 મોબાઇલ",
+ "vm_d": "🖥️ ડેસ્કટૉપ"
 };
 I18N.pa = {
  "hdr_sub": "ਰੋਜ਼ਾਨਾ ਤੇ ਹਫ਼ਤਾਵਾਰੀ ਫਾਈਨੈਂਸ ਵਸੂਲੀ",
@@ -5301,7 +5374,11 @@ I18N.pa = {
  "vo_test": "🔊 ਟੈਸਟ ਐਲਾਨ",
  "set_vo_note": "ਗਾਹਕ ਪਾਸਬੁੱਕ ਵਿੱਚ “ਮੈਂ ਭੁਗਤਾਨ ਕੀਤਾ” ਦਬਾਉਂਦੇ ਹੀ ਐਪ ਤੁਹਾਡੀ ਭਾਸ਼ਾ ਵਿੱਚ ਦੱਸੇਗਾ। ਗਾਹਕ ਆਪਣਾ ਬਕਾਇਆ ਆਪਣੀ ਪਾਸਬੁੱਕ ਭਾਸ਼ਾ ਵਿੱਚ ਸੁਣਨਗੇ। SMS ਦਬਾਉਣ ਤੇ ਸੁਨੇਹਾ ਐਪ ਲਿਖਤ ਸਮੇਤ ਖੁੱਲ੍ਹੇਗਾ — Send ਦਬਾਓ।",
  "ag_inst": "📲 ਐਪ ਇੰਸਟਾਲ ਕਰੋ (Chrome ਤੋਂ ਬਿਨਾਂ ਪੂਰੀ ਸਕਰੀਨ)",
- "ag_inst_and": "📲 ਪੂਰੀ ਸਕਰੀਨ ਐਪ ਵਾਂਗ: Chrome ਮੀਨੂ ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 ਪੂਰੀ ਸਕਰੀਨ ਐਪ ਵਾਂਗ: Chrome ਮੀਨੂ ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "ਸਕਰੀਨ ਵਿਊ",
+ "vm_auto": "ਆਟੋ",
+ "vm_m": "📱 ਮੋਬਾਈਲ",
+ "vm_d": "🖥️ ਡੈਸਕਟਾਪ"
 };
 I18N.or = {
  "hdr_sub": "ଦୈନିକ ଓ ସାପ୍ତାହିକ ଫାଇନାନ୍ସ ଆଦାୟ",
@@ -5796,7 +5873,11 @@ I18N.or = {
  "vo_test": "🔊 ପରୀକ୍ଷା ଘୋଷଣା",
  "set_vo_note": "ଗ୍ରାହକ ପାସବୁକରେ “ମୁଁ ଦେଇଛି” ଦବାଇବା ମାତ୍ରେ ଆପ୍ ଆପଣଙ୍କ ଭାଷାରେ କହିବ। ଗ୍ରାହକମାନେ ନିଜ ବକେୟା ନିଜ ପାସବୁକ ଭାଷାରେ ଶୁଣିବେ। SMS ଦବାଇଲେ ବାର୍ତ୍ତା ଆପ୍ ଲେଖା ସହ ଖୋଲିବ — Send ଦବାନ୍ତୁ।",
  "ag_inst": "📲 ଆପ୍ ଇନଷ୍ଟଲ କରନ୍ତୁ (Chrome ବିନା ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ)",
- "ag_inst_and": "📲 ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ଆପ୍ ଭାବେ: Chrome ମେନୁ ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 ପୂର୍ଣ୍ଣ ସ୍କ୍ରିନ ଆପ୍ ଭାବେ: Chrome ମେନୁ ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "ସ୍କ୍ରିନ ଭ୍ୟୁ",
+ "vm_auto": "ସ୍ୱୟଂଚାଳିତ",
+ "vm_m": "📱 ମୋବାଇଲ",
+ "vm_d": "🖥️ ଡେସ୍କଟପ"
 };
 I18N.ur = {
  "hdr_sub": "روزانہ اور ہفتہ وار فائنانس وصولی",
@@ -6291,7 +6372,11 @@ I18N.ur = {
  "vo_test": "🔊 آزمائشی اعلان",
  "set_vo_note": "گاہک پاس بک میں “میں نے ادا کیا” دباتے ہی ایپ آپ کی زبان میں بتائے گی۔ گاہک اپنا بقایا اپنی پاس بک کی زبان میں سنیں گے۔ SMS دبانے پر پیغام ایپ متن کے ساتھ کھلے گی — Send دبائیں۔",
  "ag_inst": "📲 ایپ انسٹال کریں (Chrome کے بغیر پوری اسکرین)",
- "ag_inst_and": "📲 پوری اسکرین ایپ کی طرح: Chrome مینو ⋮ ← “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 پوری اسکرین ایپ کی طرح: Chrome مینو ⋮ ← “Install app” / “Add to Home screen”",
+ "vm_h": "اسکرین ویو",
+ "vm_auto": "خودکار",
+ "vm_m": "📱 موبائل",
+ "vm_d": "🖥️ ڈیسک ٹاپ"
 };
 I18N.as = {
  "hdr_sub": "দৈনিক আৰু সাপ্তাহিক ফাইনেন্স আদায়",
@@ -6786,7 +6871,11 @@ I18N.as = {
  "vo_test": "🔊 পৰীক্ষামূলক ঘোষণা",
  "set_vo_note": "গ্ৰাহকে পাছবুকত “মই দিলোঁ” টিপাৰ লগে লগে এপে আপোনাৰ ভাষাত ক'ব। গ্ৰাহকে নিজৰ বাকী নিজৰ পাছবুকৰ ভাষাত শুনিব। SMS টিপিলে বাৰ্তা এপ লিখনিসহ খোল খাব — Send টিপক।",
  "ag_inst": "📲 এপ ইনষ্টল কৰক (Chrome অবিহনে সম্পূৰ্ণ স্ক্ৰীণ)",
- "ag_inst_and": "📲 সম্পূৰ্ণ স্ক্ৰীণ এপ হিচাপে: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 সম্পূৰ্ণ স্ক্ৰীণ এপ হিচাপে: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "স্ক্ৰীণ দৰ্শন",
+ "vm_auto": "স্বয়ংক্ৰিয়",
+ "vm_m": "📱 মোবাইল",
+ "vm_d": "🖥️ ডেস্কটপ"
 };
 I18N.ne = {
  "hdr_sub": "दैनिक र साप्ताहिक फाइनान्स असुली",
@@ -7281,7 +7370,11 @@ I18N.ne = {
  "vo_test": "🔊 परीक्षण घोषणा",
  "set_vo_note": "ग्राहकले पासबुकमा “मैले तिरें” थिच्नेबित्तिकै एपले तपाईंको भाषामा भन्छ। ग्राहकले आफ्नो बक्यौता आफ्नो पासबुक भाषामा सुन्छन्। SMS थिच्दा सन्देश एप पाठसहित खुल्छ — Send थिच्नुहोस्।",
  "ag_inst": "📲 एप इन्स्टल गर्नुहोस् (Chrome बिना पूर्ण स्क्रिन)",
- "ag_inst_and": "📲 पूर्ण स्क्रिन एपको रूपमा: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 पूर्ण स्क्रिन एपको रूपमा: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रिन दृश्य",
+ "vm_auto": "स्वचालित",
+ "vm_m": "📱 मोबाइल",
+ "vm_d": "🖥️ डेस्कटप"
 };
 I18N.sa = {
  "hdr_sub": "दैनिक-साप्ताहिक-वित्त-सङ्ग्रहः",
@@ -7776,7 +7869,11 @@ I18N.sa = {
  "vo_test": "🔊 परीक्षण-घोषणा",
  "set_vo_note": "ग्राहकः पासबुके “दत्तम्” स्पृशति चेत् एप् भवतः भाषायां वदति। ग्राहकाः स्वस्य अवशिष्टं स्वपासबुकभाषायां शृण्वन्ति। SMS स्पृष्टे सन्देश-एप् पाठेन सह उद्घाट्यते — Send स्पृशतु।",
  "ag_inst": "📲 एप् स्थापयतु (Chrome विना पूर्णपटलम्)",
- "ag_inst_and": "📲 पूर्णपटल-एप् रूपेण: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 पूर्णपटल-एप् रूपेण: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "पटल-दृश्यम्",
+ "vm_auto": "स्वचालितम्",
+ "vm_m": "📱 चलदूरवाणी",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.kok = {
  "hdr_sub": "दिसाळें आनी सुमानाळें फायनान्स वसुली",
@@ -8271,7 +8368,11 @@ I18N.kok = {
  "vo_test": "🔊 चांचणी घोशणा",
  "set_vo_note": "गिरायकान पासबुकांत “हांवें भरले” दामतकच ॲप तुमच्या भाशेंत सांगता. गिरायक आपलें येणें आपल्या पासबुक भाशेंत आयकतात. SMS दामल्यार संदेश ॲप मजकुरा सयत उगडटा — Send दामात.",
  "ag_inst": "📲 ॲप इन्स्टॉल करात (Chrome बगर पुराय स्क्रीन)",
- "ag_inst_and": "📲 पुराय स्क्रीन ॲप म्हूण: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 पुराय स्क्रीन ॲप म्हूण: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रीन दिसप",
+ "vm_auto": "आपोआप",
+ "vm_m": "📱 मोबायल",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.mai = {
  "hdr_sub": "दैनिक आ साप्ताहिक फाइनेंस वसूली",
@@ -8766,7 +8867,11 @@ I18N.mai = {
  "vo_test": "🔊 परीक्षण घोषणा",
  "set_vo_note": "ग्राहक पासबुकमे “हम भुगतान कयलहुँ” दबबिते ऐप अहाँक भाषामे बाजत। ग्राहक अपन बकाया अपन पासबुक भाषामे सुनताह। SMS दबौलापर संदेश ऐप टेक्स्टक संग खुजत — Send दबाउ।",
  "ag_inst": "📲 ऐप इंस्टॉल करू (Chrome बिना पूरा स्क्रीन)",
- "ag_inst_and": "📲 पूरा स्क्रीन ऐप जकाँ: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 पूरा स्क्रीन ऐप जकाँ: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रीन दृश्य",
+ "vm_auto": "स्वतः",
+ "vm_m": "📱 मोबाइल",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.doi = {
  "hdr_sub": "रोजाना ते हफ्तेवार फाइनेंस वसूली",
@@ -9261,7 +9366,11 @@ I18N.doi = {
  "vo_test": "🔊 परख घोशणा",
  "set_vo_note": "ग्राहक पासबुक च “में भुगतान कीता” दबांदे गै ऐप तुंदी भाशा च दस्सग। ग्राहक अपना बकाया अपनी पासबुक भाशा च सुनङन। SMS दबाने पर सनेहा ऐप टेक्स्ट कन्नै खुलग — Send दबाओ।",
  "ag_inst": "📲 ऐप इंस्टाल करो (Chrome दे बगैर पूरी स्क्रीन)",
- "ag_inst_and": "📲 पूरी स्क्रीन ऐप आंगर: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 पूरी स्क्रीन ऐप आंगर: Chrome मेनू ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रीन व्यू",
+ "vm_auto": "आटो",
+ "vm_m": "📱 मोबाइल",
+ "vm_d": "🖥️ डेस्कटॉप"
 };
 I18N.sd = {
  "hdr_sub": "روزانو ۽ هفتيوار فائنانس وصولي",
@@ -9756,7 +9865,11 @@ I18N.sd = {
  "vo_test": "🔊 آزمائشي اعلان",
  "set_vo_note": "گراهڪ پاس بڪ ۾ “مون ادا ڪيو” دٻائي ته ايپ توهان جي ٻوليءَ ۾ ٻڌائيندي. گراهڪ پنهنجو بقايا پنهنجي پاس بڪ ٻوليءَ ۾ ٻڌندا. SMS دٻائڻ سان پيغام ايپ متن سان کلندي — Send دٻايو.",
  "ag_inst": "📲 ايپ انسٽال ڪريو (Chrome کان سواءِ پوري اسڪرين)",
- "ag_inst_and": "📲 پوري اسڪرين ايپ طور: Chrome مينيو ⋮ ← “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 پوري اسڪرين ايپ طور: Chrome مينيو ⋮ ← “Install app” / “Add to Home screen”",
+ "vm_h": "اسڪرين ڏيک",
+ "vm_auto": "خودڪار",
+ "vm_m": "📱 موبائل",
+ "vm_d": "🖥️ ڊيسڪ ٽاپ"
 };
 I18N.ks = {
  "hdr_sub": "روزانہ تہٕ ہفتہٕ وار فائنانس وصولی",
@@ -10251,7 +10364,11 @@ I18N.ks = {
  "vo_test": "🔊 آزمٲیشی اعلان",
  "set_vo_note": "گاہک یِلہٕ پاس بُکہٕ منٛز “مےٚ دِتۍ” دبٲیِ، ایپ ونِ تُہٕنٛزِ زبانۍ۔ گاہک بوزن پنُن بقایا پنٕنہِ پاس بُک زبانۍ۔ SMS دبٲوِتھ کھُلِ پیغام ایپ متنَس سٕتۍ — Send دبٲیِو۔",
  "ag_inst": "📲 ایپ اِنسٹال کٔرِو (Chrome ورٲے پوٗرۍ سکرین)",
- "ag_inst_and": "📲 پوٗرِ سکرین ایپ ہِشہِ: Chrome مینیو ⋮ ← “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 پوٗرِ سکرین ایپ ہِشہِ: Chrome مینیو ⋮ ← “Install app” / “Add to Home screen”",
+ "vm_h": "سکرین نظارہ",
+ "vm_auto": "خودکار",
+ "vm_m": "📱 موبائل",
+ "vm_d": "🖥️ ڈیسک ٹاپ"
 };
 I18N.mni = {
  "hdr_sub": "নুমিৎ খুদিংগী অমসুং হপ্তা খুদিংগী ফাইনান্স শেল খোমজিনবা",
@@ -10746,7 +10863,11 @@ I18N.mni = {
  "vo_test": "🔊 চাংয়েং লাউথোকপা",
  "set_vo_note": "কস্টমরনা পাসবুকতা “ঐনা পীরে” নম্লবা মতমদা এপনা নখোয়গী লোলদা হায়গনি। কস্টমরশিংনা মখোয়গী বাকী মখোয়গী পাসবুক লোলদা তাগনি। SMS নম্লবদি পাউ এপ ইবা লৈনা হাংদোকই — Send নম্বীয়ু।",
  "ag_inst": "📲 এপ ইনস্টল তৌবীয়ু (Chrome য়াওদনা মপুং ফাবা স্ক্রীন)",
- "ag_inst_and": "📲 মপুং ফাবা স্ক্রীন এপ ওইনা: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 মপুং ফাবা স্ক্রীন এপ ওইনা: Chrome মেনু ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "স্ক্রীন উৎপা",
+ "vm_auto": "মশানা",
+ "vm_m": "📱 মোবাইল",
+ "vm_d": "🖥️ ডেস্কটপ"
 };
 I18N.sat = {
  "hdr_sub": "ᱢᱟᱦᱟᱸ ᱢᱟᱦᱟᱸ ᱟᱨ ᱦᱟᱯᱛᱟ ᱦᱟᱯᱛᱟ ᱯᱷᱟᱭᱤᱱᱟᱱᱥ ᱛᱟᱠᱟ ᱡᱟᱣᱨᱟ",
@@ -11241,7 +11362,11 @@ I18N.sat = {
  "vo_test": "🔊 ᱵᱤᱲᱟᱹᱣ ᱠᱷᱚᱵᱚᱨ",
  "set_vo_note": "ᱜᱨᱟᱦᱚᱠ ᱯᱟᱥᱵᱩᱠ ᱨᱮ “ᱤᱧ ᱮᱢ ᱠᱮᱫᱟ” ᱚᱛᱚᱭ ᱛᱮ ᱮᱯ ᱟᱢᱟᱜ ᱯᱟᱹᱨᱥᱤ ᱛᱮ ᱢᱮᱱᱟᱜᱼᱟ᱾ ᱜᱨᱟᱦᱚᱠ ᱠᱚ ᱟᱡᱟᱜ ᱵᱟᱠᱤ ᱟᱡᱟᱜ ᱯᱟᱥᱵᱩᱠ ᱯᱟᱹᱨᱥᱤ ᱛᱮ ᱟᱸᱡᱚᱢᱟ᱾ SMS ᱚᱛᱚᱭ ᱛᱮ ᱠᱷᱚᱵᱚᱨ ᱮᱯ ᱚᱞ ᱥᱟᱶ ᱡᱷᱤᱡᱚᱜᱼᱟ — Send ᱚᱛᱚᱭ ᱢᱮ᱾",
  "ag_inst": "📲 ᱮᱯ ᱵᱚᱦᱟᱞ ᱢᱮ (Chrome ᱵᱟᱹᱱᱩᱜ ᱯᱩᱨᱟᱹ ᱥᱠᱨᱤᱱ)",
- "ag_inst_and": "📲 ᱯᱩᱨᱟᱹ ᱥᱠᱨᱤᱱ ᱮᱯ ᱞᱮᱠᱟ: Chrome ᱢᱮᱱᱩ ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 ᱯᱩᱨᱟᱹ ᱥᱠᱨᱤᱱ ᱮᱯ ᱞᱮᱠᱟ: Chrome ᱢᱮᱱᱩ ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "ᱥᱠᱨᱤᱱ ᱧᱮᱞ",
+ "vm_auto": "ᱟᱡ ᱛᱮ",
+ "vm_m": "📱 ᱢᱚᱵᱟᱭᱤᱞ",
+ "vm_d": "🖥️ ᱰᱮᱥᱠᱴᱚᱯ"
 };
 I18N.brx = {
  "hdr_sub": "सानफ्रोम आरो सप्ताहफ्रोम फाइनान्स रां बुथुमनाय",
@@ -11736,7 +11861,11 @@ I18N.brx = {
  "vo_test": "🔊 आनजाद फोरमायनाय",
  "set_vo_note": "गाहाकआ पासबुकाव “आं होबाय” नेबनायजों एपआ नोंथांनि रावाव बुंगोन। गाहाकफोरा बेसोरनि बाकिखौ बेसोरनि पासबुक रावाव खोनासंगोन। SMS नेबब्ला खौरां एपआ लिरनायजों खेवगोन — Send नेब।",
  "ag_inst": "📲 एप इनस्टल खालाम (Chrome गैयाबालाबो आबुं स्क्रिन)",
- "ag_inst_and": "📲 आबुं स्क्रिन एप बादि: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”"
+ "ag_inst_and": "📲 आबुं स्क्रिन एप बादि: Chrome मेनु ⋮ → “Install app” / “Add to Home screen”",
+ "vm_h": "स्क्रिन नुथाय",
+ "vm_auto": "गावनो",
+ "vm_m": "📱 मबाइल",
+ "vm_d": "🖥️ डेस्कटप"
 };
 // </i18n-packs>
 
@@ -13934,6 +14063,21 @@ document.addEventListener('click', async e => {
   try { await ev.prompt(); await ev.userChoice; } catch (er) {}
   agInstPaint();
 });
+// 📱/🖥️ వ్యూ మోడ్ (ఈ ఫోన్ / కంప్యూటర్‌కే — localStorage)
+const vmDesk = () => { const v = vmGet(); return v === 'd' || (v !== 'm' && matchMedia('(min-width:768px)').matches && !document.documentElement.style.zoom); };
+function vmSet(v) { try { if (v) localStorage.setItem('dfp_vm', v); else localStorage.removeItem('dfp_vm'); } catch (e) {} vmApply(); vmPaint(); }
+function vmPaint() {
+  const d = vmDesk(), b = $('hdr-vm'); if (b) { b.hidden = /^#(pb|lv)=/.test(location.hash) || /[?&]app=c(&|$)/.test(location.search); b.textContent = d ? '🖥️' : '📱'; b.title = tt(d ? 'vm_d' : 'vm_m'); }
+  $$('#li-vm [data-vm]').forEach(x => x.classList.toggle('on', (x.dataset.vm === 'd') === d));
+  if ($('s-vm')) $('s-vm').value = vmGet();
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest('#hdr-vm,[data-vm]'); if (!t) return;
+  vmSet(t.id === 'hdr-vm' ? (vmDesk() ? 'm' : 'd') : t.dataset.vm);
+});
+document.addEventListener('change', e => { if (e.target && e.target.id === 's-vm') vmSet(e.target.value); });
+addEventListener('resize', () => vmPaint());
+setTimeout(vmPaint, 0);
 // </v32>
 
 
